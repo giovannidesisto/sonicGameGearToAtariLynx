@@ -50,8 +50,8 @@ CFLAGS=$(SEGMENTS) -I src/headers -t $(SYS) -Cl -O -Or
 LDFLAGS_LNX=-C lynx.cfg -t $(SYS) $(SYS).lib
 LDFLAGS_BLL=-C lynx_bll.cfg -t $(SYS) $(SYS).lib
 # default bit depth is 1-bit per pixel
-SPRFLAGS=-t6 -p2 -s4
-
+SPRFLAGS=-t6 -p2 -s4 -a000015
+SPRFLAGS_BASE=-t6 -p2 -s4 
 .SUFFIXES:
 .PHONY: clean mkbuild all
 VPATH = src/c src/images src/asm
@@ -76,22 +76,45 @@ $(BUILD_DIR)/%.o: %.c
 # == Bitmap files to intermediate assembly to bitmap objects
 BMP_SOURCES = $(wildcard $(SOURCE_DIR)/images/*.bmp)
 BMP_OBJECTS = $(patsubst $(SOURCE_DIR)/images/%.bmp, $(BUILD_DIR)/%.o, $(BMP_SOURCES))
+#$(BUILD_DIR)/%.o: %.bmp
+#	@$(ECHO) == Converting bitmap $< to $@
+#	@$(SPRPCK) $(SPRFLAGS) $< $@ > /dev/null
+#	@$(ECHO) .global _$* > $(BUILD_DIR)/$*.s
+#	@$(ECHO) .segment \"RODATA\" >> $(BUILD_DIR)/$*.s
+#	@$(ECHO) _$*: .incbin \"$*.spr\" >> $(BUILD_DIR)/$*.s
+#	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@
 $(BUILD_DIR)/%.o: %.bmp
-	@$(ECHO) == Converting bitmap $< to $@
-	@$(SPRPCK) $(SPRFLAGS) $< $@ > /dev/null
-	@$(ECHO) .global _$* > $(BUILD_DIR)/$*.s
-	@$(ECHO) .segment \"RODATA\" >> $(BUILD_DIR)/$*.s
-	@$(ECHO) _$*: .incbin \"$*.spr\" >> $(BUILD_DIR)/$*.s
-	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@
-
+	@if echo "$*" | grep -q '^img_pixel2col'; then \
+		$(ECHO) "== Converting pixel base $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s1 $< $@ > /dev/null; \
+		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+	elif echo "$*" | grep -q '^img_ag_font5x5'; then \
+		$(ECHO) "== Converting font $< to $@"; \
+		$(SPRPCK) -t6 -p2 -u -s1 -S005005 -r065001 $< $@ > /dev/null; \
+		$(SPRHLPR) "$@"; \
+		$(AS) $(ASFLAGS) $(BUILD_DIR)/img_ag_font5x5.s -o $@; \
+	elif echo "$*" | grep -q '^player'; then \
+		$(ECHO) "== Converting player $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s4 -a005015 $< $@ > /dev/null; \
+		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+	elif echo "$*" | grep -q '^tile'; then \
+		$(ECHO) "== Converting tile $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s4 -a000000 $< $@ > /dev/null; \
+		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+	fi
 
 
 # force font to be multi-sprite
-$(BUILD_DIR)/img_ag_font5x5.o : img_ag_font5x5.bmp
-	@$(ECHO) == Converting font $< to $@
-	@$(SPRPCK) $(SPRFLAGS) -u -s1 -S005005 -r065001 $< $@ > /dev/null
-	@$(SPRHLPR) "$@"
-	@$(AS) $(ASFLAGS) $(BUILD_DIR)/img_ag_font5x5.s -o $@
+
 
 # force sprites to use different bits per colour
 # 4 bits per pixel for img_player

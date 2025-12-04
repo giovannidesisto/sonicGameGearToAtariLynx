@@ -19,11 +19,11 @@ extern Player player;
 // Inizializzazione del player
 void player_init(){//, u16 x, u16 y) {
 	//player.level = level;
-	player.x = level.start_x+PLAYER_START_X;
-	player.y = level.start_y-16-8;
+	player.x = TILE_SIZE;// level.start_x+PLAYER_START_X;
+	player.y = (MAP_HEIGHT * TILE_SIZE);//level.start_y;//-16-8;
 	player.vx = 0;
 	player.vy = 0;
-	player.ground_level = level.start_y-16-8 ;
+	player.ground_level = (MAP_HEIGHT * TILE_SIZE);//level.start_y;//-16-8 ;
 
 
 	player.state = PLAYER_IDLE;
@@ -146,7 +146,7 @@ void  player_update(Level * level) {//, Level* level
 
 	// Aggiorna posizione
 	player.x += player.vx;
-	player.x += player.vx;
+	player.y += player.vy;
 
 
 

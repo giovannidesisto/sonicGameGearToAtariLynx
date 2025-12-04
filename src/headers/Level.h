@@ -13,7 +13,7 @@
 
 
 //dimensione della mappa in sprites
-#define MAP_WIDTH 22
+#define MAP_WIDTH 23
 //attualmente limitata alla dimensione dello schermo
 //occorre testare e modificare il codice per gestire mappe più
 //grandi verticalmente con la camera
@@ -27,8 +27,8 @@ nell'ottica di gestire in continuità l'aggiornamento della capera che insegue i
 non solo durante lo scorrimeto verticale del gioco ma anche durante lo scorrimento verticale (es se sale
 su piattaforme che lo portano in alto)
 */
-#define TILES_X  12
-#define TILES_Y  7
+#define TILES_X  11
+#define TILES_Y  8
 
 extern char tile_ground[];
 extern char tile_grass[];
@@ -89,7 +89,7 @@ u8 level_check_collision(u16 x, u16 y, u8 width, u8 height);
 
 void level_init_camera();
 void level_update_camera(u16 player_x, u16 player_y);
-u8 level_world_to_screen_x (u16 world_x);
-u8 level_world_to_screen_y( u16 world_y);
+int level_world_to_screen_x (int world_x);
+int level_world_to_screen_y( int world_y);
 
 #endif /* LEVEL_H */

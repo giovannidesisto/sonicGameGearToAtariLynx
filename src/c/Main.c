@@ -1,5 +1,5 @@
 #include <tgi.h>
-#include "AgCommon.h"
+#include "Utils.h"
 #include "Player.h"
 #include "Level.h"
 // ----------------------------------------------------------------------------
@@ -62,39 +62,14 @@ static void __fastcall__ resetGame();
 static void __fastcall__ updateAndDrawGame();
 
 static void __fastcall__ initPlayerFrames();
-// Punteggio
-char player_coords[16];
-// Anelli
-char level_limits[16];
-// Vita
-char camera_coords[16];
+
+
 // ----------------------------------------------------------------------------
 // CODE
 // ----------------------------------------------------------------------------
-int u16_to_ascii(unsigned short value, char *dest) {
-	int min_digits=5;
-    char temp[5];         // 65535 max 5 cifre
-    int i = 0, len = 0;
 
-    // estraggo le cifre al contrario
-    do {
-        temp[i++] = '0' + (value % 10);
-        value /= 10;
-    } while(value > 0);
 
-    // aggiungo padding fino a min_digits
-    while(i < min_digits) {
-        temp[i++] = '0';
-    }
 
-    // ora ribalto temp nel buffer finale
-    len = i;
-    while(i > 0) {
-        *dest++ = temp[--i];
-    }
-
-    return len;
-}
 void main(void) {
 
 	agInitGfx();       // initialise graphics
@@ -266,17 +241,32 @@ static void  __fastcall__  updateAndDrawGame() {
 		/* Salto verticale */
 		if (!player.is_jumping && player.is_grounded) {
 			player.is_jumping = 1;
-			player.is_grounded = 0;
+			player.is_grounded = 1;
 			player.state = PLAYER_JUMPING;
-			player.vy = -4;  // Salto normale
+			player.vy = -1;  // Salto normale
+			player.current_frame = 0;
+			player.animation_timer = 0;
+		}
+		break;
+	/*
+	 * FIXME
+	 */
+	case AG_JOY_DOWN:
+		/* Salto verticale */
+		 {
+			player.is_jumping = 0;
+			player.is_grounded = 1;
+			player.state = PLAYER_IDLE;
+			player.vy = 0;  // Salto normale
 			player.current_frame = 0;
 			player.animation_timer = 0;
 		}
 		break;
 
+
 	case AG_JOY_LEFT:
 		/* Cammina a sinistra */
-		player.vx = -2;
+		player.vx = -4;
 		player.direction = DIR_LEFT;
 		if (player.is_grounded) {
 			player.state = PLAYER_WALKING;
@@ -285,7 +275,7 @@ static void  __fastcall__  updateAndDrawGame() {
 
 	case AG_JOY_RIGHT:
 		/* Cammina a destra */
-		player.vx = 2;
+		player.vx = 4;
 		player.direction = DIR_RIGHT;
 		if (player.is_grounded) {
 			player.state = PLAYER_WALKING;
@@ -331,18 +321,16 @@ static void  __fastcall__  updateAndDrawGame() {
 		player.y = new_y;
 	}
 
-
-
+	//limite bordo SX
+	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
+	else
+	//limite bordo DX
+	if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
 
 	/* Aggiorna il player (senza chiamare player_update_sprite_position) */
 	player_update();
-
 	/* Aggiorna la camera per seguire il player */
 	level_update_camera(player.x, player.y);
-
-
-
-
 	/* Imposta la posizione dello sprite del player */
 	player.sprite.hpos = level_world_to_screen_x(player.x);
 	player.sprite.vpos = level_world_to_screen_y(player.y);
@@ -362,62 +350,11 @@ static void  __fastcall__  updateAndDrawGame() {
 
 
 
-
-		player_coords[pos++]='x';
-		pos += u16_to_ascii(player.x, (char*)&player_coords[pos]);
-		player_coords[pos++]='y';
-		pos += u16_to_ascii(player.y, (char*)&player_coords[pos]);
-		agSetFontColor(0x0E);
-	    agDrawText(1, 1, player_coords);
-
-
-	    pos=0;
-	    camera_coords[pos++]='x';
-		pos += u16_to_ascii(level.camera.x, (char*)&camera_coords[pos]);
-		camera_coords[pos++]='y';
-		pos += u16_to_ascii(level.camera.y, (char*)&camera_coords[pos]);
-		agSetFontColor(0x0D);
-	    agDrawText(1, 10, camera_coords);
-
-
-
-	    pos=0;
-	    level_limits[pos++]='x';
-		pos += u16_to_ascii(level.end_x, (char*)&level_limits[pos]);
-		level_limits[pos++]='y';
-		pos += u16_to_ascii(level.end_y, (char*)&level_limits[pos]);
-		agSetFontColor(0x0C);
-	    agDrawText(1, 20, level_limits);
-
+	printCoordsToScreen(player.x,player.y,1,0,0x0E);
+    printCoordsToScreen(level.camera.x,level.camera.y,1,10,0x0D);
+	printCoordsToScreen(level.end_x,level.end_y,1,20,0x0C);
 
 	// update the LCD
 	tgi_updatedisplay();
 }
 
-/*
-
-// Nuove funzioni per il player (da aggiungere in player.c)
-void    player_run_jump( s8 direction) {
-	if(!player.is_jumping && player.is_grounded) {
-		player.is_jumping = 1;
-		player.is_grounded = 0;
-		player.state = PLAYER_RUN_JUMPING;
-
-		// Salto più lungo in orizzontale se c'è rincorsa
-		player.vx = direction * 3;  // Più veloce in orizzontale
-		player.vy = -10;  // Salto potente
-
-		player.current_frame = 0;
-		player.animation_timer = 0;
-	}
-}
-
- void player_spindash() {
-	if(player.is_grounded && !player.is_jumping) {
-		player.state = PLAYER_SPINDASH;
-		// Accumula potenza per lo spindash
-		if(player.spindash_power < 8) {
-			player.spindash_power++;
-		}
-	}
-}*/
