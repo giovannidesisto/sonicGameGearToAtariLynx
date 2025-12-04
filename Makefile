@@ -96,14 +96,14 @@ $(BUILD_DIR)/%.o: %.bmp
 		$(SPRPCK) -t6 -p2 -u -s1 -S005005 -r065001 $< $@ > /dev/null; \
 		$(SPRHLPR) "$@"; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/img_ag_font5x5.s -o $@; \
-	elif echo "$*" | grep -q '^player'; then \
+	elif echo "$*" | grep -q '^sonic'; then \
 		$(ECHO) "== Converting player $< to $@"; \
-		$(SPRPCK) -t6 -p2 -s4 -a005015 $< $@ > /dev/null; \
+		$(SPRPCK) -t6 -p2 -s4 -a008031 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
-	elif echo "$*" | grep -q '^tile'; then \
+	elif echo "$*" | grep -q '^bck'; then \
 		$(ECHO) "== Converting tile $< to $@"; \
 		$(SPRPCK) -t6 -p2 -s4 -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \

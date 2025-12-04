@@ -3,70 +3,27 @@
 #include <tgi.h>
 #include "AgCommon.h"
 #include "Utils.h"
+#include "Level_1_bck.h"
 extern Level level;
 
-/* Informazioni sui tipi di tile */
-static TileInfo tile_info[TILE_MAX_TYPES] = {
-		/* TILE_EMPTY */
-		{0, 0, 0, 0},
-		/* TILE_GROUND - solido */
-		{1, 0, 0, 0},
-		/* TILE_GRASS - solido */
-		{1, 0, 0, 1},
-		/* TILE_DIRT - solido */
-		{1, 0, 0, 2},
-		/* TILE_SPIKE - pericoloso */
-		{0, 1, 0, 3},
-		/* TILE_SPRING - non solido */
-		{0, 0, 0, 4},
-		/* TILE_RING - collezionabile */
-		{0, 0, 1, 5},
-		/* TILE_CHECKPOINT */
-		{0, 0, 0, 6},
-		/* TILE_WATER */
-		{0, 0, 0, 7}
-};
-
-/* Array di puntatori ai dati grafici */
-static char* tile_data[TILE_MAX_TYPES] = {
-		(void*) 0,
-		tile_ground,
-		tile_grass,
-		tile_dirt,
-		tile_spike,
-		tile_spring,
-		tile_ring,
-		(void*) 0,  /* Checkpoint - da definire */
-		(void*) 0   /* Water - da definire */
-};
 
 /* Mappa di esempio (Green Hill Zone style) */
-static u8 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
-		{0,0,0,0,0,4,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,1,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+static int level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
+		//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0},
-		{0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,1,1,1,0,0},
-		{3,2,3,2,2,2,1,1,2,2,2,2,2,2,2,1,2,2,1,1,1,2,2},
-		{3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+		{0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
 };
 
-static u8 level_back_ground_map[MAP_HEIGHT][MAP_WIDTH] = {
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0},
-		{0,0,0,1,2,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
-};
+
+
 
 
 /* Inizializza il sistema di sprite */
@@ -81,7 +38,7 @@ void level_init(void) {
 			FORE_GROUND_SCB_MATRIX[y][x].sprctl1 = REHV | PACKED;
 			FORE_GROUND_SCB_MATRIX[y][x].sprcoll = 0;
 			FORE_GROUND_SCB_MATRIX[y][x].next = (void*)0;
-			FORE_GROUND_SCB_MATRIX[y][x].data =  &tile_ground[0];
+			FORE_GROUND_SCB_MATRIX[y][x].data =  &LEVEL_1_TILES[0];
 			FORE_GROUND_SCB_MATRIX[y][x].hsize = 0x0100;
 			FORE_GROUND_SCB_MATRIX[y][x].vsize = 0x0100;
 			FORE_GROUND_SCB_MATRIX[y][x].vpos = 0;// (-5 + (y*TILE_SIZE));
@@ -92,18 +49,6 @@ void level_init(void) {
 
 
 
-			BACK_GROUND_SCB_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_BACKGROUND;
-			BACK_GROUND_SCB_MATRIX[y][x].sprctl1 = REHV | PACKED;
-			BACK_GROUND_SCB_MATRIX[y][x].sprcoll = 0;
-			BACK_GROUND_SCB_MATRIX[y][x].next = (void*)0;
-			BACK_GROUND_SCB_MATRIX[y][x].data =  &tile_ground[0];
-			BACK_GROUND_SCB_MATRIX[y][x].hsize = 0x0100;
-			BACK_GROUND_SCB_MATRIX[y][x].vsize = 0x0100;
-			BACK_GROUND_SCB_MATRIX[y][x].vpos = 0;// (-5 + (y*TILE_SIZE));
-			BACK_GROUND_SCB_MATRIX[y][x].hpos = 0;//(-8 + (x*TILE_SIZE));
-			for(j = 0; j < 8; j++) {
-				BACK_GROUND_SCB_MATRIX[y][x].penpal[j] = tile_palette[j];
-			}
 
 
 		}
@@ -115,21 +60,6 @@ void level_load(u8 level_num) {
 	/* Per ora carica solo la mappa di default */
 	(void)level_num;  /* Ignorato per ora */
 
-	/**
-	 * non copio su level gli array già presenti.
-	 * ho provato con puntatore 2D o puntatore di puntatore ma non
-	 * funziona la lettura del dato
-	 */
-	/*
-	for(y = 0; y < MAP_HEIGHT; y++)
-		for(x = 0; x < MAP_WIDTH; x++) {
-			{
-				level.foregound_map[y][x] = level_foregound_map[y][x];
-			}
-		}
-	*/
-	//level.foregound_map =level_foregound_map;
-	/* Imposta posizioni di partenza e fine */
 
 	level.start_x =0;
 	level.start_y =MAP_HEIGHT * TILE_SIZE;//MAP_HEIGHT * TILE_SIZE ;
@@ -148,7 +78,7 @@ void level_load(u8 level_num) {
 
 
 void level_draw() {
-    int x, y, j,start_tile_x,start_tile_y,end_tile_x,end_tile_y;
+    int x, y, j,start_tile_x,start_tile_y,end_tile_x,end_tile_y,tile_index;
 
     /* Calcola quale porzione della mappa è visibile */
     start_tile_x = level.camera.x / TILE_SIZE  ;//+ (level.camera.x % TILE_SIZE==0?0:-1);
@@ -169,9 +99,12 @@ void level_draw() {
 
     for (y = start_tile_y; y < end_tile_y; y++) {
         for (x = start_tile_x; x < end_tile_x; x++) {
-            u8 tile_type = level_foregound_map[y][x];//level.foregound_map
 
-            if (tile_type != TILE_EMPTY && tile_data[tile_type] != (void*)0) {
+
+
+        	tile_index = level_foregound_map[y][x];//level.foregound_map
+
+            if (tile_index != 0) {
                 /* Calcola l'indice nella matrice di sprite */
                 int sprite_x = x - start_tile_x;
                 int sprite_y =  y - start_tile_y;
@@ -185,7 +118,7 @@ void level_draw() {
                 //if(screen_y>=-TILE_SIZE)
                 {
 					/* Imposta i dati dello sprite */
-					FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x].data = tile_data[tile_type];
+					FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_TILES[tile_index-1];
 					FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x].hpos =   +screen_x; //-TILE_SIZE -1
 					FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x].vpos =   +screen_y; //+TILE_SIZE -1
 

@@ -9,9 +9,8 @@
 /* player.c */
 #include "Player.h"
 #include "Level.h"
-
+#include "Level_1_bck.h"
 //#define GROUND_LEVEL 144//80  // base dello schermo
-#define PLAYER_START_X 80//80
 //static void __fastcall__ player_animate();
 
 extern Level level;
@@ -20,10 +19,10 @@ extern Player player;
 void player_init(){//, u16 x, u16 y) {
 	//player.level = level;
 	player.x = TILE_SIZE;// level.start_x+PLAYER_START_X;
-	player.y = (MAP_HEIGHT * TILE_SIZE);//level.start_y;//-16-8;
+	player.y = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE/2;//level.start_y;//-16-8;
 	player.vx = 0;
 	player.vy = 0;
-	player.ground_level = (MAP_HEIGHT * TILE_SIZE);//level.start_y;//-16-8 ;
+	player.ground_level = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE/2;//level.start_y;//-16-8 ;
 
 
 	player.state = PLAYER_IDLE;
@@ -51,7 +50,7 @@ void player_init(){//, u16 x, u16 y) {
 	player.sprite.sprctl1 = REHV | PACKED;
 	player.sprite.sprcoll = 0;
 	player.sprite.next = (void*)0;
-	player.sprite.data = player_frames[0];  // Frame iniziale
+	player.sprite.data = sonic_idle_tiles[0];  // Frame iniziale
 	player.sprite.hpos = 0;
 	player.sprite.vpos = 0;
 	player.sprite.hsize = 0x0100;  // 1:1 scale
@@ -68,12 +67,12 @@ void player_init(){//, u16 x, u16 y) {
 	player.sprite.penpal[7] = 0xEF;
 
 	// Setup animazioni
-	player.idle_frames = player_frames;
-	player.walk_frames = player_frames;  // Per ora stesso set
-	player.jump_frames = player_frames;  // Per ora stesso set
-	player.idle_frame_count = 1;         // Solo il primo frame per idle
+	player.idle_frames = sonic_idle_tiles;
+	player.walk_frames = sonic_run_tiles;  // Per ora stesso set
+	player.jump_frames = sonic_run_tiles;  // Per ora stesso set
+	player.idle_frame_count = 4;         // Solo il primo frame per idle
 	player.walk_frame_count = 4;         // 4 frame per camminata
-	player.jump_frame_count = 2;         // 2 frame per salto
+	player.jump_frame_count = 4;         // 2 frame per salto
 }
 
 // Aggiorna la posizione dello sprite
@@ -86,7 +85,7 @@ void player_update_sprite_position() {
 
 // Gestione animazione
  void  player_animate() {
-	u8 frame_count = 0;
+	int frame_count = 0;
 	char** current_animation =  (void*) 0;
 	player.animation_timer++;
 
@@ -98,7 +97,7 @@ void player_update_sprite_position() {
 	case PLAYER_IDLE:
 		current_animation = player.idle_frames;
 		frame_count = player.idle_frame_count;
-		player.animation_speed = 4;  // Più lento
+		player.animation_speed = 6;  // Più lento
 		break;
 	case PLAYER_WALKING:
 		current_animation = player.walk_frames;
@@ -108,7 +107,7 @@ void player_update_sprite_position() {
 	case PLAYER_JUMPING:
 		current_animation = player.jump_frames;
 		frame_count = player.jump_frame_count;
-		player.animation_speed = 2;  // Più veloce
+		player.animation_speed = 0;  // Più veloce
 		break;
 	default:
 		current_animation = player.idle_frames;
@@ -119,7 +118,7 @@ void player_update_sprite_position() {
 	// Cambia frame se è il momento
 	if(player.animation_timer >= player.animation_speed) {
 		player.animation_timer = 0;
-		player.current_frame = (player.current_frame + 1) % frame_count;
+		player.current_frame = (player.current_frame + 1 ) % frame_count;
 		player.sprite.data = (unsigned char*)current_animation[player.current_frame];
 	}
 

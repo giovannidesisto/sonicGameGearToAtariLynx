@@ -5,7 +5,7 @@
 #include "AgCommon.h"
 
 /* Definizioni costanti */
-#define TILE_SIZE 16
+#define TILE_SIZE 32
 
 
 #define SCREEN_WIDTH 160
@@ -13,8 +13,8 @@
 
 
 //dimensione della mappa in sprites
-#define MAP_WIDTH 23
-#define MAP_HEIGHT 10
+#define MAP_WIDTH  23
+#define MAP_HEIGHT 8
 
 
 /*
@@ -24,30 +24,12 @@ nell'ottica di gestire in continuità l'aggiornamento della capera che insegue i
 non solo durante lo scorrimeto verticale del gioco ma anche durante lo scorrimento verticale (es se sale
 su piattaforme che lo portano in alto)
 */
-#define TILES_X  11
-#define TILES_Y  8
+#define TILES_X  6//11//11
+#define TILES_Y  4//8//8
 
-extern char tile_ground[];
-extern char tile_grass[];
-extern char tile_dirt[];
-extern char tile_spike[];
-extern char tile_spring[];
-extern char tile_ring[];
+
+
 static SCB_REHV_PAL FORE_GROUND_SCB_MATRIX[TILES_Y][TILES_X];
-static SCB_REHV_PAL BACK_GROUND_SCB_MATRIX[TILES_Y][TILES_X];
-/* Tipi di tile */
-typedef enum {
-    TILE_EMPTY = 0,
-    TILE_GROUND,        /* Terreno base */
-    TILE_GRASS,         /* Erba */
-    TILE_DIRT,          /* Terra */
-    TILE_SPIKE,         /* Spina */
-    TILE_SPRING,        /* Molla */
-    TILE_RING,          /* Anello */
-    TILE_CHECKPOINT,    /* Checkpoint */
-    TILE_WATER,         /* Acqua */
-    TILE_MAX_TYPES
-} TileType;
 
 /* Struttura per informazioni del tile */
 typedef struct {

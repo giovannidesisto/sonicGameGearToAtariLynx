@@ -6,28 +6,37 @@
  */
 #ifndef PLAYER_H
 #define PLAYER_H
-#define PLAYER_FRAME_COUNT 7
-#define PLAYER_WIDTH 12
-#define PLAYER_HEIGHT 24
+#define PLAYER_FRAME_COUNT 4
+#define PLAYER_WIDTH 16
+#define PLAYER_HEIGHT 32
 #include <AgCommon.h>  
 
 // Dichiarazioni dei frame (definite altrove)
-extern char player_frame_00[];
-extern char player_frame_01[];
-extern char player_frame_02[];
-extern char player_frame_03[];
-extern char player_frame_04[];
-extern char player_frame_05[];
-extern char player_frame_06[];
+extern char sonic_run_1[];
+extern char sonic_run_2[];
+extern char sonic_run_3[];
+extern char sonic_run_4[];
+
+
+extern char sonic_idle_1[];
+extern char sonic_idle_2[];
+extern char sonic_idle_3[];
+extern char sonic_idle_4[];
+
 // Array di puntatori ai frame per animazione
-static unsigned char* player_frames[] = {
-    player_frame_00,
-    player_frame_01,
-    player_frame_02,
-    player_frame_03,
-    player_frame_04,
-    player_frame_05,
-    player_frame_06
+static unsigned char* sonic_run_tiles[] = {
+		sonic_run_1,
+		sonic_run_2,
+		sonic_run_3,
+		sonic_run_4,
+};
+
+// Array di puntatori ai frame per animazione
+static unsigned char* sonic_idle_tiles[] = {
+		sonic_idle_1,
+		sonic_idle_2,
+		sonic_idle_3,
+		sonic_idle_4,
 };
 
 
@@ -35,6 +44,7 @@ static unsigned char* player_frames[] = {
 typedef enum {
     PLAYER_IDLE = 0,
     PLAYER_WALKING,
+	PLAYER_RUNNING,
     PLAYER_JUMPING,
 	PLAYER_RUN_JUMPING,
     PLAYER_SHOOTING,

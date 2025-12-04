@@ -20,21 +20,22 @@
 // https://atarigamer.com/pages/atari-lynx-palette-generator
 #pragma bss-name (push, "RODATA")
 u16 myPalette[] = {
-		0x00ff, // purple       - index 0
-		0x0000, // black       - index 1
-		0x00A0,
+		0x0BE9,
+		0x0000,
+		0x0104,
+		0x0400,
+		0x0591,
+		0x040A,
 		0x05F5,
-		0x0A5F,
-		0x055A,
-		0x0AAA,
-		0x0FFF,
-		0x09F4,
-		0x0D60,
-		0x0E9E,
-		0x0972,
-		0x0206,
-		0x0A0E,
-		0x050A
+		0x045D,
+		0x0833,
+		0x0AF3,
+		0x0E11,
+		0x0A0F,
+		0x0B7F,
+		0x0BAF,
+		0x0F0D,
+		0x0FFF
 		
 		};
 
@@ -84,7 +85,7 @@ void main(void) {
 	//storyScreen();     // game story/instructions screen before gameplay starts
 
 	// Inizializza i frame del player
-	initPlayerFrames();
+	//initPlayerFrames();
 
 	// Inizializza il gioco
 	resetGame();       // resets the game state to a clean state
@@ -172,17 +173,7 @@ static void __fastcall__ storyScreen() {
 
 // ----------------------------------------------------------------------------
 
-static void __fastcall__ initPlayerFrames() {
-	// Inizializza l'array dei frame (in player.c dovresti avere una funzione simile)
-	player_frames[0] = player_frame_00;
-	player_frames[1] = player_frame_01;
-	player_frames[2] = player_frame_02;
-	player_frames[3] = player_frame_03;
-	player_frames[4] = player_frame_04;
-	player_frames[5] = player_frame_05;
-	player_frames[6] = player_frame_06;
 
-}
 
 static void __fastcall__ resetGame() {
 
@@ -192,7 +183,7 @@ static void __fastcall__ resetGame() {
 
 	/* Carica il livello 1 */
 	level_load(1);
-tgi_setcollisiondetection(1);
+	tgi_setcollisiondetection(1);
 	/* Inizializza il player alla posizione di partenza */
 	player_init();//level.start_x, level.start_y);
 
@@ -241,9 +232,9 @@ static void  __fastcall__  updateAndDrawGame() {
 		/* Salto verticale */
 		if (!player.is_jumping && player.is_grounded) {
 			player.is_jumping = 1;
-			player.is_grounded = 1;
+			player.is_grounded = 0;
 			player.state = PLAYER_JUMPING;
-			player.vy = -1;  // Salto normale
+			player.vy = -4;  // Salto normale
 			player.current_frame = 0;
 			player.animation_timer = 0;
 		}
@@ -251,17 +242,17 @@ static void  __fastcall__  updateAndDrawGame() {
 	/*
 	 * FIXME
 	 */
-	case AG_JOY_DOWN:
-		/* Salto verticale */
-		 {
-			player.is_jumping = 0;
-			player.is_grounded = 1;
-			player.state = PLAYER_IDLE;
-			player.vy = 0;  // Salto normale
-			player.current_frame = 0;
-			player.animation_timer = 0;
-		}
-		break;
+//	case AG_JOY_DOWN:
+//		/* Salto verticale */
+//		 {
+//			player.is_jumping = 0;
+//			player.is_grounded = 1;
+//			player.state = PLAYER_IDLE;
+//			player.vy = 0;  // Salto normale
+//			//player.current_frame = 0;
+//			//player.animation_timer = 0;
+//		}
+//		break;
 
 
 	case AG_JOY_LEFT:
@@ -270,7 +261,10 @@ static void  __fastcall__  updateAndDrawGame() {
 		player.direction = DIR_LEFT;
 		if (player.is_grounded) {
 			player.state = PLAYER_WALKING;
+			//player.current_frame = 0;
+			//player.animation_timer = 0;
 		}
+
 		break;
 
 	case AG_JOY_RIGHT:
@@ -279,14 +273,19 @@ static void  __fastcall__  updateAndDrawGame() {
 		player.direction = DIR_RIGHT;
 		if (player.is_grounded) {
 			player.state = PLAYER_WALKING;
+			//player.current_frame = 0;d
+			//player.animation_timer = 0;
 		}
 		break;
 
 	default:
 		/* Nessuna direzione premuta */
 		player.vx = 0;
-		if (player.is_grounded && !player.is_jumping) {
+		if (player.is_grounded && !player.is_jumping && player.state != PLAYER_IDLE) {
+
 			player.state = PLAYER_IDLE;
+			player.current_frame = 0;
+			player.animation_timer = player.animation_speed;
 		}
 		break;
 	}
@@ -301,6 +300,13 @@ static void  __fastcall__  updateAndDrawGame() {
 	/* Controlla collisioni con il livello */
 	new_x = player.x + player.vx;
 	new_y = player.y + player.vy;
+
+//	if(new_x == player.x && new_y == player.y)
+//	{
+//		player.current_frame = 0;
+//		player.animation_timer = 0;
+//		player.state = PLAYER_IDLE;
+//	}
 
 	/* Collisione orizzontale */
 	if(level_check_collision(new_x, player.y, PLAYER_WIDTH, PLAYER_HEIGHT)) {
@@ -343,7 +349,7 @@ static void  __fastcall__  updateAndDrawGame() {
 	AG_WAIT_LCD();
 
 	/* Disegna lo sfondo */
-	agSprBackground.penpal[0] = 0x08;
+	agSprBackground.penpal[0] = 0x00;
 	tgi_sprite(&agSprBackground);
 
 	/* Disegna il livello usando la camera */
