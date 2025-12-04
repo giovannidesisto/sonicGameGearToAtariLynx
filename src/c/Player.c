@@ -69,10 +69,14 @@ void player_init(){//, u16 x, u16 y) {
 	// Setup animazioni
 	player.idle_frames = sonic_idle_tiles;
 	player.walk_frames = sonic_run_tiles;  // Per ora stesso set
-	player.jump_frames = sonic_run_tiles;  // Per ora stesso set
+	player.brake_frames = sonic_brake_tiles;  // Per ora stesso set
+
+	player.jump_frames = sonic_jump_tiles;  // Per ora stesso set
 	player.idle_frame_count = 4;         // Solo il primo frame per idle
 	player.walk_frame_count = 4;         // 4 frame per camminata
-	player.jump_frame_count = 4;         // 2 frame per salto
+	player.brake_frame_count = 2;         // 4 frame per camminata
+
+	player.jump_frame_count = 2;         // 2 frame per salto
 }
 
 // Aggiorna la posizione dello sprite
@@ -97,16 +101,21 @@ void player_update_sprite_position() {
 	case PLAYER_IDLE:
 		current_animation = player.idle_frames;
 		frame_count = player.idle_frame_count;
-		player.animation_speed = 6;  // Più lento
+		player.animation_speed = 2;  // Più lento
 		break;
 	case PLAYER_WALKING:
 		current_animation = player.walk_frames;
 		frame_count = player.walk_frame_count;
 		player.animation_speed = 0;  // Normale
 		break;
-	case PLAYER_JUMPING:
+	case PLAYER_JUMPING|PLAYER_RUN_JUMPING:
 		current_animation = player.jump_frames;
 		frame_count = player.jump_frame_count;
+		player.animation_speed = 2;  // Più veloce
+		break;
+	case PLAYER_BRAKING:
+		current_animation = player.brake_frames;
+		frame_count = player.brake_frame_count;
 		player.animation_speed = 0;  // Più veloce
 		break;
 	default:
@@ -168,16 +177,18 @@ void  player_update(Level * level) {//, Level* level
 
 
 	// Controlla se è a terra
-	if(player.y >= player.ground_level ) {
+	if(player.y > player.ground_level ) {
 
 		player.y = player.ground_level;
 		player.vy = 0;
+		player.vx = 0;
 		player.is_grounded = 1;
 		player.is_jumping = 0;
-
+/*
 		if(player.state == PLAYER_JUMPING) {
 			player.state = PLAYER_IDLE;
 		}
+*/
 	}
 
 

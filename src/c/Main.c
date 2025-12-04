@@ -208,7 +208,7 @@ static void  __fastcall__  updateAndDrawGame() {
 	            							player.state = PLAYER_RUN_JUMPING;
 	            							player.direction = DIR_LEFT;
 	            							player.vx = -2;
-	            							player.vy = -6;  // Salto potente
+	            							player.vy = -8;  // Salto potente
 	            							player.current_frame = 0;
 	            							player.animation_timer = 0;
 	            						}
@@ -222,7 +222,7 @@ static void  __fastcall__  updateAndDrawGame() {
 	            							player.state = PLAYER_RUN_JUMPING;
 	            							player.direction = DIR_RIGHT;
 	            							player.vx = 2;
-	            							player.vy = -6;  // Salto potente
+	            							player.vy = -8;  // Salto potente
 	            							player.current_frame = 0;
 	            							player.animation_timer = 0;
 	            						}
@@ -234,7 +234,7 @@ static void  __fastcall__  updateAndDrawGame() {
 			player.is_jumping = 1;
 			player.is_grounded = 0;
 			player.state = PLAYER_JUMPING;
-			player.vy = -4;  // Salto normale
+			player.vy = -6;  // Salto normale
 			player.current_frame = 0;
 			player.animation_timer = 0;
 		}
@@ -278,14 +278,34 @@ static void  __fastcall__  updateAndDrawGame() {
 		}
 		break;
 
-	default:
-		/* Nessuna direzione premuta */
-		player.vx = 0;
-		if (player.is_grounded && !player.is_jumping && player.state != PLAYER_IDLE) {
 
-			player.state = PLAYER_IDLE;
-			player.current_frame = 0;
-			player.animation_timer = player.animation_speed;
+
+	default:
+		if (player.is_grounded && !player.is_jumping)
+		{
+
+
+			if(player.state == PLAYER_WALKING && player.vx !=0)
+			{
+				player.state = PLAYER_BRAKING;
+			}
+			else
+			{
+				//frena con scivolata
+				if(player.state == PLAYER_BRAKING ){//&& player.vx !=0
+					if(player.vx > 0)player.vx--;
+					else player.vx++;
+
+				}
+
+				if(player.vx==0 &&  player.vy==0 )
+				{
+					//caso fermo
+					player.state = PLAYER_IDLE ;
+					player.current_frame = 0;
+					player.animation_timer = player.animation_speed;
+				}
+			}
 		}
 		break;
 	}
@@ -349,7 +369,7 @@ static void  __fastcall__  updateAndDrawGame() {
 	AG_WAIT_LCD();
 
 	/* Disegna lo sfondo */
-	agSprBackground.penpal[0] = 0x00;
+	agSprBackground.penpal[0] = 0x09;
 	tgi_sprite(&agSprBackground);
 
 	/* Disegna il livello usando la camera */
@@ -360,9 +380,9 @@ static void  __fastcall__  updateAndDrawGame() {
 
 
 
-	printCoordsToScreen(player.x,player.y,1,0,0x0E);
-    printCoordsToScreen(level.camera.x,level.camera.y,1,10,0x0D);
-	printCoordsToScreen(level.end_x,level.end_y,1,20,0x0C);
+	//printCoordsToScreen(player.x,player.y,1,0,0x0E);
+    //printCoordsToScreen(level.camera.x,level.camera.y,1,10,0x0D);
+	//printCoordsToScreen(level.end_x,level.end_y,1,20,0x0C);
 
 	// update the LCD
 	tgi_updatedisplay();

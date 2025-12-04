@@ -17,6 +17,12 @@ extern char sonic_run_2[];
 extern char sonic_run_3[];
 extern char sonic_run_4[];
 
+extern char sonic_brake_1[];
+extern char sonic_brake_2[];
+
+extern char sonic_jump_1[];
+extern char sonic_jump_2[];
+
 
 extern char sonic_idle_1[];
 extern char sonic_idle_2[];
@@ -30,6 +36,18 @@ static unsigned char* sonic_run_tiles[] = {
 		sonic_run_3,
 		sonic_run_4,
 };
+
+
+static unsigned char* sonic_brake_tiles[] = {
+		sonic_brake_1,
+		sonic_brake_2
+};
+
+static unsigned char* sonic_jump_tiles[] = {
+		sonic_jump_1,
+		sonic_jump_2
+};
+
 
 // Array di puntatori ai frame per animazione
 static unsigned char* sonic_idle_tiles[] = {
@@ -45,6 +63,7 @@ typedef enum {
     PLAYER_IDLE = 0,
     PLAYER_WALKING,
 	PLAYER_RUNNING,
+	PLAYER_BRAKING,
     PLAYER_JUMPING,
 	PLAYER_RUN_JUMPING,
     PLAYER_SHOOTING,
@@ -101,9 +120,11 @@ typedef struct Player{
     // Array di frame per animazioni diverse
     char** idle_frames;
     char** walk_frames;
+    char** brake_frames;
     char** jump_frames;
     u8 idle_frame_count;
     u8 walk_frame_count;
+    u8 brake_frame_count;
     u8 jump_frame_count;
 
     u8 spindash_power;
