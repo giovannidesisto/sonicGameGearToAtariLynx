@@ -14,9 +14,6 @@
 
 //dimensione della mappa in sprites
 #define MAP_WIDTH 23
-//attualmente limitata alla dimensione dello schermo
-//occorre testare e modificare il codice per gestire mappe più
-//grandi verticalmente con la camera
 #define MAP_HEIGHT 10
 
 
@@ -36,7 +33,8 @@ extern char tile_dirt[];
 extern char tile_spike[];
 extern char tile_spring[];
 extern char tile_ring[];
-static SCB_REHV_PAL sprFontMatrix[TILES_Y][TILES_X];
+static SCB_REHV_PAL FORE_GROUND_SCB_MATRIX[TILES_Y][TILES_X];
+static SCB_REHV_PAL BACK_GROUND_SCB_MATRIX[TILES_Y][TILES_X];
 /* Tipi di tile */
 typedef enum {
     TILE_EMPTY = 0,
@@ -69,12 +67,14 @@ typedef struct {
 
 /* Struttura livello */
 typedef struct {
-    u8 map[MAP_HEIGHT][MAP_WIDTH];  /* Mappa di tile */
-    u16 start_x;                     /* Posizione di partenza player */
+    //u8* foregound_map;//[MAP_HEIGHT][MAP_WIDTH];  /* Mappa di tile */
+    //u8 background_map[MAP_HEIGHT][MAP_WIDTH];  /* Mappa di tile */
+    u16 start_x;                     		  /* Posizione di partenza player */
     u16 start_y;
-    u16 end_x;                       /* Posizione fine livello */
+    u16 end_x;                                /* Posizione fine livello */
     u16 end_y;
-    Camera camera;                   /* Camera per lo scroll */
+    u8 current_level;
+    Camera camera;                            /* Camera per lo scroll */
 } Level;
 
 

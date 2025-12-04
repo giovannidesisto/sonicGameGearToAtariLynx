@@ -41,19 +41,33 @@ static char* tile_data[TILE_MAX_TYPES] = {
 };
 
 /* Mappa di esempio (Green Hill Zone style) */
-static u8 default_map[MAP_HEIGHT][MAP_WIDTH] = {
+static u8 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
 		{0,0,0,0,0,4,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,1,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{3,2,3,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+		{0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0},
+		{0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,1,1,1,0,0},
+		{3,2,3,2,2,2,1,1,2,2,2,2,2,2,2,1,2,2,1,1,1,2,2},
 		{3,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+static u8 level_back_ground_map[MAP_HEIGHT][MAP_WIDTH] = {
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0},
+		{0,0,0,1,2,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
 };
+
 
 /* Inizializza il sistema di sprite */
 void level_init(void) {
@@ -63,17 +77,32 @@ void level_init(void) {
 	for(y = 0; y < TILES_Y; y++)
 		for(x = 0; x < TILES_X; x++)
 		{
-			sprFontMatrix[y][x].sprctl0 = BPP_4 | TYPE_BACKGROUND;
-			sprFontMatrix[y][x].sprctl1 = REHV | PACKED;
-			sprFontMatrix[y][x].sprcoll = 0;
-			sprFontMatrix[y][x].next = (void*)0;
-			sprFontMatrix[y][x].data =  &tile_ground[0];
-			sprFontMatrix[y][x].hsize = 0x0100;
-			sprFontMatrix[y][x].vsize = 0x0100;
-			sprFontMatrix[y][x].vpos = 0;// (-5 + (y*TILE_SIZE));
-			sprFontMatrix[y][x].hpos = 0;//(-8 + (x*TILE_SIZE));
+			FORE_GROUND_SCB_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_BACKGROUND;
+			FORE_GROUND_SCB_MATRIX[y][x].sprctl1 = REHV | PACKED;
+			FORE_GROUND_SCB_MATRIX[y][x].sprcoll = 0;
+			FORE_GROUND_SCB_MATRIX[y][x].next = (void*)0;
+			FORE_GROUND_SCB_MATRIX[y][x].data =  &tile_ground[0];
+			FORE_GROUND_SCB_MATRIX[y][x].hsize = 0x0100;
+			FORE_GROUND_SCB_MATRIX[y][x].vsize = 0x0100;
+			FORE_GROUND_SCB_MATRIX[y][x].vpos = 0;// (-5 + (y*TILE_SIZE));
+			FORE_GROUND_SCB_MATRIX[y][x].hpos = 0;//(-8 + (x*TILE_SIZE));
 			for(j = 0; j < 8; j++) {
-				sprFontMatrix[y][x].penpal[j] = tile_palette[j];
+				FORE_GROUND_SCB_MATRIX[y][x].penpal[j] = tile_palette[j];
+			}
+
+
+
+			BACK_GROUND_SCB_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_BACKGROUND;
+			BACK_GROUND_SCB_MATRIX[y][x].sprctl1 = REHV | PACKED;
+			BACK_GROUND_SCB_MATRIX[y][x].sprcoll = 0;
+			BACK_GROUND_SCB_MATRIX[y][x].next = (void*)0;
+			BACK_GROUND_SCB_MATRIX[y][x].data =  &tile_ground[0];
+			BACK_GROUND_SCB_MATRIX[y][x].hsize = 0x0100;
+			BACK_GROUND_SCB_MATRIX[y][x].vsize = 0x0100;
+			BACK_GROUND_SCB_MATRIX[y][x].vpos = 0;// (-5 + (y*TILE_SIZE));
+			BACK_GROUND_SCB_MATRIX[y][x].hpos = 0;//(-8 + (x*TILE_SIZE));
+			for(j = 0; j < 8; j++) {
+				BACK_GROUND_SCB_MATRIX[y][x].penpal[j] = tile_palette[j];
 			}
 
 
@@ -85,12 +114,21 @@ void level_load(u8 level_num) {
 	u8 x, y;
 	/* Per ora carica solo la mappa di default */
 	(void)level_num;  /* Ignorato per ora */
+
+	/**
+	 * non copio su level gli array già presenti.
+	 * ho provato con puntatore 2D o puntatore di puntatore ma non
+	 * funziona la lettura del dato
+	 */
+	/*
 	for(y = 0; y < MAP_HEIGHT; y++)
 		for(x = 0; x < MAP_WIDTH; x++) {
 			{
-				level.map[y][x] = default_map[y][x];
+				level.foregound_map[y][x] = level_foregound_map[y][x];
 			}
 		}
+	*/
+	//level.foregound_map =level_foregound_map;
 	/* Imposta posizioni di partenza e fine */
 
 	level.start_x =0;
@@ -131,7 +169,7 @@ void level_draw() {
 
     for (y = start_tile_y; y < end_tile_y; y++) {
         for (x = start_tile_x; x < end_tile_x; x++) {
-            u8 tile_type = level.map[y][x];
+            u8 tile_type = level_foregound_map[y][x];//level.foregound_map
 
             if (tile_type != TILE_EMPTY && tile_data[tile_type] != (void*)0) {
                 /* Calcola l'indice nella matrice di sprite */
@@ -147,12 +185,12 @@ void level_draw() {
                 //if(screen_y>=-TILE_SIZE)
                 {
 					/* Imposta i dati dello sprite */
-					sprFontMatrix[sprite_y][sprite_x].data = tile_data[tile_type];
-					sprFontMatrix[sprite_y][sprite_x].hpos =   +screen_x; //-TILE_SIZE -1
-					sprFontMatrix[sprite_y][sprite_x].vpos =   +screen_y; //+TILE_SIZE -1
+					FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x].data = tile_data[tile_type];
+					FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x].hpos =   +screen_x; //-TILE_SIZE -1
+					FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x].vpos =   +screen_y; //+TILE_SIZE -1
 
 					/* Disegna lo sprite */
-					tgi_sprite(&sprFontMatrix[sprite_y][sprite_x]);
+					tgi_sprite(&FORE_GROUND_SCB_MATRIX[sprite_y][sprite_x]);
                 }
             }
         }

@@ -321,11 +321,15 @@ static void  __fastcall__  updateAndDrawGame() {
 		player.y = new_y;
 	}
 
+
+
+	//controllo per non uscire dallo schermo
 	//limite bordo SX
 	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
 	else
 	//limite bordo DX
 	if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
+
 
 	/* Aggiorna il player (senza chiamare player_update_sprite_position) */
 	player_update();
