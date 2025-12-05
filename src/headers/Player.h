@@ -30,6 +30,11 @@ extern char sonic_idle_2[];
 extern char sonic_idle_3[];
 extern char sonic_idle_4[];
 
+
+static const s8 DEFAULT_SPEED = 8;
+static const s8 DEFAULT_JUMP_POWER = -12;
+static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
+
 // Array di puntatori ai frame per animazione
 static unsigned char* sonic_run_tiles[] = {
 		sonic_run_1,

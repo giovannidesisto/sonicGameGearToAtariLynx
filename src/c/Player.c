@@ -8,19 +8,15 @@
 
 /* player.c */
 #include "Player.h"
-//#define GROUND_LEVEL 144//80  // base dello schermo
-//static void __fastcall__ player_animate();
 
 extern Level level;
 extern Player player;
-// Inizializzazione del player
-void player_init(){//, u16 x, u16 y) {
-	//player.level = level;
-	player.x = TILE_SIZE;// level.start_x+PLAYER_START_X;
-	player.y = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE/2;//level.start_y;//-16-8;
+void player_init(){
+	player.x = TILE_SIZE;
+	player.y = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE/2;
 	player.vx = 0;
 	player.vy = 0;
-	player.ground_level = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE/2;//level.start_y;//-16-8 ;
+	player.ground_level = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE/2;
 
 
 	player.state = PLAYER_IDLE;
@@ -97,24 +93,24 @@ void player_update_sprite_position() {
 	case PLAYER_IDLE:
 		current_animation = player.idle_frames;
 		frame_count = player.idle_frame_count;
-		player.animation_speed = 6;  // Più lento
+		player.animation_speed = 10;  // Più lento
 		//player.sprite.data = (unsigned char*)current_animation[0];
 		break;
 	case PLAYER_WALKING:
 		current_animation = player.walk_frames;
 		frame_count = player.walk_frame_count;
-		player.animation_speed = 0;  // Normale
+		player.animation_speed = 4;  // Normale
 		break;
 	case PLAYER_JUMPING:
 	case PLAYER_RUN_JUMPING:
 		current_animation = player.jump_frames;
 		frame_count = player.jump_frame_count;
-		player.animation_speed = 2;  // Più veloce
+		player.animation_speed = 4;  // Più veloce
 		break;
 	case PLAYER_BRAKING:
 		current_animation = player.brake_frames;
 		frame_count = player.brake_frame_count;
-		player.animation_speed = 0;  // Più veloce
+		player.animation_speed = 4;  // Più veloce
 		break;
 	default:
 		current_animation = player.idle_frames;
@@ -128,6 +124,9 @@ void player_update_sprite_position() {
 		player.animation_timer = 0;
 		player.current_frame = (player.current_frame + 1 ) % frame_count;
 		player.sprite.data = (unsigned char*)current_animation[player.current_frame];
+
+		//resetto il timer impazienza di sonic, dopo che ha battuto il piedino
+		if(player.state==PLAYER_IDLE && player.current_frame == player.idle_frame_count-1)player.animation_timer=WAIT_BEFORE_IDLE_ANIMATION;
 	}
 	else if(player.animation_timer < 0 )
 				player.sprite.data = (unsigned char*)current_animation[0];
@@ -186,7 +185,14 @@ void  player_update() {//, Level* level
 	if(player.y > player.ground_level ) {
 		player.y = player.ground_level;
 		player.vy = 0;
-		player.vx = 0;
+
+
+		//quando atterra, se arriva da un salto angolato,
+		if(player.vx!=0)
+			player.state = PLAYER_BRAKING;
+
+
+
 		player.is_grounded = 1;
 		player.is_jumping = 0;
 
@@ -201,27 +207,27 @@ void player_handle_user_input(u8 key){
 			if (!player.is_jumping && player.is_grounded) {
 				player.is_jumping = 1;
 				player.is_grounded = 0;
-				if(player.state !=PLAYER_JUMPING)player.animation_timer=0;
+				if(player.state !=PLAYER_JUMPING)player.animation_timer=player.animation_speed;
 				player.state = PLAYER_JUMPING;
-				player.vy = -12;  // Salto normale
+				player.vy = DEFAULT_JUMP_POWER;  // Salto normale
 			}
 			break;
 
 		case AG_JOY_LEFT:
 			/* Cammina a sinistra */
-			player.vx = -4;
+			player.vx = -1 * DEFAULT_SPEED ;
 			player.direction = DIR_LEFT;
 			if (player.is_grounded) {
-				if(player.state !=PLAYER_WALKING)player.animation_timer=0;
+				if(player.state !=PLAYER_WALKING)player.animation_timer=player.animation_speed;
 				player.state = PLAYER_WALKING;
 			}
 			break;
 		case AG_JOY_RIGHT:
 			/* Cammina a destra */
-			player.vx = 4;
+			player.vx = DEFAULT_SPEED;
 			player.direction = DIR_RIGHT;
 			if (player.is_grounded) {
-				if(player.state !=PLAYER_WALKING)player.animation_timer=0;
+				if(player.state !=PLAYER_WALKING)player.animation_timer=player.animation_speed;
 				player.state = PLAYER_WALKING;
 			}
 			break;
@@ -234,10 +240,10 @@ void player_handle_user_input(u8 key){
 			if (!player.is_jumping && player.is_grounded) {
 				player.is_jumping = 1;
 				player.is_grounded = 0;
-				if(player.state !=PLAYER_JUMPING)player.animation_timer=0;
+				if(player.state !=PLAYER_JUMPING)player.animation_timer=player.animation_speed;
 				player.state = PLAYER_JUMPING;
-				player.vy = -12;
-				player.vx = -4;
+				player.vy = DEFAULT_JUMP_POWER;
+				player.vx = -1*DEFAULT_SPEED;
 			}
 			break;
 		case AG_JOY_A | AG_JOY_RIGHT:
@@ -245,10 +251,10 @@ void player_handle_user_input(u8 key){
 			if (!player.is_jumping && player.is_grounded) {
 				player.is_jumping = 1;
 				player.is_grounded = 0;
-				if(player.state !=PLAYER_JUMPING)player.animation_timer=0;
+				if(player.state !=PLAYER_JUMPING)player.animation_timer=player.animation_speed;
 				player.state = PLAYER_JUMPING;
-				player.vy = -12;
-				player.vx = +4;
+				player.vy = DEFAULT_JUMP_POWER;
+				player.vx = DEFAULT_SPEED;
 			}
 			break;
 
@@ -274,7 +280,7 @@ void player_handle_user_input(u8 key){
 						//caso fermo
 						player.state = PLAYER_IDLE;
 						player.current_frame = 0;
-						player.animation_timer = -100;//tempo di attesa prima di fare battere il piede a sonic, non è poi così impaziente :)
+						player.animation_timer = WAIT_BEFORE_IDLE_ANIMATION;//tempo di attesa prima di fare battere il piede a sonic, non è poi così impaziente :)
 					}
 				}
 			}
