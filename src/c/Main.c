@@ -192,189 +192,26 @@ static void __fastcall__ resetGame() {
 // ----------------------------------------------------------------------------
 
 static void  __fastcall__  updateAndDrawGame() {
-	// Processa l'input usando le funzioni del player
-	u8 pos = 0;
-	u8 joy = SUZY.joystick;
 	/* Controlla collisioni con il livello */
-	u16 new_x;
-	u16 new_y;
-	/* Gestione combinazioni dirette */
-	switch (joy & (AG_JOY_LEFT | AG_JOY_RIGHT | AG_JOY_UP | AG_JOY_DOWN)) {
-	case (AG_JOY_LEFT | AG_JOY_UP):
-	            						/* Salto con rincorsa a sinistra */
-	            						if (!player.is_jumping && player.is_grounded) {
-	            							player.is_jumping = 1;
-	            							player.is_grounded = 0;
-	            							player.state = PLAYER_RUN_JUMPING;
-	            							player.direction = DIR_LEFT;
-	            							player.vx = -2;
-	            							player.vy = -8;  // Salto potente
-	            							player.current_frame = 0;
-	            							player.animation_timer = 0;
-	            						}
-	break;
-
-	case (AG_JOY_RIGHT | AG_JOY_UP):
-	            						/* Salto con rincorsa a destra */
-	            						if (!player.is_jumping && player.is_grounded) {
-	            							player.is_jumping = 1;
-	            							player.is_grounded = 0;
-	            							player.state = PLAYER_RUN_JUMPING;
-	            							player.direction = DIR_RIGHT;
-	            							player.vx = 2;
-	            							player.vy = -8;  // Salto potente
-	            							player.current_frame = 0;
-	            							player.animation_timer = 0;
-	            						}
-	break;
-
-	case AG_JOY_UP:
-		/* Salto verticale */
-		if (!player.is_jumping && player.is_grounded) {
-			player.is_jumping = 1;
-			player.is_grounded = 0;
-			player.state = PLAYER_JUMPING;
-			player.vy = -6;  // Salto normale
-			player.current_frame = 0;
-			player.animation_timer = 0;
-		}
-		break;
-	/*
-	 * FIXME
-	 */
-//	case AG_JOY_DOWN:
-//		/* Salto verticale */
-//		 {
-//			player.is_jumping = 0;
-//			player.is_grounded = 1;
-//			player.state = PLAYER_IDLE;
-//			player.vy = 0;  // Salto normale
-//			//player.current_frame = 0;
-//			//player.animation_timer = 0;
-//		}
-//		break;
-
-
-	case AG_JOY_LEFT:
-		/* Cammina a sinistra */
-		player.vx = -4;
-		player.direction = DIR_LEFT;
-		if (player.is_grounded) {
-			player.state = PLAYER_WALKING;
-			//player.current_frame = 0;
-			//player.animation_timer = 0;
-		}
-
-		break;
-
-	case AG_JOY_RIGHT:
-		/* Cammina a destra */
-		player.vx = 4;
-		player.direction = DIR_RIGHT;
-		if (player.is_grounded) {
-			player.state = PLAYER_WALKING;
-			//player.current_frame = 0;d
-			//player.animation_timer = 0;
-		}
-		break;
 
 
 
-	default:
-		if (player.is_grounded && !player.is_jumping)
-		{
-
-
-			if(player.state == PLAYER_WALKING && player.vx !=0)
-			{
-				player.state = PLAYER_BRAKING;
-			}
-			else
-			{
-				//frena con scivolata
-				if(player.state == PLAYER_BRAKING ){//&& player.vx !=0
-					if(player.vx > 0)player.vx--;
-					else player.vx++;
-
-				}
-
-				if(player.vx==0 &&  player.vy==0 )
-				{
-					//caso fermo
-					player.state = PLAYER_IDLE ;
-					player.current_frame = 0;
-					player.animation_timer = player.animation_speed;
-				}
-			}
-		}
-		break;
-	}
-
-	/* Gestione pulsanti */
-	if (joy & AG_JOY_A) {
-		player_shoot();
-	}
-
-
-
-	/* Controlla collisioni con il livello */
-	new_x = player.x + player.vx;
-	new_y = player.y + player.vy;
-
-//	if(new_x == player.x && new_y == player.y)
-//	{
-//		player.current_frame = 0;
-//		player.animation_timer = 0;
-//		player.state = PLAYER_IDLE;
-//	}
-
-	/* Collisione orizzontale */
-	if(level_check_collision(new_x, player.y, PLAYER_WIDTH, PLAYER_HEIGHT)) {
-		player.vx = 0;  /* Ferma movimento orizzontale */
-	} else {
-		player.x = new_x;
-	}
-
-	/* Collisione verticale */
-	if(level_check_collision( player.x, new_y, PLAYER_WIDTH, PLAYER_HEIGHT)) {
-		if(player.vy > 0) {
-			/* Collisione dal basso (atterraggio) */
-			player.is_grounded = 1;
-			player.is_jumping = 0;
-		}
-		player.vy = 0;
-	} else {
-		player.y = new_y;
-	}
-
-
-
-	//controllo per non uscire dallo schermo
-	//limite bordo SX
-	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
-	else
-	//limite bordo DX
-	if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
-
-
+	player_handle_user_input(SUZY.joystick);
 	/* Aggiorna il player (senza chiamare player_update_sprite_position) */
 	player_update();
+	// Aggiorna animazione
+	player_animate();
 	/* Aggiorna la camera per seguire il player */
 	level_update_camera(player.x, player.y);
-	/* Imposta la posizione dello sprite del player */
-	player.sprite.hpos = level_world_to_screen_x(player.x);
-	player.sprite.vpos = level_world_to_screen_y(player.y);
+
 
 
 	AG_WAIT_LCD();
-
 	/* Disegna lo sfondo */
 	agSprBackground.penpal[0] = 0x09;
 	tgi_sprite(&agSprBackground);
-
 	/* Disegna il livello usando la camera */
 	level_draw();
-
 	/* Disegna il player */
 	tgi_sprite(&player.sprite);
 

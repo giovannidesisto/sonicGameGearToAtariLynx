@@ -10,7 +10,8 @@
 #define PLAYER_WIDTH 16
 #define PLAYER_HEIGHT 32
 #include <AgCommon.h>  
-
+#include "Level.h"
+#include "Level_1_bck.h"
 // Dichiarazioni dei frame (definite altrove)
 extern char sonic_run_1[];
 extern char sonic_run_2[];
@@ -94,8 +95,8 @@ typedef struct Player{
     PlayerState state;
     PlayerDirection direction;
     u8 current_frame;
-    u8 animation_timer;
-    u8 animation_speed;  // frame di gioco per cambio frame animazione
+    s8 animation_timer;
+    s8 animation_speed;  // frame di gioco per cambio frame animazione
 
     // Vita e punteggio
     u8 health;
@@ -132,20 +133,17 @@ typedef struct Player{
     u8 ground_level;
 
 
+
 } Player;
 
 
 // Funzioni di gestione
 void player_init();
 void player_update();
-//void player_draw();
-void player_move( s8 dx, s8 dy);
-void player_jump();
-void player_shoot();
-void player_hurt( u8 damage);
- void player_animate();
-// Nuove funzioni
-void player_run_jump(s8 direction);
-void player_spindash();
-void player_hurt( u8 damage);
+void player_animate();
+void player_handle_user_input(u8 key);
+
+
+
+
 #endif /* PLAYER_H */

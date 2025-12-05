@@ -1,11 +1,12 @@
 /* level.c */
 #include "Level.h"
+#include "Player.h"
 #include <tgi.h>
 #include "AgCommon.h"
 #include "Utils.h"
 #include "Level_1_bck.h"
 extern Level level;
-
+extern Player player;
 
 /* Mappa di esempio (Green Hill Zone style) */
 static int level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
@@ -184,6 +185,11 @@ void level_update_camera( u16 player_x, u16 player_y) {
 
     if(level.camera.x>level_width_px)level.camera.x=0;
     if(level.camera.y>level_height_px)level.camera.y=0;
+
+
+	/* Imposta la posizione dello sprite del player */
+	player.sprite.hpos = level_world_to_screen_x(player.x);
+	player.sprite.vpos = level_world_to_screen_y(player.y);
 }
 
 /* Converti coordinate world a screen X */
