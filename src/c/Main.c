@@ -229,4 +229,3 @@ static void  __fastcall__ updateAndDrawGame() {
 	tgi_updatedisplay();
 
 }
-

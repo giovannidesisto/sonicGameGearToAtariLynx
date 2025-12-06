@@ -60,4 +60,3 @@ void printCoordsToScreen(u16 x, u16 y,u8 print_x, u8 print_y,u8 color){
 int iabs(int v) {
 	return (v < 0) ? -v : v;
 }
-

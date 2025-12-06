@@ -248,4 +248,3 @@ int level_world_to_screen_y( int world_y) {
 	return (int)(world_y - level.camera.y);
 }
 
-
