@@ -2,7 +2,9 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include "AgCommon.h"
+#include "Utils.h"
+#include "Level_1_bck.h"
+
 
 /* Definizioni costanti */
 #define TILE_SIZE 32
@@ -29,7 +31,15 @@ su piattaforme che lo portano in alto)
 
 
 
-static SCB_REHV_PAL FORE_GROUND_SCB_MATRIX[TILES_Y][TILES_X];
+static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
+
+typedef enum {
+    TPVP_UP = 2,
+	TPVP_DOWN = 3,
+	TPVP_SIDE = 4,
+	TPVP_SAME_DESC=5, //gestione discese
+	TPVP_SAME_ASC=6 //gestione salite
+} TailPositionVsPlayer;
 
 /* Struttura per informazioni del tile */
 typedef struct {
@@ -58,6 +68,8 @@ typedef struct {
     u8 current_level;
     Camera camera;                            /* Camera per lo scroll */
 } Level;
+
+
 
 
 

@@ -107,6 +107,12 @@ extern char img_pixel2col[];
 extern time_t clock2();
 extern u8 agRand8(u8 bitMask);
 extern void agInitRand8(u32 seed);
+
+typedef  struct{
+  u8 deposit;
+  SCB_REHV_PAL sprite;
+} sprite_collidabile;
+
 /* Palette condivisa per tutti i tile */
 static const u8 tile_palette[8] = {
     0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF
@@ -136,8 +142,8 @@ static SCB_REHV_PAL agSprPixel = {
   (void*) 0,                                // next SCB PTR
   &img_pixel2col[0],                        // SPR data PTR
   0, 0,                                     // offset (hpos, vpos)
-  0x0100 ,                    // hsize
-  0x0100  ,                   // vsize
+  0x0100,                    // hsize
+  0x0100,                   // vsize
   {0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF} // penpal
 };
 

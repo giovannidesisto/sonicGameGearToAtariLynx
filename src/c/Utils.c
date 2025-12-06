@@ -5,6 +5,7 @@
  *      Author: giovanni-gds
  */
 #include "Utils.h"
+#define IMAX(a,b) ((a) > (b) ? (a) : (b))
 
 int u16_to_ascii(unsigned short value, char *dest) {
 	int min_digits=5;
@@ -30,6 +31,21 @@ int u16_to_ascii(unsigned short value, char *dest) {
 
     return len;
 }
+
+
+void printU8As2Nibble(unsigned char value,u8 print_x, u8 print_y,u8 color){
+	char arrToPrint[16]={0};
+    short i=0;
+
+    for(i=0;i<8;i++){
+    	arrToPrint[i] = "01"[((value >> (7-i)) & 1)];// + '0';
+    }
+
+
+    agSetFontColor(color);
+	agDrawText(print_x, print_y, arrToPrint);
+}
+
 void printCoordsToScreen(u16 x, u16 y,u8 print_x, u8 print_y,u8 color){
 	char arrToPrint[16]={0};
     short pos=0;
@@ -39,5 +55,9 @@ void printCoordsToScreen(u16 x, u16 y,u8 print_x, u8 print_y,u8 color){
 	pos += u16_to_ascii(y, (char*)&arrToPrint[pos]);
 	agSetFontColor(color);
     agDrawText(print_x, print_y, arrToPrint);
+}
+
+int iabs(int v) {
+	return (v < 0) ? -v : v;
 }
 

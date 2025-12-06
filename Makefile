@@ -98,7 +98,7 @@ $(BUILD_DIR)/%.o: %.bmp
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/img_ag_font5x5.s -o $@; \
 	elif echo "$*" | grep -q '^sonic'; then \
 		$(ECHO) "== Converting player $< to $@"; \
-		$(SPRPCK) -t6 -p2 -s4 -a008031 $< $@ > /dev/null; \
+		$(SPRPCK) -t6 -p2 -s4 -a008000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \

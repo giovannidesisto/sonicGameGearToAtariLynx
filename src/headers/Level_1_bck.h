@@ -20,8 +20,9 @@ extern char bck_010[];
 extern char bck_011[];
 
 
+extern char bck_100[];
 
-static unsigned char* LEVEL_1_TILES[] = {
+static unsigned char* LEVEL_1_FOREGROUND_TILES[] = {
 		bck_001,
 		bck_002,
 		bck_003,
@@ -33,6 +34,10 @@ static unsigned char* LEVEL_1_TILES[] = {
 		bck_009,
 		bck_010,
 		bck_011
+};
+
+static unsigned char* LEVEL_1_BACKGROUND_TILES[] = {
+		bck_100
 };
 
 

@@ -1,4 +1,4 @@
-#include <tgi.h>
+//#include <tgi.h>
 #include "Utils.h"
 #include "Player.h"
 #include "Level.h"
@@ -77,7 +77,7 @@ void main(void) {
 	agSetPalette(myPalette);
 	agInitRand8(42);   // initialise RNG (use your own seed other than 42)
 	startTime = clock2();
-
+	tgi_setcollisiondetection(1);
 
 
 	//logoScreen();      // startup logo screen
@@ -183,45 +183,50 @@ static void __fastcall__ resetGame() {
 
 	/* Carica il livello 1 */
 	level_load(1);
-	tgi_setcollisiondetection(1);
+
 	/* Inizializza il player alla posizione di partenza */
 	player_init();//level.start_x, level.start_y);
 
 }
 
 // ----------------------------------------------------------------------------
-
-static void  __fastcall__  updateAndDrawGame() {
+//
+static void  __fastcall__ updateAndDrawGame() {
 	/* Controlla collisioni con il livello */
 
 
-
 	player_handle_user_input(SUZY.joystick);
-	/* Aggiorna il player (senza chiamare player_update_sprite_position) */
-	player_update();
-	// Aggiorna animazione
-	player_animate();
-	/* Aggiorna la camera per seguire il player */
-	level_update_camera(player.x, player.y);
-
 
 
 	AG_WAIT_LCD();
-	/* Disegna lo sfondo */
-	agSprBackground.penpal[0] = 0x09;
+
+
+//	/* Aggiorna il player (senza chiamare player_update_sprite_position) */
+	player_update();
+//	// Aggiorna animazione
+	player_animate();
+//	/* Aggiorna la camera per seguire il player */
+	level_update_camera(player.x, player.y);
+
+
+	//tgi_clear();
+//	/* Disegna lo sfondo */
+    agSprBackground.penpal[0] = 0x09;
 	tgi_sprite(&agSprBackground);
 	/* Disegna il livello usando la camera */
-	level_draw();
+    level_draw();
+
+
 	/* Disegna il player */
-	tgi_sprite(&player.sprite);
+	tgi_sprite(&player.ghost_spc.sprite);
+	tgi_sprite(&player.visible_spc.sprite);
+
+	printU8As2Nibble(player.ghost_spc.deposit,10,10,1);
+	printCoordsToScreen(player.ghost_spc.sprite.hpos,player.ghost_spc.sprite.vpos,10, 20, 0x0E);
+	printCoordsToScreen(player.visible_spc.sprite.hpos,player.visible_spc.sprite.vpos,10, 30, 5);
 
 
-
-	//printCoordsToScreen(player.x,player.y,1,0,0x0E);
-    //printCoordsToScreen(level.camera.x,level.camera.y,1,10,0x0D);
-	//printCoordsToScreen(level.end_x,level.end_y,1,20,0x0C);
-
-	// update the LCD
 	tgi_updatedisplay();
+
 }
 

@@ -9,29 +9,31 @@
 #define PLAYER_FRAME_COUNT 4
 #define PLAYER_WIDTH 16
 #define PLAYER_HEIGHT 32
-#include <AgCommon.h>  
+
 #include "Level.h"
-#include "Level_1_bck.h"
+
+
+
 // Dichiarazioni dei frame (definite altrove)
-extern char sonic_run_1[];
-extern char sonic_run_2[];
-extern char sonic_run_3[];
-extern char sonic_run_4[];
+extern unsigned char sonic_run_1[];
+extern unsigned char sonic_run_2[];
+extern unsigned char sonic_run_3[];
+extern unsigned char sonic_run_4[];
 
-extern char sonic_brake_1[];
-extern char sonic_brake_2[];
+extern unsigned char sonic_brake_1[];
+extern unsigned char sonic_brake_2[];
 
-extern char sonic_jump_1[];
-extern char sonic_jump_2[];
-
-
-extern char sonic_idle_1[];
-extern char sonic_idle_2[];
-extern char sonic_idle_3[];
-extern char sonic_idle_4[];
+extern unsigned char sonic_jump_1[];
+extern unsigned char sonic_jump_2[];
 
 
-static const s8 DEFAULT_SPEED = 8;
+extern unsigned char sonic_idle_1[];
+extern unsigned char sonic_idle_2[];
+extern unsigned char sonic_idle_3[];
+extern unsigned char sonic_idle_4[];
+
+
+static const s8 DEFAULT_SPEED = 2;
 static const s8 DEFAULT_JUMP_POWER = -12;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 
@@ -86,6 +88,12 @@ typedef enum {
     DIR_DOWN
 } PlayerDirection;
 
+
+typedef struct {
+    u8 deposit;
+    u8 last_deposit;
+    u8 collision_frame_delay;
+} CollisionState;
 // Struttura principale del player
 typedef struct Player{
     // Posizione (world o screen)
@@ -120,14 +128,15 @@ typedef struct Player{
     u8 invincibility_timer;
     u8 shoot_cooldown;
 
-    // Sprite Control Block
-    SCB_REHV_PAL sprite;
+    sprite_collidabile visible_spc;
+    sprite_collidabile ghost_spc;
+
 
     // Array di frame per animazioni diverse
-    char** idle_frames;
-    char** walk_frames;
-    char** brake_frames;
-    char** jump_frames;
+    unsigned char** idle_frames;
+    unsigned char** walk_frames;
+    unsigned char** brake_frames;
+    unsigned char** jump_frames;
     u8 idle_frame_count;
     u8 walk_frame_count;
     u8 brake_frame_count;
@@ -136,10 +145,12 @@ typedef struct Player{
     u8 spindash_power;
     u8 rings;
     u8 ground_level;
-
+    CollisionState collision;
 
 
 } Player;
+
+
 
 
 // Funzioni di gestione
