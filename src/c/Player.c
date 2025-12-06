@@ -178,85 +178,156 @@ void  player_animate() {
 
 
 
-// Aggiorna il player (chiamato ogni frame)
-void  player_update() {//, Level* level
+//// Aggiorna il player (chiamato ogni frame)
+//void  player_update() {//, Level* level
+//
+//	u8 i;
+//	u8 j;
+//
+//	s8 stepX = (player.vx>0?1:player.vx<0?-1:0);
+//	s8 stepY = (player.vy>0?1:player.vy<0?-1:0);
+//	s8 nvx=0;
+//	s8 nvy=0;
+//	u8 exitLoop=0;
+//
+//	player.ghost_spc.sprite.data = &player.visible_spc.sprite.data[0];
+//	for(i=0;!exitLoop&& i<=iabs(player.vx ); i++)
+//	{
+//		for(j=0;!exitLoop&& j<=iabs(player.vy ); j++)
+//		{
+//
+//			// posiziona SPRITE FANTASMA
+//			player.ghost_spc.sprite.hpos = player.x + stepX;
+//			player.ghost_spc.sprite.vpos = player.y + stepY;
+//			tgi_sprite(&player.ghost_spc.sprite);
+//			//tgi_updatedisplay();
+//			//AG_WAIT_LCD();
+//			// lettura collisione hardware
+//			if (player.ghost_spc.deposit != 0) {
+//
+//				exitLoop=0;
+//			}
+//			nvy+=stepY;
+//		}
+//
+//		nvx+=stepX;
+//	}
+//
+//
+//
+//
+//	//TODO sostituire con tail muro ?
+//	//controllo per non uscire dallo schermo
+//	//limite bordo SX
+//	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
+//	else
+//		//limite bordo DX
+//		if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
+//	//
+//	////	// Applica gravità
+//	if(!player.is_grounded) {
+//		player.vy += player.gravity;
+//		if(player.vy > 16) player.vy = 16;  // Velocità massima di caduta
+//	}
+//
+//
+//
+//	// Aggiorna posizione
+//	player.x+=player.vx;//
+//	player.y+=player.vy;player.vy;//
+//
+//
+//
+//	//
+//	//
+//	//	// Controlla se è a terra
+//	//	if(player.y > player.ground_level ) {
+//	//		player.y = player.ground_level;
+//	//		player.vy = 0;
+//	//
+//	//
+//	//		//quando atterra, se arriva da un salto angolato,
+//	//		if(player.vx!=0)
+//	//			player.state = PLAYER_BRAKING;
+//	//
+//	//
+//	//		player.is_grounded = 1;
+//	//		player.is_jumping = 0;
+//	//
+//	//	}
+//
+//}
 
-	u8 i;
-	u8 j;
+// In player_update():
+void player_update() {
 
-	s8 stepX = (player.vx>0?1:player.vx<0?-1:0);
-	s8 stepY = (player.vy>0?1:player.vy<0?-1:0);
-	s8 nvx=0;
-	s8 nvy=0;
-	u8 exitLoop=0;
 
-	player.ghost_spc.sprite.data = &player.visible_spc.sprite.data[0];
-	for(i=0;!exitLoop&& i<=iabs(player.vx ); i++)
-	{
-		for(j=0;!exitLoop&& j<=iabs(player.vy ); j++)
-		{
 
-			// posiziona SPRITE FANTASMA
-			player.ghost_spc.sprite.hpos = player.x + stepX;
-			player.ghost_spc.sprite.vpos = player.y + stepY;
-			tgi_sprite(&player.ghost_spc.sprite);
-			//tgi_updatedisplay();
-			//AG_WAIT_LCD();
-			// lettura collisione hardware
-			if (player.ghost_spc.deposit != 0) {
+	// 1. Gestisci collisioni dal frame precedente
+    if (player.collision.collision_frame_delay > 0) {
+        player.collision.collision_frame_delay--;
+        if (player.collision.collision_frame_delay == 0) {
+            // Ora leggiamo il deposit del ghost sprite
+            if (player.ghost_spc.deposit != 0) {
+                // Collisione rilevata! Annulla movimento
+                player.x -= player.vx;
+                player.y -= player.vy;
+                player.vx = 0;
+                player.vy = 0;
+            }
+        }
+    }
 
-				exitLoop=0;
-			}
-			nvy+=stepY;
+    // 2. Aggiorna posizione del ghost sprite per il prossimo frame
+    if (player.vx != 0 || player.vy != 0) {
+        player.ghost_spc.sprite.hpos = level_world_to_screen_x(player.x + player.vx);
+        player.ghost_spc.sprite.vpos = level_world_to_screen_y(player.y + player.vy);
+        player.collision.collision_frame_delay = 1; // Controlla nel prossimo frame
+    }
+
+
+		// Controlla se è a terra
+		if(player.y > player.ground_level ) {
+			player.y = player.ground_level;
+			player.vy = 0;
+
+
+			//quando atterra, se arriva da un salto angolato,
+			if(player.vx!=0)
+				player.state = PLAYER_BRAKING;
+
+
+			player.is_grounded = 1;
+			player.is_jumping = 0;
+
 		}
 
-		nvx+=stepX;
-	}
+
+
+
+    	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
+    	else
+    		//limite bordo DX
+    		if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
+    	//
+    	////	// Applica gravità
+    	if(!player.is_grounded) {
+    		player.vy += player.gravity;
+    		if(player.vy > 16) player.vy = 16;  // Velocità massima di caduta
+    	}
+
+
+
+        // 3. Aggiorna posizione del player
+        player.x += player.vx;
+        player.y += player.vy;
 
 
 
 
-	//TODO sostituire con tail muro ?
-	//controllo per non uscire dallo schermo
-	//limite bordo SX
-	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
-	else
-		//limite bordo DX
-		if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
-	//
-	////	// Applica gravità
-	if(!player.is_grounded) {
-		player.vy += player.gravity;
-		if(player.vy > 16) player.vy = 16;  // Velocità massima di caduta
-	}
-
-
-
-	// Aggiorna posizione
-	player.x+=player.vx;//
-	player.y+=player.vy;player.vy;//
-
-
-
-	//
-	//
-	//	// Controlla se è a terra
-	//	if(player.y > player.ground_level ) {
-	//		player.y = player.ground_level;
-	//		player.vy = 0;
-	//
-	//
-	//		//quando atterra, se arriva da un salto angolato,
-	//		if(player.vx!=0)
-	//			player.state = PLAYER_BRAKING;
-	//
-	//
-	//		player.is_grounded = 1;
-	//		player.is_jumping = 0;
-	//
-	//	}
 
 }
+
 
 void player_handle_user_input(u8 key){
 
