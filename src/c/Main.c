@@ -219,6 +219,7 @@ static void  __fastcall__ updateAndDrawGame() {
 
 	/* Disegna il player */
 	tgi_sprite(&player.ghost_spc.sprite);
+	//if(&player.collision.collision_frame_delay == 0)
 	tgi_sprite(&player.visible_spc.sprite);
 
 	printU8As2Nibble(player.ghost_spc.deposit,10,10,1);

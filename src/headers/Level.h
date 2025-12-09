@@ -7,8 +7,6 @@
 
 
 /* Definizioni costanti */
-#define TILE_SIZE 32
-
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 102
@@ -26,8 +24,7 @@ nell'ottica di gestire in continuità l'aggiornamento della capera che insegue i
 non solo durante lo scorrimeto verticale del gioco ma anche durante lo scorrimento verticale (es se sale
 su piattaforme che lo portano in alto)
 */
-#define TILES_X  6//11//11
-#define TILES_Y  4//8//8
+
 
 
 
@@ -78,7 +75,6 @@ typedef struct {
 void level_init(void);
 void level_load( u8 level_num);
 void level_draw();
-u8 level_check_collision(u16 x, u16 y, u8 width, u8 height);
 
 
 void level_init_camera();

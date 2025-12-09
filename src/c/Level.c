@@ -50,8 +50,8 @@ void level_init(void) {
 			SCB_MATRIX[y][x].sprcoll =  0x00;// 32;
 			SCB_MATRIX[y][x].next = (void*)0;
 			SCB_MATRIX[y][x].data = (void*)0;// &LEVEL_1_FOREGROUND_TILES[0];
-			SCB_MATRIX[y][x].hsize = 0x0100;
-			SCB_MATRIX[y][x].vsize = 0x0100;
+			SCB_MATRIX[y][x].hsize = 0x0100*SCALE/SCALE_DIVIDER;
+			SCB_MATRIX[y][x].vsize = 0x0100*SCALE/SCALE_DIVIDER;
 			SCB_MATRIX[y][x].vpos = 0;// (-5 + (y*TILE_SIZE));
 			SCB_MATRIX[y][x].hpos = 0;//(-8 + (x*TILE_SIZE));
 			for(j = 0; j < 8; j++) {
@@ -174,16 +174,7 @@ void level_draw() {
 	}
 }
 
-/* Controlla collisioni (versione semplificata) */
-u8 level_check_collision( u16 x, u16 y, u8 width, u8 height) {
 
-	//limit destro dello schermo
-	//if(x + width > level.end_x - width)return 1;
-	//inizio del livello
-	//if(x < 80)return 1;
-	return 0;
-
-}
 
 void level_init_camera() {
 	level.camera.x = 0;
@@ -231,11 +222,14 @@ void level_update_camera( u16 player_x, u16 player_y) {
 
 
 	/* Imposta la posizione dello sprite del player */
-	player.visible_spc.sprite.hpos = level_world_to_screen_x(player.x);
-	player.visible_spc.sprite.vpos = level_world_to_screen_y(player.y);
-
-	player.ghost_spc.sprite.hpos = level_world_to_screen_x(player.x);
-	player.ghost_spc.sprite.vpos = level_world_to_screen_y(player.y);
+	if(player.collision.collision_frame_delay == 0){
+		player.visible_spc.sprite.hpos = level_world_to_screen_x(player.x);
+		player.visible_spc.sprite.vpos = level_world_to_screen_y(player.y);
+		player.collision.collision_frame_delay=1;
+		//player.collision.collision_frame_delay = 1;
+	}
+	//player.ghost_spc.sprite.hpos = level_world_to_screen_x(player.x);
+	//player.ghost_spc.sprite.vpos = level_world_to_screen_y(player.y);
 }
 
 /* Converti coordinate world a screen X */

@@ -6,9 +6,12 @@
  */
 #ifndef PLAYER_H
 #define PLAYER_H
-#define PLAYER_FRAME_COUNT 4
-#define PLAYER_WIDTH 16
-#define PLAYER_HEIGHT 32
+
+
+
+//#define PLAYER_FRAME_COUNT 4
+//#define PLAYER_WIDTH 16
+//#define PLAYER_HEIGHT 32
 
 #include "Level.h"
 
