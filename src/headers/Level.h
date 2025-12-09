@@ -26,7 +26,7 @@ su piattaforme che lo portano in alto)
 */
 
 
-
+extern int level_foregound_map[MAP_HEIGHT][MAP_WIDTH];
 
 static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
 

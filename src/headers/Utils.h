@@ -22,13 +22,15 @@
 	#define SCALE 1
 	#define SCALE_DIVIDER 1
 	#define TILE_SIZE 32
+	#define PLAYER_WIDTH 16
 	#define TILES_X  6 //11//11
 	#define TILES_Y  4 //8//8
 #elif RES24
 	#define RATIO 1
 	#define SCALE 2
 	#define SCALE_DIVIDER 3
-	#define TILE_SIZE 21
+	#define TILE_SIZE 24
+	#define PLAYER_WIDTH 12
 	#define TILES_X  9//11//11
 	#define TILES_Y  5 //8//8
 #elif RES16
@@ -36,6 +38,7 @@
 	#define SCALE 1
 	#define SCALE_DIVIDER 2
 	#define TILE_SIZE 16
+	#define PLAYER_WIDTH 8
 	#define TILES_X  11//11//11
 	#define TILES_Y  8 //8//8
 

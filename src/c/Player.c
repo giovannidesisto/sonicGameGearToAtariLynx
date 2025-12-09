@@ -52,15 +52,6 @@ void player_init(){
 	player.visible_spc.sprite.vsize = 0x0100*SCALE/SCALE_DIVIDER;//*5/6;
 
 
-	player.ghost_spc.sprite.sprctl0=BPP_4 | TYPE_BOUNDARY;
-	player.ghost_spc.sprite.sprctl1 = REHV ;//| PACKED
-	player.ghost_spc.sprite.sprcoll = 0x00;//32;
-	player.ghost_spc.sprite.next = (void*)0;
-	player.ghost_spc.sprite.data = sonic_idle_tiles[0];  // Frame iniziale
-	player.ghost_spc.sprite.hpos = 0;
-	player.ghost_spc.sprite.vpos = 0;
-	player.ghost_spc.sprite.hsize = 0x0100*SCALE/SCALE_DIVIDER;//*5/6;  // 1:1 scale
-	player.ghost_spc.sprite.vsize = 0x0100*SCALE/SCALE_DIVIDER;//*5/6;
 
 	/* Inizializza palette - senza array temporaneo */
 	player.visible_spc.sprite.penpal[0] = 0x01;
@@ -72,16 +63,6 @@ void player_init(){
 	player.visible_spc.sprite.penpal[6] = 0xCD;
 	player.visible_spc.sprite.penpal[7] = 0xEF;
 
-
-
-	player.ghost_spc.sprite.penpal[0] = 0xFF;
-	player.ghost_spc.sprite.penpal[1] = 0xFF;
-	player.ghost_spc.sprite.penpal[2] = 0xFF;
-	player.ghost_spc.sprite.penpal[3] = 0xFF;
-	player.ghost_spc.sprite.penpal[4] = 0xFF;
-	player.ghost_spc.sprite.penpal[5] = 0xFF;
-	player.ghost_spc.sprite.penpal[6] = 0xFF;
-	player.ghost_spc.sprite.penpal[7] = 0xFF;
 
 
 	// Setup animazioni
@@ -101,13 +82,6 @@ void player_init(){
 
 }
 
-//// Aggiorna la posizione dello sprite
-//void player_update_sprite_position() {
-//	// Converti coordinate world in coordinate schermo
-//	// (dipende dal tuo sistema di coordinate)
-//	player.spc.sprite.hpos = (u16)player.x;
-//	player.spc.sprite.vpos = (u16)player.y;
-//}
 
 // Gestione animazione
 void  player_animate() {
@@ -175,6 +149,193 @@ void  player_animate() {
 
 }
 
+void check_world_collision() {
+    s16 new_x, new_y;
+    s16 x_boundary, y_boundary;
+    s16 tile_x, tile_y;
+    s16 tile_x1, tile_x2, tile_y1, tile_y2;
+    s16 tx, ty;
+    s16 tile_index;
+    s16 collision_detected;
+    s16 corner_x, corner_y;
+    s16 check_y, mid_x;
+    s16 corner;
+
+    new_x = player.x + player.vx;
+    new_y = player.y + player.vy;
+
+    // Reset dello stato ground - verrà reimpostato se troviamo collisione sotto
+    player.is_grounded = 0;
+
+    // 1. Prima controlla collisioni lungo l'asse X
+    if (player.vx != 0) {
+        // Determina quale lato stiamo controllando in base alla direzione
+        if (player.vx > 0) {
+            // Controlla il lato destro del player
+            x_boundary = new_x + TILE_SIZE;
+            tile_x = x_boundary / TILE_SIZE;
+        } else {
+            // Controlla il lato sinistro del player
+            x_boundary = new_x;
+            tile_x = x_boundary / TILE_SIZE;
+        }
+
+        // Controlla per tutta l'altezza del player
+        tile_y1 = player.y / TILE_SIZE;
+        tile_y2 = (player.y + TILE_SIZE - 1) / TILE_SIZE;
+
+        // Verifica se c'è una tile solida lungo il percorso
+        for (ty = tile_y1; ty <= tile_y2; ty++) {
+            if (ty >= 0 && ty < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
+                tile_index = level_foregound_map[ty][tile_x];
+
+                // Se la tile è solida (1-99)
+                if (tile_index != 0 && tile_index < 100) {
+                    // Regola la posizione X per essere tangente alla tile
+                    if (player.vx > 0) {
+                        player.x = tile_x * TILE_SIZE - TILE_SIZE;
+                    } else {
+                        player.x = (tile_x + 1) * TILE_SIZE;
+                    }
+                    player.vx = 0;
+                    new_x = player.x;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 2. Poi controlla collisioni lungo l'asse Y
+    if (player.vy != 0) {
+        // Determina quale lato stiamo controllando in base alla direzione
+        if (player.vy > 0) {
+            // Controlla il lato inferiore del player (caduta)
+            y_boundary = new_y + TILE_SIZE;
+            tile_y = y_boundary / TILE_SIZE;
+        } else {
+            // Controlla il lato superiore del player (salto)
+            y_boundary = new_y;
+            tile_y = y_boundary / TILE_SIZE;
+        }
+
+        // Controlla per tutta la larghezza del player
+        tile_x1 = new_x / TILE_SIZE;
+        tile_x2 = (new_x + TILE_SIZE - 1) / TILE_SIZE;
+
+        // Flag per gestire collisioni multiple
+        collision_detected = 0;
+
+        for (tx = tile_x1; tx <= tile_x2; tx++) {
+            if (tile_y >= 0 && tile_y < MAP_HEIGHT && tx >= 0 && tx < MAP_WIDTH) {
+                tile_index = level_foregound_map[tile_y][tx];
+
+                // Se la tile è solida (1-99)
+                if (tile_index != 0 && tile_index < 100) {
+                    collision_detected = 1;
+
+                    // Regola la posizione Y per essere tangente alla tile
+                    if (player.vy > 0) {
+                        // Collisione con il terreno sotto
+                        player.y = tile_y * TILE_SIZE - TILE_SIZE;
+                        player.is_grounded = 1;
+                        player.is_jumping = 0;
+                        player.vy = 0;
+
+                        // Se atterra da un salto in movimento
+                        if (player.vx != 0) {
+                            player.state = PLAYER_BRAKING;
+                        }
+                    } else {
+                        // Collisione con il soffitto sopra
+                        player.y = (tile_y + 1) * TILE_SIZE;
+                        player.vy = 0; // Annulla il salto
+                    }
+                    new_y = player.y;
+                    break;
+                }
+            }
+        }
+
+        // Se non c'è collisione sotto e stiamo cadendo, verifica se c'è terreno sotto di noi
+        if (!collision_detected && player.vy >= 0) {
+            // Controlla se c'è terreno direttamente sotto i piedi
+            check_y = (player.y + TILE_SIZE) / TILE_SIZE;
+            mid_x = (player.x + TILE_SIZE/2) / TILE_SIZE;
+
+            if (check_y < MAP_HEIGHT && mid_x >= 0 && mid_x < MAP_WIDTH) {
+                tile_index = level_foregound_map[check_y][mid_x];
+                if (tile_index != 0 && tile_index < 100) {
+                    // Il player è molto vicino al terreno, posizionalo esattamente sopra
+                    if ((player.y + TILE_SIZE) - (check_y * TILE_SIZE) <= 2) {
+                        player.y = check_y * TILE_SIZE - TILE_SIZE;
+                        player.is_grounded = 1;
+                        player.is_jumping = 0;
+                        player.vy = 0;
+                        new_y = player.y;
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Applica il movimento residuo se non ci sono state collisioni
+    if (player.vx != 0) {
+        player.x = new_x;
+    }
+    if (player.vy != 0) {
+        player.y = new_y;
+    }
+
+    // 4. Controlla collisioni con gli angoli (gestione avanzata)
+    // Questo aiuta con collisioni diagonali
+    if (player.vx != 0 && player.vy != 0) {
+        // Controlla tutti e 4 gli angoli in base alla direzione
+        for (corner = 0; corner < 4; corner++) {
+            switch (corner) {
+                case 0: // Angolo in alto a sinistra
+                    corner_x = player.x;
+                    corner_y = player.y;
+                    break;
+                case 1: // Angolo in alto a destra
+                    corner_x = player.x + TILE_SIZE - 1;
+                    corner_y = player.y;
+                    break;
+                case 2: // Angolo in basso a sinistra
+                    corner_x = player.x;
+                    corner_y = player.y + TILE_SIZE - 1;
+                    break;
+                case 3: // Angolo in basso a destra
+                    corner_x = player.x + TILE_SIZE - 1;
+                    corner_y = player.y + TILE_SIZE - 1;
+                    break;
+                default:
+                    corner_x = player.x;
+                    corner_y = player.y;
+                    break;
+            }
+
+            tile_x = corner_x / TILE_SIZE;
+            tile_y = corner_y / TILE_SIZE;
+
+            if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
+                tile_index = level_foregound_map[tile_y][tile_x];
+
+                if (tile_index != 0 && tile_index < 100) {
+                    // Regola la posizione in base all'angolo
+                    if (corner_y == player.y) { // Angolo superiore
+                        player.y = (tile_y + 1) * TILE_SIZE;
+                        player.vy = 0;
+                    } else { // Angolo inferiore
+                        player.y = tile_y * TILE_SIZE - TILE_SIZE;
+                        player.vy = 0;
+                        player.is_grounded = 1;
+                        player.is_jumping = 0;
+                    }
+                }
+            }
+        }
+    }
+}
 
 // In player_update():
 void player_update() {
@@ -189,15 +350,10 @@ void player_update() {
 		//quando atterra, se arriva da un salto angolato,
 		if(player.vx!=0)
 			player.state = PLAYER_BRAKING;
-
-
 		player.is_grounded = 1;
 		player.is_jumping = 0;
 
 	}
-
-
-
 	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
 	else
 	//limite bordo DX
@@ -209,38 +365,7 @@ void player_update() {
 		if(player.vy > 16) player.vy = 16;  // Velocità massima di caduta
 	}
 
-
-
-	// 3. Aggiorna posizione del player
-	player.x += player.vx;
-	player.y += player.vy;
-
-
-	// 1. Gestisci collisioni dal frame precedente
-	if (player.collision.collision_frame_delay == 1)
-	{
-		player.collision.collision_frame_delay--;
-
-		if (player.collision.collision_frame_delay == 0)
-		{
-			// Ora leggiamo il deposit del ghost sprite
-			if (player.ghost_spc.deposit != 0) {
-				// Collisione rilevata! Annulla movimento
-				player.x -= player.vx;
-				player.y -= player.vy;
-				player.vx = 0;
-				player.vy = 0;
-			}
-
-		}
-	}
-
-	// 2. Aggiorna posizione del ghost sprite per il prossimo frame
-	//if (player.collision.collision_frame_delay == 1 ) {
-	player.ghost_spc.sprite.hpos = level_world_to_screen_x(player.x + player.vx);
-	player.ghost_spc.sprite.vpos = level_world_to_screen_y(player.y + player.vy);
-	//}
-
+	check_world_collision();
 
 }
 

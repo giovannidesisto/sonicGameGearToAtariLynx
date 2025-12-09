@@ -218,12 +218,12 @@ static void  __fastcall__ updateAndDrawGame() {
 
 
 	/* Disegna il player */
-	tgi_sprite(&player.ghost_spc.sprite);
+	//tgi_sprite(&player.ghost_spc.sprite);
 	//if(&player.collision.collision_frame_delay == 0)
 	tgi_sprite(&player.visible_spc.sprite);
 
-	printU8As2Nibble(player.ghost_spc.deposit,10,10,1);
-	printCoordsToScreen(player.ghost_spc.sprite.hpos,player.ghost_spc.sprite.vpos,10, 20, 0x0E);
+	//printU8As2Nibble(player.ghost_spc.deposit,10,10,1);
+	//printCoordsToScreen(player.ghost_spc.sprite.hpos,player.ghost_spc.sprite.vpos,10, 20, 0x0E);
 	printCoordsToScreen(player.visible_spc.sprite.hpos,player.visible_spc.sprite.vpos,10, 30, 5);
 
 

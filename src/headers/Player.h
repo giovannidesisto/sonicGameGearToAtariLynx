@@ -132,7 +132,7 @@ typedef struct Player{
     u8 shoot_cooldown;
 
     sprite_collidabile visible_spc;
-    sprite_collidabile ghost_spc;
+//    sprite_collidabile ghost_spc;
 
 
     // Array di frame per animazioni diverse

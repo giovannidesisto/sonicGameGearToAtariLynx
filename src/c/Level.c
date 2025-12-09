@@ -6,7 +6,7 @@ extern Level level;
 extern Player player;
 
 /* Mappa di esempio (Green Hill Zone style) */
-static int level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
+int level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
 		//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		/*
@@ -151,15 +151,15 @@ void level_draw() {
 						 * attenzione alle cordinate del player, la sua x è centrale per
 						 * gestire il cambio direzione
 						 */
-						else
-							if(player.x+TILE_SIZE/2<world_x  || world_x<player.x-TILE_SIZE/2 )SCB_MATRIX[sprite_y][sprite_x].sprcoll=  TPVP_SIDE;
+							else
+								if(player.x+TILE_SIZE/2<world_x  || world_x<player.x-TILE_SIZE/2 )SCB_MATRIX[sprite_y][sprite_x].sprcoll=  TPVP_SIDE;
 
 					}
 					else
-				    {
+					{
 						SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_BACKGROUND_TILES[100-tile_index];
 						SCB_MATRIX[sprite_y][sprite_x].sprcoll=  NO_COLLIDE;
-				    }
+					}
 
 
 					SCB_MATRIX[sprite_y][sprite_x].hpos =   +screen_x; //-TILE_SIZE -1
@@ -221,15 +221,18 @@ void level_update_camera( u16 player_x, u16 player_y) {
 	if(level.camera.y>level_height_px)level.camera.y=0;
 
 
-	/* Imposta la posizione dello sprite del player */
-	if(player.collision.collision_frame_delay == 0){
-		player.visible_spc.sprite.hpos = level_world_to_screen_x(player.x);
-		player.visible_spc.sprite.vpos = level_world_to_screen_y(player.y);
-		player.collision.collision_frame_delay=1;
-		//player.collision.collision_frame_delay = 1;
-	}
-	//player.ghost_spc.sprite.hpos = level_world_to_screen_x(player.x);
-	//player.ghost_spc.sprite.vpos = level_world_to_screen_y(player.y);
+	//implementazione con check collisioni da HW / non applicabile per il terreno
+	//il player resta bloccato in troppi casi, la utilizzerò solo per intercettare
+	//eventuali proiettili, collisioni nemici o bonus area
+	//	if(player.collision.collision_frame_delay == 0){
+	//		player.visible_spc.sprite.hpos = level_world_to_screen_x(player.x);
+	//		player.visible_spc.sprite.vpos = level_world_to_screen_y(player.y);
+	//		player.collision.collision_frame_delay=1;
+	//	}
+
+	player.visible_spc.sprite.hpos = level_world_to_screen_x(player.x);
+	player.visible_spc.sprite.vpos = level_world_to_screen_y(player.y);
+
 }
 
 /* Converti coordinate world a screen X */
