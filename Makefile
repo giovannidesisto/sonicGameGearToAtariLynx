@@ -105,7 +105,7 @@ $(BUILD_DIR)/%.o: %.bmp
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
 	elif echo "$*" | grep -q '^bck'; then \
 		$(ECHO) "== Converting tile $< to $@"; \
-		$(SPRPCK) -t6 -p2 -s4 -a000000 $< $@ > /dev/null; \
+		$(SPRPCK) -t6 -p2 -s4 -u -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \

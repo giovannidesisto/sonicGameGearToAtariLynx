@@ -7,20 +7,18 @@
 
 #ifndef LEVEL_1_BCK_H
 #define LEVEL_1_BCK_H
-extern char bck_001[];
-extern char bck_002[];
-extern char bck_003[];
-extern char bck_004[];
-extern char bck_005[];
-extern char bck_006[];
-extern char bck_007[];
-extern char bck_008[];
-extern char bck_009[];
-extern char bck_010[];
-extern char bck_011[];
-
-
-extern char bck_100[];
+extern unsigned char bck_001[];
+extern unsigned char bck_002[];
+extern unsigned char bck_003[];
+extern unsigned char bck_004[];
+extern unsigned char bck_005[];
+extern unsigned char bck_006[];
+extern unsigned char bck_007[];
+extern unsigned char bck_008[];
+extern unsigned char bck_009[];
+extern unsigned char bck_010[];
+extern unsigned char bck_011[];
+extern unsigned char bck_100[];
 
 static unsigned char* LEVEL_1_FOREGROUND_TILES[] = {
 		bck_001,

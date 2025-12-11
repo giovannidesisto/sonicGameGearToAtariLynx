@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "Player.h"
 #include "Level.h"
+
 // ----------------------------------------------------------------------------
 // DEFINES
 // ----------------------------------------------------------------------------
@@ -10,7 +11,6 @@
 #define FONT_COLOUR_LOGO 0x0F
 #define FONT_COLOUR_MENU 0x04
 #define FONT_COLOUR_STORY 0x0F
-
 
 // ----------------------------------------------------------------------------
 // READ-ONLY DATA
@@ -60,7 +60,8 @@ static void __fastcall__ logoScreen();
 static void __fastcall__ gameMenuScreen();
 static void __fastcall__ storyScreen();
 static void __fastcall__ resetGame();
-static void __fastcall__ updateAndDrawGame();
+//__fastcall__
+static void  updateAndDrawGame();
 
 static void __fastcall__ initPlayerFrames();
 
@@ -190,43 +191,38 @@ static void __fastcall__ resetGame() {
 }
 
 // ----------------------------------------------------------------------------
-//
-static void  __fastcall__ updateAndDrawGame() {
+//__fastcall__
+static void   updateAndDrawGame() {
 	/* Controlla collisioni con il livello */
 
-
-	player_handle_user_input(SUZY.joystick);
-
-
-	AG_WAIT_LCD();
-
-
-//	/* Aggiorna il player (senza chiamare player_update_sprite_position) */
-	player_update();
-//	// Aggiorna animazione
-	player_animate();
-//	/* Aggiorna la camera per seguire il player */
-	level_update_camera(player.x, player.y);
-
-
-	//tgi_clear();
-//	/* Disegna lo sfondo */
-    agSprBackground.penpal[0] = 0x09;
-	tgi_sprite(&agSprBackground);
-	/* Disegna il livello usando la camera */
-    level_draw();
-
-
-	/* Disegna il player */
-	//tgi_sprite(&player.ghost_spc.sprite);
-	//if(&player.collision.collision_frame_delay == 0)
-	tgi_sprite(&player.visible_spc.sprite);
-
-	//printU8As2Nibble(player.ghost_spc.deposit,10,10,1);
-	//printCoordsToScreen(player.ghost_spc.sprite.hpos,player.ghost_spc.sprite.vpos,10, 20, 0x0E);
-	printCoordsToScreen(player.visible_spc.sprite.hpos,player.visible_spc.sprite.vpos,10, 30, 5);
-
-
-	tgi_updatedisplay();
-
+//	if(0)
+	{
+		player_handle_user_input(SUZY.joystick);
+		AG_WAIT_LCD();
+		/* Aggiorna il player (senza chiamare player_update_sprite_position) */
+		player_update();
+		// Aggiorna animazione
+		player_animate();
+		/* Aggiorna la camera per seguire il player */
+		level_update_camera(player.x, player.y);
+		//tgi_clear();
+		/* Disegna lo sfondo */
+		agSprBackground.penpal[0] = 0x09;
+		tgi_sprite(&agSprBackground);
+		/* Disegna il livello usando la camera */
+		level_draw();
+		/* Disegna il player */
+		tgi_sprite(&player.visible_spc.sprite);
+		tgi_updatedisplay();
+	}
+//	else{
+//		AG_WAIT_LCD();
+//		agSprBackground.penpal[0] = 0x01;
+//		//tgi_sprite(&agSprBackground);
+//		SCB_MATRIX[0][0].data =(unsigned char*) bck_100;
+//		SCB_MATRIX[0][0].vpos= 60;
+//		SCB_MATRIX[0][0].hpos= 60;
+//		tgi_sprite(&SCB_MATRIX[0][0]);
+//		tgi_updatedisplay();
+//	}
 }
