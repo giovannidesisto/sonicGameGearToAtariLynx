@@ -8,8 +8,12 @@
 #define UTILS_H
 #include "AgCommon.h"
 #include <tgi.h>
+#include <string.h>
+#include <stdio.h>
 
-
+#define DEBUG_BUFFER_SIZE 512
+#define DEBUG_BUFFER ((char*)0xFA00)
+//extern char DEBUG_BUFFER[DEBUG_BUFFER_SIZE] ;
 
 //#define RES32 0
 #define RES32 1
@@ -51,4 +55,8 @@ void printU16(u16 value,u8 print_x, u8 print_y,u8 color);
 void printS16(s16 value,u8 print_x, u8 print_y,u8 color);
 void printExadec(s16 value,u8 print_x, u8 print_y,u8 color);
 int iabs(int v);
+void debug_init(void);
+void debug_print(const char *str);
 #endif /* UTILS_H */
+
+

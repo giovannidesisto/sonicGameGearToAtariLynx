@@ -36,8 +36,8 @@ extern unsigned char sonic_idle_3[];
 extern unsigned char sonic_idle_4[];
 
 
-static const s8 DEFAULT_SPEED = 4;
-static const s8 DEFAULT_JUMP_POWER = -12;
+static const s8 DEFAULT_SPEED = 6;
+static const s8 DEFAULT_JUMP_POWER = -14;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 
 // Array di puntatori ai frame per animazione
@@ -151,6 +151,14 @@ typedef struct Player{
 
     CollisionState collision;
 
+    s16 xOnSprite;
+    s16 tx;
+    s16 newX;
+
+    s16 yOnSprite;
+    s16 ty;
+    s16 newY;
+    s16 collisionByteVal;
 } Player;
 
 

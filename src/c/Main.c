@@ -73,6 +73,7 @@ static void __fastcall__ initPlayerFrames();
 
 
 void main(void) {
+	debug_init();
 
 	agInitGfx();       // initialise graphics
 	agSetPalette(myPalette);
@@ -197,6 +198,7 @@ static void   updateAndDrawGame() {
 
 //	if(0)
 	{
+
 		player_handle_user_input(SUZY.joystick);
 		AG_WAIT_LCD();
 		/* Aggiorna il player (senza chiamare player_update_sprite_position) */
@@ -213,6 +215,17 @@ static void   updateAndDrawGame() {
 		level_draw();
 		/* Disegna il player */
 		tgi_sprite(&player.visible_spc.sprite);
+		//debug_print("Score");
+
+		printExadec(player.collisionByteVal,0,0,4);
+		//printS16(player.x,0,6,0x04);
+		printS16(player.y,0, 6,0x04);
+		//printU16(player.xOnSprite,0, 6,0x03);
+		//printU16(player.newX,0, 12,0x05);
+//		printU16(player.tx,0, 18,0x06);
+
+
+
 		tgi_updatedisplay();
 	}
 //	else{

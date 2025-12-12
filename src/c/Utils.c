@@ -6,7 +6,7 @@
  */
 #include "Utils.h"
 #define IMAX(a,b) ((a) > (b) ? (a) : (b))
-
+//char DEBUG_BUFFER[DEBUG_BUFFER_SIZE]={0};
 
 int u8_to_hex_ascii(unsigned char value, char *dest) {
     int min_digits = 2;      // un byte = due cifre hex
@@ -37,8 +37,8 @@ int u8_to_hex_ascii(unsigned char value, char *dest) {
 
 
 int u16_to_ascii(unsigned short value, char *dest) {
-	int min_digits=5;
-	char temp[5];         // 65535 max 5 cifre
+	int min_digits=3;
+	char temp[3];         // 65535 max 5 cifre
 	int i = 0, len = 0;
 
 	// estraggo le cifre al contrario
@@ -141,3 +141,14 @@ void printCoordsToScreen(u16 x, u16 y,u8 print_x, u8 print_y,u8 color){
 int iabs(int v) {
 	return (v < 0) ? -v : v;
 }
+
+void debug_init(void) {
+    /* Pulisci il buffer */
+   memset(DEBUG_BUFFER,0, DEBUG_BUFFER_SIZE);
+	//DEBUG_BUFFER={(unsigned char)0xFF};
+}
+
+void debug_print(const char *str) {
+    strcpy(DEBUG_BUFFER, str);
+}
+

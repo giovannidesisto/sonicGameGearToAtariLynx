@@ -12,8 +12,8 @@ extern Level level;
 
 extern Player player;
 void player_init(){
-	player.x =TILE_SIZE;
-	player.y = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*2;//va infondo alla mappa, considerato che lo y0 e in alto
+	player.x =TILE_SIZE+16;
+	player.y = 0;//(MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*2;//va infondo alla mappa, considerato che lo y0 e in alto
 
 	player.width=PLAYER_WIDTH;
 	player.height=TILE_SIZE;
@@ -22,7 +22,7 @@ void player_init(){
 	//quindi sottrae l'altezza della tail del terreno e l'altezza della tail del personaggio
 	player.vx = 0;
 	player.vy = 0;
-	player.ground_level = (MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*2;
+	player.ground_level = 0;//(MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*2;
 
 
 	player.state = PLAYER_IDLE;
@@ -83,7 +83,7 @@ void player_init(){
 	player.jump_frame_count = 2;         // 2 frame per salto
 
 
-
+	player.xOnSprite=0;
 
 }
 
@@ -155,157 +155,192 @@ void  player_animate() {
 }
 
 void check_world_collision() {
-    s16 new_x,
-		new_y,
-		x_boundary,
-		y_boundary,
-		tile_x,
-		tile_y,
-		tile_x1,
-		tile_x2,
-		tile_y1,
-		tile_y2,
-		tx,
-		ty,
-		tile_index;
-		//collision_detected,
-		//corner_x,
-		//corner_y,
-		//check_y,
-		//mid_x,corner;
+	s16 new_x,
+	new_y,
+	x_boundary,
+	y_boundary,
+	tile_x,
+	tile_y,
+	tile_x1,
+	tile_x2,
+	tile_y1,
+	tile_y2,
+	tx,
+	ty,
+	tile_index,
+	srpite_y_offset,
+	sprite_y,sprite_x,sprite_x_offset;
+	//collision_detected,
+	//corner_x,
+	//corner_y,
+	//check_y,
+	//mid_x,corner;
+	char buffer[DEBUG_BUFFER_SIZE];
+	s16 transparentPixelIndex,playerXOnSprite,playerYOnSprite;
+	new_x = player.x + player.vx;
+	new_y = player.y + player.vy;
 
-    new_x = player.x + player.vx;
-    new_y = player.y + player.vy;
+	// Reset dello stato ground - verrà reimpostato se troviamo collisione sotto
+	player.is_grounded = 0;
 
-    // Reset dello stato ground - verrà reimpostato se troviamo collisione sotto
-    player.is_grounded = 0;
+	// 1. Prima controlla collisioni lungo l'asse X
+	if (player.vx != 0) {
+		// Determina quale lato stiamo controllando in base alla direzione
+		if (player.vx > 0) {
+			// Controlla il lato destro del player
+			x_boundary = new_x+player.width/2 ;
+			tile_x = x_boundary / TILE_SIZE;
+		} else {
+			// Controlla il lato sinistro del player
+			x_boundary = new_x-player.width/2;
+			tile_x = x_boundary / TILE_SIZE;
+		}
 
-    // 1. Prima controlla collisioni lungo l'asse X
-    if (player.vx != 0) {
-        // Determina quale lato stiamo controllando in base alla direzione
-        if (player.vx > 0) {
-            // Controlla il lato destro del player
-            x_boundary = new_x+player.width/2 ;
-            tile_x = x_boundary / TILE_SIZE;
-        } else {
-            // Controlla il lato sinistro del player
-            x_boundary = new_x-player.width/2;
-            tile_x = x_boundary / TILE_SIZE;
-        }
+		// Controlla per tutta l'altezza del player
+		tile_y1 = player.y / TILE_SIZE;
+		tile_y2 = (player.y + TILE_SIZE - 1) / player.height;
 
-        // Controlla per tutta l'altezza del player
-        tile_y1 = player.y / TILE_SIZE;
-        tile_y2 = (player.y + TILE_SIZE - 1) / player.height;
+		// Verifica se c'è una tile solida lungo il percorso
+		if(0)
+		for (ty = tile_y1; ty <= tile_y2; ty++) {
+			if (ty >= 0 && ty < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
+				tile_index = level_foregound_map[ty][tile_x];
 
-        // Verifica se c'è una tile solida lungo il percorso
-        for (ty = tile_y1; ty <= tile_y2; ty++) {
-            if (ty >= 0 && ty < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-                tile_index = level_foregound_map[ty][tile_x];
-
-                // Se la tile è solida (1-99)
-                if (tile_index != 0 && tile_index < 100) {
-                    // Regola la posizione X per essere tangente alla tile
-                    if (player.vx > 0) {
-                        player.x = tile_x * TILE_SIZE - (PLAYER_WIDTH/2)   ; //TODO aggiungere 1 px per arrivare esattametne al bordo
-                    } else {
-                        player.x = (tile_x + 1) * TILE_SIZE +  (PLAYER_WIDTH/2) ;
-                    }
-                    player.vx = 0;
-                    new_x = player.x;
-                    break;
-                }
-            }
-        }
-    }
-
-    // 2. Poi controlla collisioni lungo l'asse Y
-    if (player.vy != 0) {
-        // Determina quale lato stiamo controllando in base alla direzione
-        if (player.vy > 0) {
-            // Controlla il lato inferiore del player (caduta)
-            /**
-             * TODO se imposto y_boundary = new_y  sembra salire in automatico sugli ostacoli
-             */
-        	y_boundary = new_y + player.height;
-            tile_y = y_boundary / TILE_SIZE;
-        } else {
-            // Controlla il lato superiore del player (salto)
-            y_boundary = new_y;
-            tile_y = y_boundary / TILE_SIZE;
-        }
-
-        // Controlla per tutta la larghezza del player
-        tile_x1 = (new_x / TILE_SIZE) ;
-        tile_x2 = (new_x + TILE_SIZE - 1) / TILE_SIZE;
+				// Se la tile è solida (1-99)
+				if (tile_index != 0 && tile_index < 100) {
+					// Regola la posizione X per essere tangente alla tile
+					if (player.vx > 0)
+					{
+						playerYOnSprite=TILE_SIZE - ((ty * TILE_SIZE)-(new_y)) -1;
+						player.yOnSprite=playerYOnSprite;
 
 
-        for (tx = tile_x1; tx <= tile_x2; tx++) {
-            if (tile_y >= 0 && tile_y < MAP_HEIGHT && tx >= 0 && tx < MAP_WIDTH) {
-                tile_index = level_foregound_map[tile_y][tx];
+						player.x = tile_x * TILE_SIZE - (PLAYER_WIDTH/2);
+					}
+					else
+					{
 
-                // Se la tile è solida (1-99) e la x del player ricade nalla tail corrente
-                if (tx * TILE_SIZE <= new_x &&  (tx * TILE_SIZE)+TILE_SIZE >= new_x &&    tile_index != 0 && tile_index < 100)
-                {
+						player.x = (tile_x + 1) * TILE_SIZE +  (PLAYER_WIDTH/2) ;
+					}
 
 
 
 
 
-                    // Regola la posizione Y per essere tangente alla tile
-                    if (player.vy > 0) {
-                        // Collisione con il terreno sotto
-                        player.y = tile_y * TILE_SIZE - TILE_SIZE;
-                        player.is_grounded = 1;
-                        player.is_jumping = 0;
-                        player.vy = 0;
+					player.vx = 0;
+					new_x = player.x;
+					break;
+				}
+			}
+		}
+	}
 
-                        // Se atterra da un salto in movimento
-//                        if (player.vx != 0) {
-//                            player.state = PLAYER_BRAKING;
-//                        }
-                    } else {
-                        // Collisione con il soffitto sopra
-                        player.y = (tile_y + 1) * TILE_SIZE;
-                        player.vy = 0; // Annulla il salto
-                    }
-                    new_y = player.y;
-                    break;
-                }
-            }
-        }
-    }
+	// 2. Poi controlla collisioni lungo l'asse YplayerXOnSprite
+	if (player.vy != 0) {
+		// Determina quale lato stiamo controllando in base alla direzione
+		if (player.vy > 0) {
+			// Controlla il lato inferiore del player (caduta)
+			y_boundary = new_y + player.height;
+			tile_y = y_boundary / TILE_SIZE;
+		} else {
+			// Controlla il lato superiore del player (salto)
+			y_boundary = new_y;
+			tile_y = y_boundary / TILE_SIZE;
+		}
 
-    // 3. Applica il movimento residuo se non ci sono state collisioni
-    if (player.vx != 0) {
-        player.x = new_x;
-    }
-    if (player.vy != 0) {
-        player.y = new_y;
-    }
+		// Controlla per tutta la larghezza del player
+		tile_x1 = (new_x / TILE_SIZE) ;
+		tile_x2 = (new_x + TILE_SIZE - 1) / TILE_SIZE;
+
+
+		for (tx = tile_x1; tx <= tile_x2; tx++) {
+			if (tile_y >= 0 && tile_y < MAP_HEIGHT && tx >= 0 && tx < MAP_WIDTH) {
+				tile_index = level_foregound_map[tile_y][tx];
+
+				// Se la tile è solida (1-99) e la x del player ricade nalla tail corrente
+				if (tx * TILE_SIZE <= new_x &&  (tx * TILE_SIZE)+TILE_SIZE >= new_x && tile_index != 0 && tile_index < 100)
+				{
+
+
+					//un byte sulla sprite riporta due posizioni di X, pertanto occorrerà valutare se si tratta del nibble basso o
+					//alto in fase valutazione
+					playerXOnSprite=(new_x-(tx * TILE_SIZE));
+					player.xOnSprite=playerXOnSprite;
+					player.tx=tx;
+					player.newX = new_x;
+					// Regola la posizione Y per essere tangente alla tile
+					if (player.vy >0)
+					{
+						// Collisione con il terreno sotto
+						//posizione il player tangente alla srpite sottostante
+						player.y = tile_y * TILE_SIZE - TILE_SIZE;
+
+
+
+						for(sprite_y=0;sprite_y<TILE_SIZE;sprite_y++)
+						{
+
+
+							transparentPixelIndex = (sprite_y*((TILE_SIZE/2)+2)) + 1 + (playerXOnSprite/2);
+
+							player.collisionByteVal = (playerXOnSprite%2!=0)?
+									LEVEL_1_FOREGROUND_TILES[tile_index-1][transparentPixelIndex] & 0x0F
+									:
+									LEVEL_1_FOREGROUND_TILES[tile_index-1][transparentPixelIndex] >>4 ;
+
+							if(player.collisionByteVal == 0x00)
+							{
+								//if(player.y<MAP_HEIGHT*TILE_SIZE - TILE_SIZE -1)
+								player.y++;
+
+							}
+							else
+							{
+								//atterro solo se incontro un pixel solido
+								player.is_grounded = 1;
+								player.is_jumping = 0;
+								player.vy = 0;
+								break;
+							}
+
+						}
+
+
+
+
+					}
+					else
+					{
+						// Collisione con il soffitto sopra
+						player.y = (tile_y + 1) * TILE_SIZE;
+						player.vy = 0; // Annulla la velocità ascensionale, cadrà con la gravità
+					}
+
+
+					new_y = player.y;
+					break;
+				}
+			}
+		}
+	}
+
+	// 3. Applica il movimento residuo se non ci sono state collisioni
+	//if (player.vx != 0) {
+	player.x = new_x;
+	//}
+	//if (player.vy != 0) {
+	player.y = new_y;
+	//}
 }
 
 // In player_update():
 void player_update() {
 
-	// Controlla se è a terra
-	if(player.y > player.ground_level )
-	{
-		player.y = player.ground_level;
-		player.vy = 0;
 
-
-		//quando atterra, se arriva da un salto angolato,
-		//if(player.vx!=0)
-		//	player.state = PLAYER_BRAKING;
-
-		player.is_grounded = 1;
-		player.is_jumping = 0;
-
-	}
 	if(player.x < TILE_SIZE) player.x=TILE_SIZE;
 	else
-	//limite bordo DX
-	if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
+		//limite bordo DX
+		if(player.x > level.end_x - (TILE_SIZE))player.x=level.end_x - (TILE_SIZE);
 	//
 	////	// Applica gravità
 	if(!player.is_grounded) {
@@ -382,26 +417,26 @@ void player_handle_user_input(u8 key){
 		{
 
 
-//			if(player.state == PLAYER_WALKING && player.vx !=0)
-//			{
-//				player.state = PLAYER_BRAKING;
-//			}
-//			else
-//			{
-				//frena con scivolata quando sta correndo e si mollano i tasti
-//				if(player.state == PLAYER_BRAKING ){
-//					if(player.vx > 0)player.vx--;
-//					else player.vx++;
-//				}
+			//			if(player.state == PLAYER_WALKING && player.vx !=0)
+			//			{
+			//				player.state = PLAYER_BRAKING;
+			//			}
+			//			else
+			//			{
+			//frena con scivolata quando sta correndo e si mollano i tasti
+			//				if(player.state == PLAYER_BRAKING ){
+			//					if(player.vx > 0)player.vx--;
+			//					else player.vx++;
+			//				}
 			player.vx=0;player.vy=0;
-				if(player.state != PLAYER_IDLE)
-				{
-					//caso fermo
-					player.state = PLAYER_IDLE;
-					player.current_frame = 0;
-					player.animation_timer = WAIT_BEFORE_IDLE_ANIMATION;//tempo di attesa prima di fare battere il piede a sonic, non è poi così impaziente :)
-				}
-//			}
+			if(player.state != PLAYER_IDLE)
+			{
+				//caso fermo
+				player.state = PLAYER_IDLE;
+				player.current_frame = 0;
+				player.animation_timer = WAIT_BEFORE_IDLE_ANIMATION;//tempo di attesa prima di fare battere il piede a sonic, non è poi così impaziente :)
+			}
+			//			}
 		}
 		break;
 	}
