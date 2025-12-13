@@ -36,7 +36,7 @@ extern unsigned char sonic_idle_3[];
 extern unsigned char sonic_idle_4[];
 
 
-static const s8 DEFAULT_SPEED = 6;
+static const s8 DEFAULT_SPEED = 16;
 static const s8 DEFAULT_JUMP_POWER = -14;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 

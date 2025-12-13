@@ -28,7 +28,7 @@
 	#define TILE_SIZE 32
 	#define PLAYER_WIDTH 16
 	#define TILES_X  6 //11//11
-	#define TILES_Y  4 //8//8
+	#define TILES_Y  5 //8//8
 #elif RES24
 	#define RATIO 1
 	#define SCALE 2

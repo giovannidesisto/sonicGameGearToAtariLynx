@@ -217,10 +217,10 @@ static void   updateAndDrawGame() {
 		tgi_sprite(&player.visible_spc.sprite);
 		//debug_print("Score");
 
-		printExadec(player.collisionByteVal,0,0,4);
+		//printExadec(player.collisionByteVal,0,0,4);
 		//printS16(player.x,0,6,0x04);
-		printS16(player.y,0, 6,0x04);
-		//printU16(player.xOnSprite,0, 6,0x03);
+		//printS16(player.y,0, 6,0x04);
+		printU16(player.xOnSprite,0, 6,0x03);
 		//printU16(player.newX,0, 12,0x05);
 //		printU16(player.tx,0, 18,0x06);
 
