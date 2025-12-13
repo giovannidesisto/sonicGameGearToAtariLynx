@@ -36,8 +36,8 @@ u16 myPalette[] = {
 		0x0BAF,
 		0x0F0D,
 		0x0FFF
-		
-		};
+
+};
 
 #pragma bss-name (pop)
 
@@ -61,7 +61,7 @@ static void __fastcall__ gameMenuScreen();
 static void __fastcall__ storyScreen();
 static void __fastcall__ resetGame();
 //__fastcall__
-static void  updateAndDrawGame();
+static void __fastcall__ updateAndDrawGame();
 
 static void __fastcall__ initPlayerFrames();
 
@@ -73,14 +73,14 @@ static void __fastcall__ initPlayerFrames();
 
 
 void main(void) {
-	debug_init();
+	//debug_init();
 
 	agInitGfx();       // initialise graphics
 	agSetPalette(myPalette);
-	agInitRand8(42);   // initialise RNG (use your own seed other than 42)
+	agInitRand8(37);   // initialise RNG (use your own seed other than 42)
 	startTime = clock2();
-	tgi_setcollisiondetection(1);
-
+	//tgi_setcollisiondetection(1);
+	//tgi_setframerate(140);
 
 	//logoScreen();      // startup logo screen
 	//gameMenuScreen();  // game menu screen, before you begin a game
@@ -192,50 +192,41 @@ static void __fastcall__ resetGame() {
 }
 
 // ----------------------------------------------------------------------------
-//__fastcall__
-static void   updateAndDrawGame() {
-	/* Controlla collisioni con il livello */
+//
+//static u8 frame_counter = 0;
+	static u16 frame_count = 0;
+	static clock_t last_time = 0;
+	static u16 fps = 0;
+ void measure_performance() {
 
-//	if(0)
+	//frame_count++;
+
+	if (clock2() - last_time >= 75) { // ~1 secondo a 75Hz
+		fps = frame_count;
+		frame_count = 0;
+		last_time = clock2();
+
+		// Mostra FPS (top-right corner)
+	}
+}
+static void __fastcall__ updateAndDrawGame() {
+	player_handle_user_input(SUZY.joystick);
+
+	// Aggiorna logica ogni frame
+	player_update();
+	player_animate();
+	level_update_camera(player.x, player.y);
+	// DISEGNA solo ogni 2 frame (30 FPS ancora fluido)
+	if (frame_count++ % 2 == 0)
 	{
-
-		player_handle_user_input(SUZY.joystick);
+		//measure_performance();
 		AG_WAIT_LCD();
-		/* Aggiorna il player (senza chiamare player_update_sprite_position) */
-		player_update();
-		// Aggiorna animazione
-		player_animate();
-		/* Aggiorna la camera per seguire il player */
-		level_update_camera(player.x, player.y);
-		//tgi_clear();
-		/* Disegna lo sfondo */
-		agSprBackground.penpal[0] = 0x09;
-		tgi_sprite(&agSprBackground);
-		/* Disegna il livello usando la camera */
+		//agSprBackground.penpal[0] = 0x09;
 		level_draw();
-		/* Disegna il player */
-		tgi_sprite(&player.visible_spc.sprite);
-		//debug_print("Score");
-
-		//printExadec(player.collisionByteVal,0,0,4);
-		//printS16(player.x,0,6,0x04);
-		//printS16(player.y,0, 6,0x04);
-		printU16(player.xOnSprite,0, 6,0x03);
-		//printU16(player.newX,0, 12,0x05);
-//		printU16(player.tx,0, 18,0x06);
-
-
-
+		//tgi_sprite(first_sprite);
+		//printS16(player.x, 0, 6, 0x04);
+		//printU16(fps, 120, 0, 0x04);
 		tgi_updatedisplay();
 	}
-//	else{
-//		AG_WAIT_LCD();
-//		agSprBackground.penpal[0] = 0x01;
-//		//tgi_sprite(&agSprBackground);
-//		SCB_MATRIX[0][0].data =(unsigned char*) bck_100;
-//		SCB_MATRIX[0][0].vpos= 60;
-//		SCB_MATRIX[0][0].hpos= 60;
-//		tgi_sprite(&SCB_MATRIX[0][0]);
-//		tgi_updatedisplay();
-//	}
+
 }

@@ -28,11 +28,8 @@ su piattaforme che lo portano in alto)
 
 extern u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH];
 
-//extern unsigned char* LEVEL_1_FOREGROUND_TILES[];
-//extern unsigned char* LEVEL_1_BACKGROUND_TILES[];
-
 static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
-
+/*
 typedef enum {
     TPVP_UP = 2,
 	TPVP_DOWN = 3,
@@ -40,6 +37,9 @@ typedef enum {
 	TPVP_SAME_DESC=5, //gestione discese
 	TPVP_SAME_ASC=6 //gestione salite
 } TailPositionVsPlayer;
+*/
+
+
 
 /* Struttura per informazioni del tile */
 typedef struct {

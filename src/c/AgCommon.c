@@ -58,7 +58,8 @@
 // Font image data and SCB sprite definition. Literal (non packed) data is used
 // to simplify offset calculations. Image data is 1-bit i.e. either background
 // or foreground.
-extern char img_ag_font5x5[];
+
+
 static SCB_REHV_PAL sprFont = {
 	BPP_1 | TYPE_NORMAL,                      // sprctl0
   REHV | LITERAL,                           // sprctl1
@@ -70,6 +71,32 @@ static SCB_REHV_PAL sprFont = {
   {0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF} // penpal
 };
 SCB_REHV_PAL* sprFontPtr = &sprFont;
+
+SCB_REHV_PAL agSprBackground = {
+  BPP_1 | TYPE_BACKGROUND,                  // sprctl0
+  REHV | LITERAL,                           // sprctl1
+  0,                                        // sprcoll
+  (void*) 0,                                // next SCB PTR
+  &img_pixel2col[0],                        // SPR data PTR
+  0, 0,                                     // offset (hpos, vpos)
+  0x0100 * AG_LCD_WIDTH,                    // hsize
+  0x0100 * AG_LCD_HEIGHT,                   // vsize
+  {0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF} // penpal
+};
+
+
+SCB_REHV_PAL agSprPixel = {
+  BPP_1 | TYPE_BACKGROUND,                  // sprctl0
+  REHV | LITERAL,                           // sprctl1
+  0,                                        // sprcoll
+  (void*) 0,                                // next SCB PTR
+  &img_pixel2col[0],                        // SPR data PTR
+  0, 0,                                     // offset (hpos, vpos)
+  0x0100,                    // hsize
+  0x0100,                   // vsize
+  {0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF} // penpal
+};
+
 
 
 /******************************************************************************

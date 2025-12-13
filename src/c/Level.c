@@ -5,6 +5,9 @@
 extern Level level;
 extern Player player;
 
+
+
+
 /* Mappa di esempio (Green Hill Zone style) */
 u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
 		//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -23,14 +26,13 @@ u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
 		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,2,4,3,2,4,3,2,4,3,2,4,3,2,4,3,0},
-		{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0},
-		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+		{0,0,0,0,0,0,0,0,100,0,0,100,0,0,0,0,0,0,0,0,0,0,0},
+		{0,0,0,200,200,0,0,2,  4,3,2,  4,3,2,4,3,2,4,3,2,4,3,0},
+		{4,4,4,  4,  4,4,4,4,  4,4,4,  4,4,4,4,4,4,4,4,4,4,4,0},
+		{1,1,1,  1,  1,1,1,1,  1,1,1,  1,1,1,1,1,1,1,1,1,1,1,1}
 
 
 };
-
 
 
 
@@ -41,24 +43,24 @@ void level_init(void) {
 	short x;
 	short y;
 	short j;
-	//short s=1;
+
 	for(y = 0; y < TILES_Y; y++)
 		for(x = 0; x < TILES_X; x++)
 		{
 			SCB_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_NORMAL;
-			SCB_MATRIX[y][x].sprctl1 = REHV  | LITERAL ;//LITERAL per sprite non compresse
-			SCB_MATRIX[y][x].sprcoll =  NO_COLLIDE;// 32;
+			SCB_MATRIX[y][x].sprctl1 = REHV  | LITERAL ;//LITERAL per sprite non compresse, SOLO PIATTAFORME!!! le altre sprite devono essere compresse
+			SCB_MATRIX[y][x].sprcoll =  NO_COLLIDE;
 			SCB_MATRIX[y][x].next = (void*)0;
-			SCB_MATRIX[y][x].data = (void*)0;// &LEVEL_1_FOREGROUND_TILES[0];
+			SCB_MATRIX[y][x].data = (void*)0;
 			SCB_MATRIX[y][x].hsize = 0x0100*SCALE/SCALE_DIVIDER;
 			SCB_MATRIX[y][x].vsize = 0x0100*SCALE/SCALE_DIVIDER;
-			SCB_MATRIX[y][x].vpos = 0;// (-5 + (y*TILE_SIZE));
-			SCB_MATRIX[y][x].hpos = 0;//(-8 + (x*TILE_SIZE));
+			SCB_MATRIX[y][x].vpos = 0;
+			SCB_MATRIX[y][x].hpos = 0;
 			for(j = 0; j < 8; j++) {
 				SCB_MATRIX[y][x].penpal[j] = tile_palette[j];
 			}
 
-			//s++;
+
 		}
 
 
@@ -94,6 +96,119 @@ void level_load(u8 level_num) {
 
 
 void level_draw() {
+	int x, y, start_tile_x, start_tile_y, end_tile_x, end_tile_y, tile_index;
+
+	int sprite_count = 0;
+
+	prev_sprite = NULL;
+	first_sprite = NULL;
+	/* Calcola quale porzione della mappa è visibile */
+	start_tile_x = level.camera.x / TILE_SIZE;
+	start_tile_y = level.camera.y / TILE_SIZE;
+
+	end_tile_x = start_tile_x + TILES_X;
+	end_tile_y = start_tile_y + TILES_Y;
+
+	/* Limita ai bordi della mappa */
+	if (end_tile_x > MAP_WIDTH) end_tile_x = MAP_WIDTH;
+	if (end_tile_y > MAP_HEIGHT) end_tile_y = MAP_HEIGHT;
+
+	// 1. COMINCIA CON LO SFONDO
+	agSprBackground.penpal[0] = 0x09;
+	first_sprite = &agSprBackground;  // Sfondo è il primo
+	prev_sprite = first_sprite;
+
+
+	// 2. AGGIUNGI I TILE DI BACKGROUND (indice >= 100)
+	// ALBERI,PALME,FIORI
+	for (y = start_tile_y; y < end_tile_y; y++) {
+		for (x = start_tile_x; x < end_tile_x; x++) {
+			tile_index = level_foregound_map[y][x];
+
+			if (tile_index >= 100) {  // Background tiles
+				int sprite_x = x - start_tile_x;
+				int sprite_y = y - start_tile_y;
+
+				int world_x = x * TILE_SIZE;
+				int world_y = y * TILE_SIZE;
+				int screen_x = level_world_to_screen_x(world_x);
+				int screen_y = level_world_to_screen_y(world_y);
+
+				// Setup sprite background
+				SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_BACKGROUND[tile_index-100];
+				SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+				SCB_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+				SCB_MATRIX[sprite_y][sprite_x].next = (void*)0;  // Termina per ora
+				SCB_MATRIX[sprite_y][sprite_x].sprctl1 = REHV  | PACKED;
+				// Aggiungi in level_draw(), prima di setup sprite:
+				if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
+						screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
+					continue;  // Tile non visibile, salta
+				}
+				// Aggiungi alla lista
+				prev_sprite->next = &SCB_MATRIX[sprite_y][sprite_x];
+				prev_sprite = &SCB_MATRIX[sprite_y][sprite_x];
+				sprite_count++;
+			}
+		}
+	}
+
+	// 3. AGGIUNGI I TILE DI FOREGROUND (indice 1-99)
+	// PIATTAFORME E MURI
+	for (y = start_tile_y; y < end_tile_y; y++) {
+		for (x = start_tile_x; x < end_tile_x; x++) {
+			tile_index = level_foregound_map[y][x];
+
+			if (tile_index != 0 && (tile_index < 100 || tile_index >= 200)) {  // Foreground tiles
+				int sprite_x = x - start_tile_x;
+				int sprite_y = y - start_tile_y;
+
+				int world_x = x * TILE_SIZE;
+				int world_y = y * TILE_SIZE;
+				int screen_x = level_world_to_screen_x(world_x);
+				int screen_y = level_world_to_screen_y(world_y);
+
+				// Setup sprite foreground
+				if(tile_index < 100){
+					SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PLATFORM[tile_index-1];
+					SCB_MATRIX[sprite_y][sprite_x].sprctl1 = REHV  | LITERAL ;
+				}
+				else
+				{
+					SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_WALL[tile_index-200];
+					SCB_MATRIX[sprite_y][sprite_x].sprctl1 = REHV  | PACKED ;
+				}
+
+
+				SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+				SCB_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+				SCB_MATRIX[sprite_y][sprite_x].next = (void*)0;
+				// Aggiungi in level_draw(), prima di setup sprite:
+				if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
+						screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
+					continue;  // Tile non visibile, salta
+				}
+				// Aggiungi alla lista
+				prev_sprite->next = &SCB_MATRIX[sprite_y][sprite_x];
+				prev_sprite = &SCB_MATRIX[sprite_y][sprite_x];
+				sprite_count++;
+			}
+		}
+	}
+
+	// 4. AGGIUNGI IL PLAYER (ULTIMO, SOPRA TUTTO)
+	player.visible_spc.sprite.next = (void*)0;
+	prev_sprite->next = &player.visible_spc.sprite;
+
+	// 5. DISEGNA TUTTA LA LISTA CON UNA SOLA CHIAMATA
+	tgi_sprite(first_sprite);
+	sprite_count++;
+	// Debug: mostra quanti sprite stai disegnando
+	printU16(sprite_count, 00, 0, 0x04);
+}
+
+
+void level_draw_OLD() {
 	int x, y, j,start_tile_x,start_tile_y,end_tile_x,end_tile_y,tile_index;
 	u8 xx;
 	/* Calcola quale porzione della mappa è visibile */
@@ -134,11 +249,11 @@ void level_draw() {
 					//100-199 non collidable, es nuvole
 					if(tile_index<100)
 					{
-						SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_FOREGROUND_TILES[tile_index-1];
+						SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_PLATFORM[tile_index-1];
 					}
 					else
 					{
-						SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_BACKGROUND_TILES[100-tile_index];
+						SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_BACKGROUND[100-tile_index];
 					}
 
 
@@ -146,14 +261,15 @@ void level_draw() {
 					SCB_MATRIX[sprite_y][sprite_x].vpos =   +screen_y;
 
 
-					//if(screen_x==0){
-						/* Disegna lo sprite */
+					//{
+					/* Disegna lo sprite */
+					//if(screen_x==0)
 					tgi_sprite(&SCB_MATRIX[sprite_y][sprite_x]);
 
 
 
-						//for(xx=0;xx<19;xx++){
-						//	printExadec(SCB_MATRIX[sprite_y][sprite_x].data[xx],50 , xx*5 ,0x01+(xx%2)*4);
+					//for(xx=0;xx<19;xx++){
+					//	printExadec(SCB_MATRIX[sprite_y][sprite_x].data[xx],50 , xx*5 ,0x01+(xx%2)*4);
 					//	}
 
 					//}

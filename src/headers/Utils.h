@@ -15,9 +15,9 @@
 #define DEBUG_BUFFER ((char*)0xFA00)
 //extern char DEBUG_BUFFER[DEBUG_BUFFER_SIZE] ;
 
-//#define RES32 0
-#define RES32 1
-//#define RES16 0
+#define RES32
+//#define RES24 1
+//#define RES16 1
 
 
 
@@ -31,12 +31,12 @@
 	#define TILES_Y  5 //8//8
 #elif RES24
 	#define RATIO 1
-	#define SCALE 2
-	#define SCALE_DIVIDER 3
+	#define SCALE 3
+	#define SCALE_DIVIDER 4
 	#define TILE_SIZE 24
 	#define PLAYER_WIDTH 12
 	#define TILES_X  9//11//11
-	#define TILES_Y  5 //8//8
+	#define TILES_Y  6 //8//8
 #elif RES16
 	#define RATIO 1
 	#define SCALE 1
@@ -47,6 +47,10 @@
 	#define TILES_Y  8 //8//8
 
 #endif
+
+
+extern SCB_REHV_PAL* prev_sprite;
+extern SCB_REHV_PAL* first_sprite;
 
 
 int u16_to_ascii(unsigned short value, char *dest);

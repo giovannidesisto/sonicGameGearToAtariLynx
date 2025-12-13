@@ -6,8 +6,11 @@
  */
 #include "Utils.h"
 #define IMAX(a,b) ((a) > (b) ? (a) : (b))
-//char DEBUG_BUFFER[DEBUG_BUFFER_SIZE]={0};
 
+SCB_REHV_PAL* prev_sprite = NULL;
+SCB_REHV_PAL* first_sprite = NULL;
+
+//char DEBUG_BUFFER[DEBUG_BUFFER_SIZE]={0};
 int u8_to_hex_ascii(unsigned char value, char *dest) {
     int min_digits = 2;      // un byte = due cifre hex
     char temp[2];            // buffer temporaneo

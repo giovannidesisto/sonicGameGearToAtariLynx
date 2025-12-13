@@ -98,7 +98,7 @@ Single pixel, 1-bit colour image, with the colour set to 1 i.e. the second
 colour in the pallete of possible colours.
 */
 extern char img_pixel2col[];
-
+extern char img_ag_font5x5[];
 
 // ----------------------------------------------------------------------------
 // IMPORTED FUNCTIONS
@@ -121,31 +121,8 @@ static const u8 tile_palette[8] = {
 // ----------------------------------------------------------------------------
 // Global variables
 // ----------------------------------------------------------------------------
-
-static SCB_REHV_PAL agSprBackground = {
-  BPP_1 | TYPE_BACKGROUND,                  // sprctl0
-  REHV | LITERAL,                           // sprctl1
-  0,                                        // sprcoll
-  (void*) 0,                                // next SCB PTR
-  &img_pixel2col[0],                        // SPR data PTR
-  0, 0,                                     // offset (hpos, vpos)
-  0x0100 * AG_LCD_WIDTH,                    // hsize
-  0x0100 * AG_LCD_HEIGHT,                   // vsize
-  {0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF} // penpal
-};
-
-
-static SCB_REHV_PAL agSprPixel = {
-  BPP_1 | TYPE_BACKGROUND,                  // sprctl0
-  REHV | LITERAL,                           // sprctl1
-  0,                                        // sprcoll
-  (void*) 0,                                // next SCB PTR
-  &img_pixel2col[0],                        // SPR data PTR
-  0, 0,                                     // offset (hpos, vpos)
-  0x0100,                    // hsize
-  0x0100,                   // vsize
-  {0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF} // penpal
-};
+extern SCB_REHV_PAL agSprBackground;
+extern SCB_REHV_PAL agSprPixel;
 
 
 #endif // __LYNX_AG_COMMON__
