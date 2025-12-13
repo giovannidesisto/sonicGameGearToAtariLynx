@@ -194,7 +194,7 @@ static void __fastcall__ resetGame() {
 // ----------------------------------------------------------------------------
 //
 //static u8 frame_counter = 0;
-	static u16 frame_count = 0;
+u8 frame_count = 0;
 	static clock_t last_time = 0;
 	static u16 fps = 0;
  void measure_performance() {

@@ -33,8 +33,8 @@ extern unsigned char sonic_idle_3[];
 extern unsigned char sonic_idle_4[];
 
 
-static const s8 DEFAULT_SPEED = 2;
-static const s8 DEFAULT_JUMP_POWER = -15;
+static const s8 DEFAULT_SPEED = 6;
+static const s8 DEFAULT_JUMP_POWER = -14;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 
 // Array di puntatori ai frame per animazione

@@ -178,10 +178,15 @@ void check_world_collision() {
 	char buffer[DEBUG_BUFFER_SIZE];
 	u8 y_rebased;
 	s16 transparentPixelIndex,playerXOnSprite,playerYOnSprite;
+
+
+	//return;
+
 	new_x = player.x + player.vx;
 	new_y = player.y + player.vy;
 	// Reset dello stato ground - verrà reimpostato se troviamo collisione sotto
 	player.is_grounded = 0;
+
 
 
 	/**
@@ -221,6 +226,8 @@ void check_world_collision() {
 		 * FIXME gestione disabilitata per testare il comportamento verticale dovuto alla gravità
 		 */
 		// Verifica se c'è una tile solida lungo il percorso
+		//if(frame_count %2==0)
+
 		for (ty = tile_y1; ty <= tile_y2; ty++)
 		{
 			if (ty >= 0 && ty < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH)
@@ -248,42 +255,44 @@ void check_world_collision() {
 			}
 		}
 
+		//l'adeguamento alle superfici lo gestisco ogni 2 cicli
+		if(frame_count %2==0)
+		{
+			//calcolare i boundary con meta player size solo per i muri, così da arrivare a livello
+			if (player.vx > 0) {
+				// Controlla il lato destro del player
+				x_boundary = new_x;//+player.width/2 ;
+				tile_x = x_boundary / TILE_SIZE;
+			} else {
+				// Controlla il lato sinistro del player
+				x_boundary = new_x;//-player.width/2;
+				tile_x = x_boundary / TILE_SIZE;
+			}
 
-		//calcolare i boundary con meta player size solo per i muri, così da arrivare a livello
-		if (player.vx > 0) {
-			// Controlla il lato destro del player
-			x_boundary = new_x;//+player.width/2 ;
-			tile_x = x_boundary / TILE_SIZE;
-		} else {
-			// Controlla il lato sinistro del player
-			x_boundary = new_x;//-player.width/2;
-			tile_x = x_boundary / TILE_SIZE;
-		}
-
-		//sale sulla prossima tile se non è un muro, serve per gestire le salite o discese
-		for (ty = tile_y1; ty <= tile_y2; ty++) {
-			if (ty >= 0 && ty < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH)
-			{
-				tile_index = level_foregound_map[ty][tile_x];
-
-				// Se la tile è solida (1-99)
-				if (tile_index != 0 && tile_index < 100)
+			//sale sulla prossima tile se non è un muro, serve per gestire le salite o discese
+			for (ty = tile_y1; ty <= tile_y2; ty++) {
+				if (ty >= 0 && ty < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH)
 				{
-					player.y = ty * TILE_SIZE - TILE_SIZE;
-					new_y=player.y;
-					//y_rebased=1;
-					break;
+					tile_index = level_foregound_map[ty][tile_x];
+
+					// Se la tile è solida (1-99)
+					if (tile_index != 0 && tile_index < 100)
+					{
+						player.y = ty * TILE_SIZE - TILE_SIZE;
+						new_y=player.y;
+						//y_rebased=1;
+						break;
+					}
 				}
 			}
 		}
-
 	}
 
 
 
 
 	// 2. Poi controlla collisioni lungo l'asse y
-	if (player.vy != 0)
+	if(frame_count %2==0 && player.vy != 0)
 	{
 		// Determina quale lato stiamo controllando in base alla direzione
 		if (player.vy >= 0) {
@@ -310,17 +319,24 @@ void check_world_collision() {
 				{
 					playerXOnSprite=(new_x-(tx * TILE_SIZE));
 
-					if(tile_index >= 200){
-						player.y = tile_y * TILE_SIZE -TILE_SIZE;
-						player.is_grounded = 1;
-						player.is_jumping = 0;
-						player.vy = 0;
-						new_y = player.y;
+					if(tile_index >= 200)
+					{
+						if(player.vy >= 0)
+						{
+							player.y = tile_y * TILE_SIZE -TILE_SIZE;
+							player.is_grounded = 1;
+							player.is_jumping = 0;
+							player.vy = 0;
+							new_y = player.y;
+						}else{
+							player.y = (tile_y + 1) * TILE_SIZE;
+							player.vy = 0; // Annulla la velocità ascensionale, cadrà con la gravità
+						}
+						break;
 
-					break;
 					}
 					// Regola la posizione Y per essere tangente alla tile
-					else if (player.vy >=0)
+					if (player.vy >=0)
 					{
 						// Collisione con il terreno sotto
 						//posizione il player tangente alla srpite sottostante
@@ -400,10 +416,11 @@ void player_update() {
 	if(player.y> MAP_HEIGHT*TILE_SIZE )
 	{
 		player.y=0;
-		player.x=0;
-		player.vx=0;
-		player.vy=0;
+		//player.x=0;
+		//player.vx=0;
+		//player.vy=0;
 	}
+	//if(player.y<0)player.y=0;
 
 	check_world_collision();
 

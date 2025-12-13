@@ -22,14 +22,14 @@ u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
 		{0,0,1,0,0,0,0,0,0,0,06,0,0,0,0,0,0,4,0,0,0,0,0},
 		{1,1,1,1,1,1,2,2,2,2,05,2,2,2,2,2,2,3,2,2,2,2,2},
 		 */
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,100,0,0,100,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,200,200,0,0,2,  4,3,2,  4,3,2,4,3,2,4,3,2,4,3,0},
-		{4,4,4,  4,  4,4,4,4,  4,4,4,  4,4,4,4,4,4,4,4,4,4,4,0},
-		{1,1,1,  1,  1,1,1,1,  1,1,1,  1,1,1,1,1,1,1,1,1,1,1,1}
+		{100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
+		{100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
+		{100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
+		{100,100,100,100,100,200,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
+		{100,100,100,100,200,200,200,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
+		{100,100,100,100,100,100,100,  2,  4, 3,   2,  4,  3,  2,  4,  3,  2,  4,  3,  2,  4,  3,100},
+		{  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4 , 4,  4,  4,  4,  4,  4,  4,  4,100},
+		{  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1}
 
 
 };
@@ -125,7 +125,7 @@ void level_draw() {
 		for (x = start_tile_x; x < end_tile_x; x++) {
 			tile_index = level_foregound_map[y][x];
 
-			if (tile_index >= 100) {  // Background tiles
+			if (tile_index >= 100 && tile_index <200) {  // Background tiles
 				int sprite_x = x - start_tile_x;
 				int sprite_y = y - start_tile_y;
 
@@ -144,11 +144,12 @@ void level_draw() {
 				if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
 						screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
 					continue;  // Tile non visibile, salta
+				}else{
+					// Aggiungi alla lista
+					prev_sprite->next = &SCB_MATRIX[sprite_y][sprite_x];
+					prev_sprite = &SCB_MATRIX[sprite_y][sprite_x];
+					sprite_count++;
 				}
-				// Aggiungi alla lista
-				prev_sprite->next = &SCB_MATRIX[sprite_y][sprite_x];
-				prev_sprite = &SCB_MATRIX[sprite_y][sprite_x];
-				sprite_count++;
 			}
 		}
 	}
@@ -188,10 +189,12 @@ void level_draw() {
 						screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
 					continue;  // Tile non visibile, salta
 				}
-				// Aggiungi alla lista
-				prev_sprite->next = &SCB_MATRIX[sprite_y][sprite_x];
-				prev_sprite = &SCB_MATRIX[sprite_y][sprite_x];
-				sprite_count++;
+				else{
+					// Aggiungi alla lista
+					prev_sprite->next = &SCB_MATRIX[sprite_y][sprite_x];
+					prev_sprite = &SCB_MATRIX[sprite_y][sprite_x];
+					sprite_count++;
+				}
 			}
 		}
 	}
