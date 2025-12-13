@@ -76,13 +76,6 @@ $(BUILD_DIR)/%.o: %.c
 # == Bitmap files to intermediate assembly to bitmap objects
 BMP_SOURCES = $(wildcard $(SOURCE_DIR)/images/*.bmp)
 BMP_OBJECTS = $(patsubst $(SOURCE_DIR)/images/%.bmp, $(BUILD_DIR)/%.o, $(BMP_SOURCES))
-#$(BUILD_DIR)/%.o: %.bmp
-#	@$(ECHO) == Converting bitmap $< to $@
-#	@$(SPRPCK) $(SPRFLAGS) $< $@ > /dev/null
-#	@$(ECHO) .global _$* > $(BUILD_DIR)/$*.s
-#	@$(ECHO) .segment \"RODATA\" >> $(BUILD_DIR)/$*.s
-#	@$(ECHO) _$*: .incbin \"$*.spr\" >> $(BUILD_DIR)/$*.s
-#	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@
 $(BUILD_DIR)/%.o: %.bmp
 	@if echo "$*" | grep -q '^img_pixel2col'; then \
 		$(ECHO) "== Converting pixel base $< to $@"; \
@@ -105,6 +98,20 @@ $(BUILD_DIR)/%.o: %.bmp
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
 	elif echo "$*" | grep -q '^bck'; then \
 		$(ECHO) "== Converting tile $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
+		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+	elif echo "$*" | grep -q '^wall'; then \
+		$(ECHO) "== Converting tile $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
+		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+	elif echo "$*" | grep -q '^for'; then \
+		$(ECHO) "== Converting tile $< to $@"; \
 		$(SPRPCK) -t6 -p2 -s4 -u -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
@@ -113,22 +120,8 @@ $(BUILD_DIR)/%.o: %.bmp
 	fi
 
 
-# force font to be multi-sprite
 
-
-# force sprites to use different bits per colour
-# 4 bits per pixel for img_player
-#$(BUILD_DIR)/img_player.o : SPRFLAGS=-t6 -p2 -s4 -S012016 -r008001 
-
-#$(BUILD_DIR)/img_player.o : img_player.bmp
-#	@$(ECHO) == Converting player $< to $@
-#	@$(SPRPCK) $(SPRFLAGS)  -s4 -t6 -p2  -S012016 -r008001  $< $@ > /dev/null
-#	@$(SPRHLPR) "$@"
-#	@$(AS) $(ASFLAGS) $(BUILD_DIR)/img_player.s -o $@
-
-
-
-
+####################################################################################################
 
 # == Link all objects to final binary - LNX
 $(BIN_LNX): $(BMP_OBJECTS) $(ASM_OBJECTS) $(C_OBJECTS)
