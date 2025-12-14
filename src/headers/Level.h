@@ -13,7 +13,7 @@
 
 
 //dimensione della mappa in sprites
-#define MAP_WIDTH  23
+#define MAP_WIDTH  24
 #define MAP_HEIGHT 8
 
 
@@ -28,7 +28,10 @@ su piattaforme che lo portano in alto)
 
 extern u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH];
 
+extern u16 level_prx_map[MAP_HEIGHT/2][MAP_WIDTH/2];
+
 static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
+static SCB_REHV_PAL SCB_PRX_MATRIX[TILES_Y][TILES_X];
 /*
 typedef enum {
     TPVP_UP = 2,

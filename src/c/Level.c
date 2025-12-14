@@ -10,32 +10,24 @@ extern Player player;
 
 /* Mappa di esempio (Green Hill Zone style) */
 u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
-		//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		/*
-		{0,0,00,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,00,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,00,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,00,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,00,0,0,0,0,0,0,0,8,9,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,00,0,0,0,0,0,0,0,7,10,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,1,0,0,0,0,0,0,0,06,0,0,0,0,0,0,4,0,0,0,0,0},
-		{1,1,1,1,1,1,2,2,2,2,05,2,2,2,2,2,2,3,2,2,2,2,2},
-		 */
-		{100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
-		{100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
-		{100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
-		{100,100,100,100,100,200,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
-		{100,100,100,100,200,200,200,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100},
-		{100,100,100,100,100,100,100,  2,  4, 3,   2,  4,  3,  2,  4,  3,  2,  4,  3,  2,  4,  3,100},
-		{  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4 , 4,  4,  4,  4,  4,  4,  4,  4,100},
-		{  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1}
-
-
+		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,0,  0,200,0,0,0,0,0,0,2,4,4,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,0,200,200,200,0,0,0,2,4,4,4,0,0,0,0,0,0,0,0,0,0},
+		{0,100,0,0,  0,  0,  0,2,4,4,4,4,4,4,4,3,2,4,3,2,4,3,0,0},
+		{4,  4,4,4,  4,  4,  4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0},
+		{1,  1,1,1,  1,  1,  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
 
+u16 level_prx_map[MAP_HEIGHT/2][MAP_WIDTH/2]={
+		{0,0,0,1,0,0,0,0,0,1,0,0},
+		{0,0,1,0,1,0,0,0,1,0,1,0},
+		{0,1,0,0,0,1,0,1,0,0,0,1},
+		{1,0,0,0,0,0,1,0,0,0,0,0}
 
+};
 
 
 /* Inizializza il sistema di sprite */
@@ -66,7 +58,22 @@ void level_init(void) {
 
 
 
-
+	// In Level.c, inizializzala in level_init()
+	for(y = 0; y < TILES_Y; y++)
+	    for(x = 0; x < TILES_X; x++) {
+	        SCB_PRX_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_NORMAL;
+	        SCB_PRX_MATRIX[y][x].sprctl1 = REHV  | LITERAL ;//LITERAL per sprite non compresse, SOLO PIATTAFORME!!! le altre sprite devono essere compresse
+	        SCB_PRX_MATRIX[y][x].sprcoll =  NO_COLLIDE;
+	        SCB_PRX_MATRIX[y][x].next = (void*)0;
+	        SCB_PRX_MATRIX[y][x].data = (void*)0;
+	        SCB_PRX_MATRIX[y][x].hsize = 0x0100*SCALE/SCALE_DIVIDER;
+	        SCB_PRX_MATRIX[y][x].vsize = 0x0100*SCALE/SCALE_DIVIDER;
+	        SCB_PRX_MATRIX[y][x].vpos = 0;
+	        SCB_PRX_MATRIX[y][x].hpos = 0;
+			for(j = 0; j < 8; j++) {
+				SCB_PRX_MATRIX[y][x].penpal[j] = tile_palette[j];
+			}
+	    }
 
 
 
@@ -96,8 +103,10 @@ void level_load(u8 level_num) {
 
 
 void level_draw() {
-	int x, y, start_tile_x, start_tile_y, end_tile_x, end_tile_y, tile_index;
-
+	int x, y, start_tile_x, start_tile_y, end_tile_x, end_tile_y, tile_index,
+	parallax_offset_x,parallax_offset_y,prx_start_tile_x ,prx_start_tile_y ;
+	int prx_end_tile_x;
+	int prx_end_tile_y;
 	int sprite_count = 0;
 
 	prev_sprite = NULL;
@@ -117,6 +126,69 @@ void level_draw() {
 	agSprBackground.penpal[0] = 0x09;
 	first_sprite = &agSprBackground;  // Sfondo è il primo
 	prev_sprite = first_sprite;
+
+
+
+	//aggiunge le tile dello sfondo che si muove in parallasse orizzontale
+	parallax_offset_x = level.camera.x / 2;
+	parallax_offset_y = level.camera.y / 2;
+
+	// Calcola quali tile di parallasse sono visibili
+	 prx_start_tile_x = parallax_offset_x / TILE_SIZE;
+	prx_start_tile_y = parallax_offset_y / TILE_SIZE;
+	prx_end_tile_x = prx_start_tile_x + TILES_X;
+	prx_end_tile_y = prx_start_tile_y + TILES_Y;
+
+	// Limita ai bordi della mappa parallasse
+	if (prx_end_tile_x > MAP_WIDTH/2) prx_end_tile_x = MAP_WIDTH/2;
+	if (prx_end_tile_y > MAP_HEIGHT/2) prx_end_tile_y = MAP_HEIGHT/2;
+
+	// Disegna le tile di parallasse
+	for (y = prx_start_tile_y; y < prx_end_tile_y; y++) {
+	    for (x = prx_start_tile_x; x < prx_end_tile_x; x++) {
+	        tile_index = level_prx_map[y][x];
+
+	        if (tile_index != 0) {
+	            int sprite_x = x - prx_start_tile_x;
+	            int sprite_y = y - prx_start_tile_y;
+
+	            // Posizione mondo della tile (senza effetto parallasse)
+	            int world_x = x * TILE_SIZE;
+	            int world_y = y * TILE_SIZE;
+
+	            // Posizione schermo con effetto parallasse
+	            int screen_x = world_x - parallax_offset_x;
+	            int screen_y = world_y - parallax_offset_y;
+
+	            // Setup sprite parallasse
+	            SCB_PRX_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PRX[tile_index-1];
+	            SCB_PRX_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+	            SCB_PRX_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+	            SCB_PRX_MATRIX[sprite_y][sprite_x].next = (void*)0;
+	            SCB_PRX_MATRIX[sprite_y][sprite_x].sprctl1 = REHV | PACKED;
+
+	            // Controlla se la tile è visibile
+	            if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
+	                screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
+	                continue;  // Tile non visibile
+	            } else {
+	                // Aggiungi alla lista
+	                prev_sprite->next = &SCB_PRX_MATRIX[sprite_y][sprite_x];
+	                prev_sprite = &SCB_PRX_MATRIX[sprite_y][sprite_x];
+	                sprite_count++;
+	            }
+	        }
+	    }
+	}
+
+
+
+
+
+	//////////////////////////////////////////////////////////////////////
+
+
+
 
 
 	// 2. AGGIUNGI I TILE DI BACKGROUND (indice >= 100)

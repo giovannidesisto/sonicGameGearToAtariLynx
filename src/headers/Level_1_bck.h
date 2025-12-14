@@ -7,6 +7,7 @@
 
 #ifndef LEVEL_1_BCK_H
 #define LEVEL_1_BCK_H
+
 extern unsigned char for_001[];
 extern unsigned char for_002[];
 extern unsigned char for_003[];
@@ -16,6 +17,8 @@ extern unsigned char bck_001[];
 
 
 extern unsigned char wall_001[];
+
+extern unsigned char prx_001[];
 
 //PIATTAFORME, MURI
 static unsigned char* LEVEL_1_PLATFORM[] = {
@@ -30,10 +33,17 @@ static unsigned char* LEVEL_1_BACKGROUND[] = {
 		bck_001
 };
 
+
+//TILE SOLIDE, su tutti i 4 lati
 static unsigned char* LEVEL_1_WALL[] = {
 		wall_001
 };
 
+
+//SFONDO IN PARALLASSE
+static unsigned char* LEVEL_1_PRX[] = {
+		prx_001
+};
 
 
 #endif /* LEVEL_1_BCK_H */
