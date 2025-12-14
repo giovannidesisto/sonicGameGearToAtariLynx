@@ -19,6 +19,7 @@ extern unsigned char bck_001[];
 extern unsigned char wall_001[];
 
 extern unsigned char prx_001[];
+extern unsigned char prx_002[];
 
 //PIATTAFORME, MURI
 static unsigned char* LEVEL_1_PLATFORM[] = {
@@ -42,7 +43,8 @@ static unsigned char* LEVEL_1_WALL[] = {
 
 //SFONDO IN PARALLASSE
 static unsigned char* LEVEL_1_PRX[] = {
-		prx_001
+		prx_001,
+		prx_002
 };
 
 

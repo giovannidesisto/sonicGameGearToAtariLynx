@@ -48,10 +48,11 @@
 
 #endif
 
-
+#define EFFECT_TOGGLE_VALUE 10
 extern SCB_REHV_PAL* prev_sprite;
 extern SCB_REHV_PAL* first_sprite;
 extern u8 frame_count;
+extern u8 effect_counter;
 
 int u16_to_ascii(unsigned short value, char *dest);
 void printCoordsToScreen(u16 x, u16 y,u8 print_x, u8 print_y,u8 color);

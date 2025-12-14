@@ -195,8 +195,9 @@ static void __fastcall__ resetGame() {
 //
 //static u8 frame_counter = 0;
 u8 frame_count = 0;
-	static clock_t last_time = 0;
-	static u16 fps = 0;
+u8 effect_counter =0;
+static clock_t last_time = 0;
+static u16 fps = 0;
  void measure_performance() {
 
 	//frame_count++;
@@ -227,6 +228,9 @@ static void __fastcall__ updateAndDrawGame() {
 		//printS16(player.x, 0, 6, 0x04);
 		//printU16(fps, 120, 0, 0x04);
 		tgi_updatedisplay();
+		if(effect_counter <EFFECT_TOGGLE_VALUE*2)
+			effect_counter++;
+		else effect_counter=0;
 	}
 
 }

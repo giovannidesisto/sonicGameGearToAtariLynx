@@ -13,10 +13,10 @@ u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
 		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,  0,0,0,  0,200,0,0,0,0,0,0,2,4,4,0,0,0,0,0,0,0,0,0},
-		{0,  0,0,0,200,200,200,0,0,0,2,4,4,4,0,0,0,0,0,0,0,0,0,0},
-		{0,100,0,0,  0,  0,  0,2,4,4,4,4,4,4,4,3,2,4,3,2,4,3,0,0},
-		{4,  4,4,4,  4,  4,  4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0},
+		{0,  0,0,0,  0,200,0,0,0,0,0,0,2,  4,200,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,0,200,200,200,0,0,0,2,4,  4,200,0,0,0,0,0,0,0,0,0,0},
+		{0,100,0,0,  0,  0,  0,2,4,4,4,4,  4,  4,4,3,2,4,3,2,4,3,0,0},
+		{4,  4,4,4,  4,  4,  4,4,4,4,4,4,  4,  4,4,4,4,4,4,4,4,4,0,0},
 		{1,  1,1,1,  1,  1,  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
@@ -60,20 +60,20 @@ void level_init(void) {
 
 	// In Level.c, inizializzala in level_init()
 	for(y = 0; y < TILES_Y; y++)
-	    for(x = 0; x < TILES_X; x++) {
-	        SCB_PRX_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_NORMAL;
-	        SCB_PRX_MATRIX[y][x].sprctl1 = REHV  | LITERAL ;//LITERAL per sprite non compresse, SOLO PIATTAFORME!!! le altre sprite devono essere compresse
-	        SCB_PRX_MATRIX[y][x].sprcoll =  NO_COLLIDE;
-	        SCB_PRX_MATRIX[y][x].next = (void*)0;
-	        SCB_PRX_MATRIX[y][x].data = (void*)0;
-	        SCB_PRX_MATRIX[y][x].hsize = 0x0100*SCALE/SCALE_DIVIDER;
-	        SCB_PRX_MATRIX[y][x].vsize = 0x0100*SCALE/SCALE_DIVIDER;
-	        SCB_PRX_MATRIX[y][x].vpos = 0;
-	        SCB_PRX_MATRIX[y][x].hpos = 0;
+		for(x = 0; x < TILES_X; x++) {
+			SCB_PRX_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_NORMAL;
+			SCB_PRX_MATRIX[y][x].sprctl1 = REHV  | PACKED ;//LITERAL per sprite non compresse, SOLO PIATTAFORME!!! le altre sprite devono essere compresse
+			SCB_PRX_MATRIX[y][x].sprcoll =  NO_COLLIDE;
+			SCB_PRX_MATRIX[y][x].next = (void*)0;
+			SCB_PRX_MATRIX[y][x].data = (void*)0;
+			SCB_PRX_MATRIX[y][x].hsize = 0x0100*SCALE/SCALE_DIVIDER;
+			SCB_PRX_MATRIX[y][x].vsize = 0x0100*SCALE/SCALE_DIVIDER;
+			SCB_PRX_MATRIX[y][x].vpos = 0;
+			SCB_PRX_MATRIX[y][x].hpos = 0;
 			for(j = 0; j < 8; j++) {
 				SCB_PRX_MATRIX[y][x].penpal[j] = tile_palette[j];
 			}
-	    }
+		}
 
 
 
@@ -134,7 +134,7 @@ void level_draw() {
 	parallax_offset_y = level.camera.y / 2;
 
 	// Calcola quali tile di parallasse sono visibili
-	 prx_start_tile_x = parallax_offset_x / TILE_SIZE;
+	prx_start_tile_x = parallax_offset_x / TILE_SIZE;
 	prx_start_tile_y = parallax_offset_y / TILE_SIZE;
 	prx_end_tile_x = prx_start_tile_x + TILES_X;
 	prx_end_tile_y = prx_start_tile_y + TILES_Y;
@@ -145,40 +145,40 @@ void level_draw() {
 
 	// Disegna le tile di parallasse
 	for (y = prx_start_tile_y; y < prx_end_tile_y; y++) {
-	    for (x = prx_start_tile_x; x < prx_end_tile_x; x++) {
-	        tile_index = level_prx_map[y][x];
+		for (x = prx_start_tile_x; x < prx_end_tile_x; x++) {
+			tile_index = level_prx_map[y][x];
 
-	        if (tile_index != 0) {
-	            int sprite_x = x - prx_start_tile_x;
-	            int sprite_y = y - prx_start_tile_y;
+			if (tile_index != 0) {
+				int sprite_x = x - prx_start_tile_x;
+				int sprite_y = y - prx_start_tile_y;
 
-	            // Posizione mondo della tile (senza effetto parallasse)
-	            int world_x = x * TILE_SIZE;
-	            int world_y = y * TILE_SIZE;
+				// Posizione mondo della tile (senza effetto parallasse)
+				int world_x = x * TILE_SIZE;
+				int world_y = y * TILE_SIZE;
 
-	            // Posizione schermo con effetto parallasse
-	            int screen_x = world_x - parallax_offset_x;
-	            int screen_y = world_y - parallax_offset_y;
+				// Posizione schermo con effetto parallasse
+				int screen_x = world_x - parallax_offset_x;
+				int screen_y = world_y - parallax_offset_y;
 
-	            // Setup sprite parallasse
-	            SCB_PRX_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PRX[tile_index-1];
-	            SCB_PRX_MATRIX[sprite_y][sprite_x].hpos = screen_x;
-	            SCB_PRX_MATRIX[sprite_y][sprite_x].vpos = screen_y;
-	            SCB_PRX_MATRIX[sprite_y][sprite_x].next = (void*)0;
-	            SCB_PRX_MATRIX[sprite_y][sprite_x].sprctl1 = REHV | PACKED;
+				// Setup sprite parallasse
+				SCB_PRX_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PRX[effect_counter< EFFECT_TOGGLE_VALUE%10==0 ? tile_index-1:tile_index];
+				SCB_PRX_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+				SCB_PRX_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+				SCB_PRX_MATRIX[sprite_y][sprite_x].next = (void*)0;
+				SCB_PRX_MATRIX[sprite_y][sprite_x].sprctl1 = REHV | PACKED;
 
-	            // Controlla se la tile è visibile
-	            if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
-	                screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
-	                continue;  // Tile non visibile
-	            } else {
-	                // Aggiungi alla lista
-	                prev_sprite->next = &SCB_PRX_MATRIX[sprite_y][sprite_x];
-	                prev_sprite = &SCB_PRX_MATRIX[sprite_y][sprite_x];
-	                sprite_count++;
-	            }
-	        }
-	    }
+				// Controlla se la tile è visibile
+				if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
+						screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
+					continue;  // Tile non visibile
+				} else {
+					// Aggiungi alla lista
+					prev_sprite->next = &SCB_PRX_MATRIX[sprite_y][sprite_x];
+					prev_sprite = &SCB_PRX_MATRIX[sprite_y][sprite_x];
+					sprite_count++;
+				}
+			}
+		}
 	}
 
 
