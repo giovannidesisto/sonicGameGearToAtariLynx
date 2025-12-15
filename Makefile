@@ -124,7 +124,29 @@ $(BUILD_DIR)/%.o: %.bmp
 		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
-	fi
+	fi	
+#	elif echo "$*" | grep -q '^tile3'; then \
+#		$(ECHO) "== Converting tile $< to $@"; \
+#		$(SPRPCK) -t6 -p2 -s3  -a000000 $< $@ > /dev/null; \
+#		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+#		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+#		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+#		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+#	elif echo "$*" | grep -q '^tile2'; then \
+#		$(ECHO) "== Converting tile $< to $@"; \
+#		$(SPRPCK) -t6 -p2 -s2  -a000000 $< $@ > /dev/null; \
+#		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+#		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+#		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+#		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+#	elif echo "$*" | grep -q '^tile1'; then \
+#		$(ECHO) "== Converting tile $< to $@"; \
+#		$(SPRPCK) -t6 -p2 -s1  -a000000 $< $@ > /dev/null; \
+#		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
+#		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+#		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
+#		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
+
 
 
 

@@ -16,19 +16,21 @@
 
 /* Tipi di tile */
 typedef enum {
-    TILE_EMPTY = 0,        // 0: Vuoto
-    TILE_PLATFORM =   1,     // 1-99: Piattaforma (solo collisione dall'alto)
-    TILE_SOLID =      2,       // >=200: Solido (tutti i lati)
-    TILE_BACKGROUND = 3 // 100-199: Sfondo (non collidibile)
+	TILE_EMPTY = 0,        // 0: Vuoto
+	TILE_PLATFORM =   1,     // 1-99: Piattaforma (solo collisione dall'alto)
+	TILE_SOLID =      2,       // >=200: Solido (tutti i lati)
+	TILE_BACKGROUND = 3 // 100-199: Sfondo (non collidibile)
 } TileType;
 
 /* Struttura informazioni tile semplificata */
 typedef struct {
 	u8 colorDepth;
-    u8 type;               // TileType
-    u8 height_map[16];     // Mappa altezze per ogni colonna (0-15, 0 = vuoto, 15 = pieno)
-    u8 is_mirrored;        // 1 = tile specchiata orizzontalmente
-    unsigned char* bitmap; // Puntatore ai dati bitmap
+	u8 type;               // TileType
+	u8 height_map[16];     // Mappa altezze per ogni colonna (0-15, 0 = vuoto, 15 = pieno)
+	u8 is_mirrored;        // 1 = tile specchiata orizzontalmente
+	u8 is_flipped;        // 1 = tile specchiata verticalmente
+	unsigned char* bitmap; // Puntatore ai dati bitmap
+	char* palette;
 } TileInfo;
 
 /* Dichiarazioni pubbliche */
