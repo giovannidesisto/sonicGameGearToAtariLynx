@@ -161,7 +161,7 @@ void level_draw() {
 				int screen_y = world_y - parallax_offset_y;
 
 				// Setup sprite parallasse
-				SCB_PRX_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PRX[effect_counter< EFFECT_TOGGLE_VALUE%10==0 ? tile_index-1:tile_index];
+				SCB_PRX_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PRX[effect_counter< EFFECT_TOGGLE_VALUE==0 ? tile_index-1:tile_index];
 				SCB_PRX_MATRIX[sprite_y][sprite_x].hpos = screen_x;
 				SCB_PRX_MATRIX[sprite_y][sprite_x].vpos = screen_y;
 				SCB_PRX_MATRIX[sprite_y][sprite_x].next = (void*)0;
