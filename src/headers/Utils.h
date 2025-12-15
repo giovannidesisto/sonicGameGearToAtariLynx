@@ -10,7 +10,7 @@
 #include <tgi.h>
 #include <string.h>
 #include <stdio.h>
-
+#include "TileInfo.h"
 #define DEBUG_BUFFER_SIZE 512
 #define DEBUG_BUFFER ((char*)0xFA00)
 //extern char DEBUG_BUFFER[DEBUG_BUFFER_SIZE] ;
@@ -25,10 +25,11 @@
 	#define RATIO 1
 	#define SCALE 1
 	#define SCALE_DIVIDER 1
-	#define TILE_SIZE 32
+	#define TILE_SIZE 16
 	#define PLAYER_WIDTH 16
-	#define TILES_X  6 //11//11
-	#define TILES_Y  5 //8//8
+	#define PLAYER_HEIGHT 32
+	#define TILES_X  12 //11//11
+	#define TILES_Y  10 //8//8
 #elif RES24
 	#define RATIO 1
 	#define SCALE 3
@@ -49,6 +50,7 @@
 #endif
 
 #define EFFECT_TOGGLE_VALUE 10
+#define FRAME_DIVIDER 2
 extern SCB_REHV_PAL* prev_sprite;
 extern SCB_REHV_PAL* first_sprite;
 extern u8 frame_count;

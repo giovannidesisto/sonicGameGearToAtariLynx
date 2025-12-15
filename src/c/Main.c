@@ -88,7 +88,7 @@ void main(void) {
 
 	// Inizializza i frame del player
 	//initPlayerFrames();
-
+    tileinfo_init_table();
 	// Inizializza il gioco
 	resetGame();       // resets the game state to a clean state
 
@@ -212,13 +212,12 @@ static u16 fps = 0;
 }
 static void __fastcall__ updateAndDrawGame() {
 	player_handle_user_input(SUZY.joystick);
-
 	// Aggiorna logica ogni frame
 	player_update();
 	player_animate();
 	level_update_camera(player.x, player.y);
 	// DISEGNA solo ogni 2 frame (30 FPS ancora fluido)
-	if (frame_count++ % 2 == 0)
+	if (frame_count++ % FRAME_DIVIDER == 0)
 	{
 		//measure_performance();
 		AG_WAIT_LCD();

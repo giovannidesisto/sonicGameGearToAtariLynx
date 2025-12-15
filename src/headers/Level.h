@@ -3,7 +3,7 @@
 #define LEVEL_H
 
 #include "Utils.h"
-#include "Level_1_bck.h"
+#include "Zone_1_tiles.h"
 
 
 /* Definizioni costanti */
@@ -44,14 +44,6 @@ typedef enum {
 
 
 
-/* Struttura per informazioni del tile */
-typedef struct {
-    u8 is_solid;        /* 1 = collisione */
-    u8 is_hazard;       /* 1 = pericoloso */
-    u8 is_collectible;  /* 1 = collezionabile */
-    u8 sprite_id;       /* ID dello sprite pre-allocato */
-} TileInfo;
-
 
 typedef struct {
     u16 x;        /* Posizione X della camera (in pixel world) */
@@ -87,5 +79,6 @@ void level_init_camera();
 void level_update_camera(u16 player_x, u16 player_y);
 int level_world_to_screen_x (int world_x);
 int level_world_to_screen_y( int world_y);
+
 
 #endif /* LEVEL_H */

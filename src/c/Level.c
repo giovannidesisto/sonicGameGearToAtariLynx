@@ -10,22 +10,22 @@ extern Player player;
 
 /* Mappa di esempio (Green Hill Zone style) */
 u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
-		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,  0,0,0,  0,200,0,0,0,0,0,0,2,  4,200,0,0,0,0,0,0,0,0,0},
-		{0,  0,0,0,200,200,200,0,0,0,2,4,  4,200,0,0,0,0,0,0,0,0,0,0},
-		{0,100,0,0,  0,  0,  0,2,4,4,4,4,  4,  4,4,3,2,4,3,2,4,3,0,0},
-		{4,  4,4,4,  4,  4,  4,4,4,4,4,4,  4,  4,4,4,4,4,4,4,4,4,0,0},
-		{1,  1,1,1,  1,  1,  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  0,3,  2,2,2,2,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		{0,  5,0,  0,  0,0,0,0,0,3,5,5,5,4,0,0,0,0,0,0,0,0,0,0},
+		{1,  1,1,  1,  1,  1,  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
 
 u16 level_prx_map[MAP_HEIGHT/2][MAP_WIDTH/2]={
-		{0,0,0,1,0,0,0,0,0,1,0,0},
-		{0,0,1,0,1,0,0,0,1,0,1,0},
-		{0,1,0,0,0,1,0,1,0,0,0,1},
-		{1,0,0,0,0,0,1,0,0,0,0,0}
+		{0,0,0,100,0,0,0,0,0,100,0,0},
+		{0,0,100,0,100,0,0,0,100,0,100,0},
+		{0,100,0,0,0,100,0,100,0,0,0,100},
+		{100,0,0,0,0,0,100,0,0,0,0,0}
 
 };
 
@@ -40,7 +40,7 @@ void level_init(void) {
 		for(x = 0; x < TILES_X; x++)
 		{
 			SCB_MATRIX[y][x].sprctl0 = BPP_4 | TYPE_NORMAL;
-			SCB_MATRIX[y][x].sprctl1 = REHV  | LITERAL ;//LITERAL per sprite non compresse, SOLO PIATTAFORME!!! le altre sprite devono essere compresse
+			SCB_MATRIX[y][x].sprctl1 = REHV  | PACKED ;//LITERAL per sprite non compresse, SOLO PIATTAFORME!!! le altre sprite devono essere compresse
 			SCB_MATRIX[y][x].sprcoll =  NO_COLLIDE;
 			SCB_MATRIX[y][x].next = (void*)0;
 			SCB_MATRIX[y][x].data = (void*)0;
@@ -108,7 +108,7 @@ void level_draw() {
 	int prx_end_tile_x;
 	int prx_end_tile_y;
 	int sprite_count = 0;
-
+	TileInfo* tile_info;
 	prev_sprite = NULL;
 	first_sprite = NULL;
 	/* Calcola quale porzione della mappa è visibile */
@@ -159,13 +159,26 @@ void level_draw() {
 				// Posizione schermo con effetto parallasse
 				int screen_x = world_x - parallax_offset_x;
 				int screen_y = world_y - parallax_offset_y;
-
+				tile_info = tileinfo_get(tile_index);
 				// Setup sprite parallasse
-				SCB_PRX_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PRX[effect_counter< EFFECT_TOGGLE_VALUE==0 ? tile_index-1:tile_index];
-				SCB_PRX_MATRIX[sprite_y][sprite_x].hpos = screen_x;
-				SCB_PRX_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+				SCB_PRX_MATRIX[sprite_y][sprite_x].data =(unsigned char*)  tile_info->bitmap;//; (unsigned char*) LEVEL_1_PRX[effect_counter< EFFECT_TOGGLE_VALUE==0 ? tile_index-1:tile_index];
+
 				SCB_PRX_MATRIX[sprite_y][sprite_x].next = (void*)0;
-				SCB_PRX_MATRIX[sprite_y][sprite_x].sprctl1 = REHV | PACKED;
+				//SCB_PRX_MATRIX[sprite_y][sprite_x].sprctl1 = REHV | PACKED;
+
+				SCB_PRX_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+				if(tile_info->is_mirrored)
+				{
+					SCB_PRX_MATRIX[sprite_y][sprite_x].sprctl0 = tile_info->colorDepth | TYPE_NORMAL| HFLIP;
+					SCB_PRX_MATRIX[sprite_y][sprite_x].hpos = screen_x+TILE_SIZE-1;
+				}
+				else
+				{
+					SCB_PRX_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+					SCB_PRX_MATRIX[sprite_y][sprite_x].sprctl0 = tile_info->colorDepth | TYPE_NORMAL ;
+				}
+
+
 
 				// Controlla se la tile è visibile
 				if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
@@ -191,13 +204,15 @@ void level_draw() {
 
 
 
-	// 2. AGGIUNGI I TILE DI BACKGROUND (indice >= 100)
+
 	// ALBERI,PALME,FIORI
 	for (y = start_tile_y; y < end_tile_y; y++) {
 		for (x = start_tile_x; x < end_tile_x; x++) {
 			tile_index = level_foregound_map[y][x];
+			tile_info = tileinfo_get(tile_index);
 
-			if (tile_index >= 100 && tile_index <200) {  // Background tiles
+
+			if (tile_info->type == TILE_BACKGROUND) {  // Background tiles
 				int sprite_x = x - start_tile_x;
 				int sprite_y = y - start_tile_y;
 
@@ -206,12 +221,27 @@ void level_draw() {
 				int screen_x = level_world_to_screen_x(world_x);
 				int screen_y = level_world_to_screen_y(world_y);
 
+
 				// Setup sprite background
-				SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_BACKGROUND[tile_index-100];
+				SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*)  tile_info->bitmap;//  LEVEL_1_BACKGROUND[tile_index-100];
 				SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x;
-				SCB_MATRIX[sprite_y][sprite_x].vpos = screen_y;
 				SCB_MATRIX[sprite_y][sprite_x].next = (void*)0;  // Termina per ora
-				SCB_MATRIX[sprite_y][sprite_x].sprctl1 = REHV  | PACKED;
+
+				SCB_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+
+				if(tile_info->is_mirrored)
+				{
+					SCB_MATRIX[sprite_y][sprite_x].sprctl0 = tile_info->colorDepth | TYPE_NORMAL| HFLIP;
+					SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x+TILE_SIZE-1;
+				}
+				else
+				{
+					SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+					SCB_MATRIX[sprite_y][sprite_x].sprctl0 = tile_info->colorDepth | TYPE_NORMAL ;
+				}
+
+
+
 				// Aggiungi in level_draw(), prima di setup sprite:
 				if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
 						screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
@@ -226,13 +256,13 @@ void level_draw() {
 		}
 	}
 
-	// 3. AGGIUNGI I TILE DI FOREGROUND (indice 1-99)
+
 	// PIATTAFORME E MURI
 	for (y = start_tile_y; y < end_tile_y; y++) {
 		for (x = start_tile_x; x < end_tile_x; x++) {
 			tile_index = level_foregound_map[y][x];
-
-			if (tile_index != 0 && (tile_index < 100 || tile_index >= 200)) {  // Foreground tiles
+			tile_info = tileinfo_get(tile_index);
+			if (tile_info->type == TILE_PLATFORM || tile_info->type == TILE_SOLID) {  // Foreground tiles
 				int sprite_x = x - start_tile_x;
 				int sprite_y = y - start_tile_y;
 
@@ -241,21 +271,26 @@ void level_draw() {
 				int screen_x = level_world_to_screen_x(world_x);
 				int screen_y = level_world_to_screen_y(world_y);
 
-				// Setup sprite foreground
-				if(tile_index < 100){
-					SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_PLATFORM[tile_index-1];
-					SCB_MATRIX[sprite_y][sprite_x].sprctl1 = REHV  | LITERAL ;
+				// Setup sprite background
+				SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*)  tile_info->bitmap;//  LEVEL_1_BACKGROUND[tile_index-100];
+				SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+				SCB_MATRIX[sprite_y][sprite_x].next = (void*)0;  // Termina per ora
+
+				SCB_MATRIX[sprite_y][sprite_x].vpos = screen_y;
+				if(tile_info->is_mirrored)
+				{
+					SCB_MATRIX[sprite_y][sprite_x].sprctl0 = tile_info->colorDepth | TYPE_NORMAL| HFLIP;
+					SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x+TILE_SIZE-1;
 				}
 				else
 				{
-					SCB_MATRIX[sprite_y][sprite_x].data = (unsigned char*) LEVEL_1_WALL[tile_index-200];
-					SCB_MATRIX[sprite_y][sprite_x].sprctl1 = REHV  | PACKED ;
+					SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x;
+					SCB_MATRIX[sprite_y][sprite_x].sprctl0 = tile_info->colorDepth | TYPE_NORMAL ;
 				}
 
 
-				SCB_MATRIX[sprite_y][sprite_x].hpos = screen_x;
-				SCB_MATRIX[sprite_y][sprite_x].vpos = screen_y;
-				SCB_MATRIX[sprite_y][sprite_x].next = (void*)0;
+
+
 				// Aggiungi in level_draw(), prima di setup sprite:
 				if (screen_x + TILE_SIZE < 0 || screen_x >= SCREEN_WIDTH ||
 						screen_y + TILE_SIZE < 0 || screen_y >= SCREEN_HEIGHT) {
@@ -280,78 +315,6 @@ void level_draw() {
 	sprite_count++;
 	// Debug: mostra quanti sprite stai disegnando
 	printU16(sprite_count, 00, 0, 0x04);
-}
-
-
-void level_draw_OLD() {
-	int x, y, j,start_tile_x,start_tile_y,end_tile_x,end_tile_y,tile_index;
-	u8 xx;
-	/* Calcola quale porzione della mappa è visibile */
-	start_tile_x = level.camera.x / TILE_SIZE  ;//+ (level.camera.x % TILE_SIZE==0?0:-1);
-	start_tile_y =  (level.camera.y / TILE_SIZE) ;
-
-	end_tile_x = start_tile_x + TILES_X; /*  per sicurezza */
-	end_tile_y =  start_tile_y + TILES_Y ;
-
-	/* Limita ai bordi della mappa */
-	if (end_tile_x > MAP_WIDTH) end_tile_x = MAP_WIDTH;
-	if (end_tile_y > MAP_HEIGHT) end_tile_y = MAP_HEIGHT;
-
-
-
-	for (y = start_tile_y; y < end_tile_y; y++) {
-		for (x = start_tile_x; x < end_tile_x; x++) {
-
-
-
-			tile_index = level_foregound_map[y][x];//level.foregound_map
-
-			if (tile_index != 0) {
-				/* Calcola l'indice nella matrice di sprite */
-				int sprite_x = x - start_tile_x;
-				int sprite_y =  y - start_tile_y;
-
-				/* Calcola la posizione sullo schermo */
-				int world_x = x * TILE_SIZE;
-				int world_y = y * TILE_SIZE;
-
-				int screen_x = level_world_to_screen_x( world_x);
-				int screen_y = level_world_to_screen_y( world_y);
-				//if(screen_y>=-TILE_SIZE)
-				{
-					/* Imposta i dati dello sprite */
-					//indici 0-99 tail collidable
-					//100-199 non collidable, es nuvole
-					if(tile_index<100)
-					{
-						SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_PLATFORM[tile_index-1];
-					}
-					else
-					{
-						SCB_MATRIX[sprite_y][sprite_x].data =   (unsigned char*) LEVEL_1_BACKGROUND[100-tile_index];
-					}
-
-
-					SCB_MATRIX[sprite_y][sprite_x].hpos =   +screen_x;
-					SCB_MATRIX[sprite_y][sprite_x].vpos =   +screen_y;
-
-
-					//{
-					/* Disegna lo sprite */
-					//if(screen_x==0)
-					tgi_sprite(&SCB_MATRIX[sprite_y][sprite_x]);
-
-
-
-					//for(xx=0;xx<19;xx++){
-					//	printExadec(SCB_MATRIX[sprite_y][sprite_x].data[xx],50 , xx*5 ,0x01+(xx%2)*4);
-					//	}
-
-					//}
-				}
-			}
-		}
-	}
 }
 
 
@@ -414,4 +377,6 @@ int level_world_to_screen_x( int world_x) {
 int level_world_to_screen_y( int world_y) {
 	return (int)(world_y - level.camera.y);
 }
+
+
 
