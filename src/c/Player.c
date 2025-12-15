@@ -159,130 +159,161 @@ void  player_animate() {
 
 
 void check_world_collision() {
-    s16 new_x, new_y;
-    s16 tile_x, tile_y;
-    s16 tile_index;
-    TileInfo* tile_info;
+	s16 new_x, new_y;
+	s16 tile_x, tile_y;
+	s16 tile_index;
+	TileInfo* tile_info;
 
-    new_x = player.x + player.vx;
-    new_y = player.y + player.vy;
+	new_x = player.x + player.vx;
+	new_y = player.y + player.vy;
 
-    player.is_grounded = 0;
+	player.is_grounded = 0;
 
-    /* 1. COLLISIONI ORIZZONTALI */
-    if (player.vx != 0) {
-        s16 check_x = (player.vx > 0) ? (new_x + player.width/2) : (new_x - player.width/2);
-        tile_x = check_x / TILE_SIZE;
-        tile_y = (player.y + player.height/2) / TILE_SIZE;
+	/* 1. COLLISIONI ORIZZONTALI */
+	if (player.vx != 0) {
+		s16 check_x = (player.vx > 0) ? (new_x + player.width/2) : (new_x - player.width/2);
+		tile_x = check_x / TILE_SIZE;
+		tile_y = (player.y + player.height/2) / TILE_SIZE;
 
-        if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-            tile_index = level_foregound_map[tile_y][tile_x];
-            tile_info = tileinfo_get(tile_index);
+		if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH)
+		{
+			tile_index = level_foregound_map[tile_y][tile_x];
+			tile_info = tileinfo_get(tile_index);
 
-            if (tile_info->type == TILE_SOLID) {
-                if (player.vx > 0) {
-                    player.x = tile_x * TILE_SIZE - (player.width/2);
-                } else {
-                    player.x = (tile_x + 1) * TILE_SIZE + (player.width/2);
-                }
-                player.vx = 0;
-                new_x = player.x;
-            }
-        }
-    }
+			if (tile_info->type == TILE_SOLID)
+			{
+				if (player.vx > 0) {
+					player.x = tile_x * TILE_SIZE - (player.width/2);
+				} else {
+					player.x = (tile_x + 1) * TILE_SIZE + (player.width/2);
+				}
+				player.vx = 0;
+				new_x = player.x;
+			}
+			else if(tile_info->type == TILE_PLATFORM)
+			{
+				s16 feet_y = new_y + player.height;
 
-    /* 2. COLLISIONI VERTICALI */
-    if (player.vy != 0) {
-        s16 center_x = new_x;
+				u8 local_x = new_x - (tile_x * TILE_SIZE);
+				u8 terrain_height = tileinfo_get_height_at(tile_info, local_x);
 
-        if (player.vy > 0) {
-            /* CADUTA - Controlla sotto */
-            s16 feet_y = new_y + player.height;
-            tile_x = center_x / TILE_SIZE;
-            tile_y = feet_y / TILE_SIZE;
 
-            if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-                tile_index = level_foregound_map[tile_y][tile_x];
-                tile_info = tileinfo_get(tile_index);
+				if (terrain_height > 0) {
+					/* IMPORTANTE:
+					   - terrain_height = 15: cima della tile (y = tile_top)
+					   - terrain_height = 0: fondo della tile (y = tile_top + 15)
+					   ground_y = tile_top + (15 - terrain_height)
+					 */
+					u16 ground_y = (tile_y * TILE_SIZE) + (15 - terrain_height);
 
-                if (tile_info->type == TILE_SOLID) {
-                    player.y = tile_y * TILE_SIZE - player.height;
-                    player.is_grounded = 1;
-                    player.is_jumping = 0;
-                    player.vy = 0;
-                    new_y = player.y;
-                }
-                else if (tile_info->type == TILE_PLATFORM) {
-                    u8 local_x = center_x - (tile_x * TILE_SIZE);
-                    u8 terrain_height = tileinfo_get_height_at(tile_info, local_x); // 0-15
+					if (feet_y >= ground_y) {
+						player.y = ground_y - player.height;
+						player.is_grounded = 1;
+						player.is_jumping = 0;
+						player.vy = 0;
+						new_y = player.y;
+					}
+				}
+			}
+		}
+	}
 
-                    if (terrain_height > 0) {
-                        /* IMPORTANTE:
+
+
+
+
+	/* 2. COLLISIONI VERTICALI */
+	if (player.vy != 0) {
+		s16 center_x = new_x;
+
+		if (player.vy > 0) {
+			/* CADUTA - Controlla sotto */
+			s16 feet_y = new_y + player.height;
+			tile_x = center_x / TILE_SIZE;
+			tile_y = feet_y / TILE_SIZE;
+
+			if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
+				tile_index = level_foregound_map[tile_y][tile_x];
+				tile_info = tileinfo_get(tile_index);
+
+				if (tile_info->type == TILE_SOLID) {
+					player.y = tile_y * TILE_SIZE - player.height;
+					player.is_grounded = 1;
+					player.is_jumping = 0;
+					player.vy = 0;
+					new_y = player.y;
+				}
+				else if (tile_info->type == TILE_PLATFORM) {
+					u8 local_x = center_x - (tile_x * TILE_SIZE);
+					u8 terrain_height = tileinfo_get_height_at(tile_info, local_x); // 0-15
+
+					if (terrain_height > 0) {
+						/* IMPORTANTE:
                            - terrain_height = 15: cima della tile (y = tile_top)
                            - terrain_height = 0: fondo della tile (y = tile_top + 15)
 
                            ground_y = tile_top + (15 - terrain_height)
-                        */
-                        u16 ground_y = (tile_y * TILE_SIZE) + (15 - terrain_height);
+						 */
+						u16 ground_y = (tile_y * TILE_SIZE) + (15 - terrain_height);
 
-                        if (feet_y >= ground_y) {
-                            player.y = ground_y - player.height;
-                            player.is_grounded = 1;
-                            player.is_jumping = 0;
-                            player.vy = 0;
-                            new_y = player.y;
-                        }
-                    }
-                }
-            }
-        } else {
-            /* SALTO - Controlla sopra */
-            s16 head_y = new_y;
-            tile_x = center_x / TILE_SIZE;
-            tile_y = head_y / TILE_SIZE;
+						if (feet_y >= ground_y) {
+							player.y = ground_y - player.height;
+							player.is_grounded = 1;
+							player.is_jumping = 0;
+							player.vy = 0;
+							new_y = player.y;
+						}
+					}
+				}
+			}
+		} else {
+			/* SALTO - Controlla sopra */
+			s16 head_y = new_y;
+			tile_x = center_x / TILE_SIZE;
+			tile_y = head_y / TILE_SIZE;
 
-            if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-                tile_index = level_foregound_map[tile_y][tile_x];
-                tile_info = tileinfo_get(tile_index);
+			if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
+				tile_index = level_foregound_map[tile_y][tile_x];
+				tile_info = tileinfo_get(tile_index);
 
-                if (tile_info->type == TILE_SOLID) {
-                    player.y = (tile_y + 1) * TILE_SIZE;
-                    player.vy = 0;
-                    new_y = player.y;
-                }
-            }
-        }
-    }
+				if (tile_info->type == TILE_SOLID) {
+					player.y = (tile_y + 1) * TILE_SIZE;
+					player.vy = 0;
+					new_y = player.y;
+				}
+			}
+		}
+	}
 
-    /* 3. APPLICA MOVIMENTO */
-    player.x = new_x;
-    player.y = new_y;
+	/* 3. APPLICA MOVIMENTO */
+	player.x = new_x;
+	player.y = new_y;
 }
 
 void player_adjust_to_ground(void) {
 	s16 tile_x ,tile_y;
 	if (!player.is_grounded) return;
 
-    tile_x = player.x / TILE_SIZE;
-    tile_y = (player.y + player.height) / TILE_SIZE;
+	tile_x = player.x / TILE_SIZE;
+	tile_y = (player.y + player.height) / TILE_SIZE;
 
-    if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-        s16 tile_index = level_foregound_map[tile_y][tile_x];
-        TileInfo* tile_info = tileinfo_get(tile_index);
+	if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
+		s16 tile_index = level_foregound_map[tile_y][tile_x];
+		TileInfo* tile_info = tileinfo_get(tile_index);
 
-        if (tile_info->type == TILE_PLATFORM) {
-            u8 local_x = player.x - (tile_x * TILE_SIZE);
-            u8 terrain_height = tileinfo_get_height_at(tile_info, local_x);
+		if (tile_info->type == TILE_PLATFORM) {
+			u8 local_x = player.x - (tile_x * TILE_SIZE);
+			u8 terrain_height = tileinfo_get_height_at(tile_info, local_x);
 
-            if (terrain_height > 0) {
-                u16 correct_y = (tile_y * TILE_SIZE) + (15 - terrain_height) - player.height;
+			if (terrain_height > 0) {
+				u16 correct_y = (tile_y * TILE_SIZE) + (15 - terrain_height) - player.height;
 
-                if (player.y != correct_y) {
-                    player.y = correct_y;
-                }
-            }
-        }
-    }
+				if (player.y != correct_y) {
+					player.y = correct_y;
+				}
+			}
+		}
+	}
 }
 
 void player_update() {
@@ -297,7 +328,7 @@ void player_update() {
 
 	check_world_collision();
 
-//	/* Se il player è a terra, regola l'altezza in base alla piattaforma */
+	//	/* Se il player è a terra, regola l'altezza in base alla piattaforma */
 	if (player.is_grounded) {
 		player_adjust_to_ground();
 	}

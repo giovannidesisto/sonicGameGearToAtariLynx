@@ -210,26 +210,25 @@ static u16 fps = 0;
 		// Mostra FPS (top-right corner)
 	}
 }
+
+
 static void __fastcall__ updateAndDrawGame() {
 	player_handle_user_input(SUZY.joystick);
 	// Aggiorna logica ogni frame
 	player_update();
 	player_animate();
 	level_update_camera(player.x, player.y);
+
 	// DISEGNA solo ogni 2 frame (30 FPS ancora fluido)
 	if (frame_count++ % FRAME_DIVIDER == 0)
 	{
-		//measure_performance();
 		AG_WAIT_LCD();
-		//agSprBackground.penpal[0] = 0x09;
 		level_draw();
-		//tgi_sprite(first_sprite);
-		//printS16(player.x, 0, 6, 0x04);
-		//printU16(fps, 120, 0, 0x04);
 		tgi_updatedisplay();
 		if(effect_counter <EFFECT_TOGGLE_VALUE*2)
 			effect_counter++;
-		else effect_counter=0;
+		else
+			effect_counter=0;
 	}
 
 }
