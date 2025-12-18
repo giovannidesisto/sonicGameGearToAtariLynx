@@ -12,6 +12,8 @@
         .import		__STACKSIZE__
         .import		__MAPS_SIZE__
         .import		__MAPS_START__
+        .import		__PLAYERGFX_SIZE__
+        .import		__PLAYERGFX_START__        
         .export         __DEFDIR__: absolute = 1
 
 
@@ -48,9 +50,11 @@ len0 = __BSS_LOAD__ - __STARTUP_LOAD__
         .word   len0
 
 
-
+; Entry 1 map level 1
 entry off0, len0, off1, block1, len1,__MAPS_SIZE__, __MAPS_START__
 
+; Entry 2 player sprites
+entry off1, len1, off2, block2, len2,__PLAYERGFX_SIZE__, __PLAYERGFX_START__
 
 
 __DIRECTORY_END__:

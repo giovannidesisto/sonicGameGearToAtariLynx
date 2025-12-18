@@ -49,4 +49,6 @@ const u8 Z1L1_BG_MAP[MAP_HEIGHT][MAP_WIDTH]={
 
 };
 
+#pragma rodata-name("RODATA")
+
 
