@@ -4,6 +4,7 @@
 
 #include "Utils.h"
 #include "Zone_1_tiles.h"
+#include "maps/Level1_maps.h"
 
 
 /* Definizioni costanti */
@@ -26,9 +27,9 @@ su piattaforme che lo portano in alto)
  */
 
 
-extern u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH];
+//extern u16 FG_MAP[MAP_HEIGHT][MAP_WIDTH];
 
-extern u16 level_prx_map[MAP_HEIGHT][MAP_WIDTH];
+//extern u16 BCKG_MAP[MAP_HEIGHT][MAP_WIDTH];
 
 static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
 static SCB_REHV_PAL SCB_PRX_MATRIX[TILES_Y][TILES_X];
@@ -48,8 +49,8 @@ typedef enum {
 typedef struct {
 	u16 x;        /* Posizione X della camera (in pixel world) */
 	u16 y;        /* Posizione Y della camera (in pixel world) */
-	u16 width;    /* Larghezza della viewport (solitamente SCREEN_WIDTH) */
-	u16 height;   /* Altezza della viewport (solitamente SCREEN_HEIGHT) */
+	u8 width;    /* Larghezza della viewport (solitamente SCREEN_WIDTH) */
+	u8 height;   /* Altezza della viewport (solitamente SCREEN_HEIGHT) */
 } Camera;
 
 /* Struttura livello */
@@ -60,7 +61,12 @@ typedef struct {
 	u16 start_y;
 	u16 end_x;                                /* Posizione fine livello */
 	u16 end_y;
+
+	u16 map_w;
+	u8  map_h;
 	u8 current_level;
+	u8* fg_map;
+	u8* bg_map;
 	Camera camera;                            /* Camera per lo scroll */
 } Level;
 

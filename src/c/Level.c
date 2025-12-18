@@ -8,8 +8,13 @@ extern Player player;
 
 
 
+
+
+//u8* FG_MAP;
+//u8* BG_MAP;
+
 /* Mappa di esempio (Green Hill Zone style) */
-u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
+u8 FG_MAP[MAP_HEIGHT][MAP_WIDTH] = {
 		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -30,7 +35,7 @@ u16 level_foregound_map[MAP_HEIGHT][MAP_WIDTH] = {
 };
 
 
-u16 level_prx_map[MAP_HEIGHT][MAP_WIDTH]={
+u8 BCKG_MAP[MAP_HEIGHT][MAP_WIDTH]={
 		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 		{0,  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -51,13 +56,21 @@ u16 level_prx_map[MAP_HEIGHT][MAP_WIDTH]={
 
 };
 
-
 /* Inizializza il sistema di sprite */
 void level_init(void) {
+
 	short x;
 	short y;
 	short j;
+	lynx_load(1);
 
+	//FG_MAP = Z1L1_FG_ADDR;
+	//BG_MAP = Z1L1_FG_ADDR;
+	level.fg_map = &Z1L1_FG_MAP[0];// *FG_MAP;
+	level.bg_map = &Z1L1_BG_MAP[0];//*BG_MAP;
+
+	level.map_h= MAP_HEIGHT;
+	level.map_w= MAP_WIDTH;
 	for(y = 0; y < TILES_Y; y++)
 		for(x = 0; x < TILES_X; x++)
 		{
@@ -109,10 +122,10 @@ void level_load(u8 level_num) {
 
 
 	level.start_x =0;
-	level.start_y =MAP_HEIGHT * TILE_SIZE;//MAP_HEIGHT * TILE_SIZE ;
+	level.start_y =level.map_h * TILE_SIZE;//level.map_h * TILE_SIZE ;
 
-	level.end_x =  MAP_WIDTH * TILE_SIZE;
-	level.end_y =  MAP_HEIGHT * TILE_SIZE ;
+	level.end_x =  level.map_w * TILE_SIZE;
+	level.end_y =  level.map_h * TILE_SIZE ;
 
 
 	/* Inizializza la camera */
@@ -141,8 +154,8 @@ void level_draw() {
 	end_tile_y = start_tile_y + TILES_Y;
 
 	/* Limita ai bordi della mappa */
-	if (end_tile_x > MAP_WIDTH) end_tile_x = MAP_WIDTH;
-	if (end_tile_y > MAP_HEIGHT) end_tile_y = MAP_HEIGHT;
+	if (end_tile_x > level.map_w) end_tile_x = level.map_w;
+	if (end_tile_y > level.map_h) end_tile_y = level.map_h;
 
 	// 1. COMINCIA CON LO SFONDO
 	agSprBackground.penpal[0] = 0x09;
@@ -162,13 +175,13 @@ void level_draw() {
 	prx_end_tile_y = prx_start_tile_y + TILES_Y;
 
 	// Limita ai bordi della mappa parallasse
-	if (prx_end_tile_x > MAP_WIDTH) prx_end_tile_x = MAP_WIDTH;
-	if (prx_end_tile_y > MAP_HEIGHT) prx_end_tile_y = MAP_HEIGHT;
+	if (prx_end_tile_x > level.map_w) prx_end_tile_x = level.map_w;
+	if (prx_end_tile_y > level.map_h) prx_end_tile_y = level.map_h;
 
 	// Disegna le tile di parallasse
 	for (y = prx_start_tile_y; y < prx_end_tile_y; y++) {
 		for (x = prx_start_tile_x; x < prx_end_tile_x; x++) {
-			tile_index = level_prx_map[y][x];
+			tile_index = level.bg_map[y*level.map_w+x];// BCKG_MAP[y][x];
 
 			if (tile_index != 0) {
 				int sprite_x = x - prx_start_tile_x;
@@ -230,7 +243,7 @@ void level_draw() {
 	// ALBERI,PALME,FIORI
 	for (y = start_tile_y; y < end_tile_y; y++) {
 		for (x = start_tile_x; x < end_tile_x; x++) {
-			tile_index = level_foregound_map[y][x];
+			tile_index =  level.fg_map[y*level.map_w+x];//FG_MAP[y][x];
 			tile_info = tileinfo_get(tile_index);
 
 
@@ -282,7 +295,7 @@ void level_draw() {
 	// PIATTAFORME E MURI
 	for (y = start_tile_y; y < end_tile_y; y++) {
 		for (x = start_tile_x; x < end_tile_x; x++) {
-			tile_index = level_foregound_map[y][x];
+			tile_index =level.fg_map[y*level.map_w+x];//; FG_MAP[y][x];
 			tile_info = tileinfo_get(tile_index);
 			if (tile_info->type == TILE_PLATFORM || tile_info->type == TILE_SOLID) {  // Foreground tiles
 				int sprite_x = x - start_tile_x;
@@ -363,8 +376,8 @@ void level_update_camera( u16 player_x, u16 player_y) {
 	level.camera.y =  player_y  - center_y ;
 
 	/* Limita la camera ai bordi del livello */
-	level_width_px =  MAP_WIDTH * TILE_SIZE;
-	level_height_px = MAP_HEIGHT * TILE_SIZE;
+	level_width_px =  level.map_w * TILE_SIZE;
+	level_height_px = level.map_h * TILE_SIZE;
 
 	/* Limiti orizzontali */
 	if (level.camera.x < 0) {

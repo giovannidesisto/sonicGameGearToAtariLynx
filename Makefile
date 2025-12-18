@@ -15,8 +15,8 @@
  # limitations under the License.
  ##
 
-ROMNAME=MYROM
-BIN_LNX = ${ROMNAME}.LNX
+ROMNAME=sonic
+BIN_LNX = ${ROMNAME}.lnx
 BIN_BLL = ${ROMNAME}.O
 
 SOURCE_DIR=src
@@ -46,9 +46,9 @@ TGI=$(SYS)-160-102-16
 JOY=$(SYS)-stdjoy
 SEGMENTS=--code-name CODE --rodata-name RODATA --bss-name BSS --data-name DATA
 ASFLAGS=-t $(SYS) -I $(CC65_ASMINC)
-CFLAGS=$(SEGMENTS) -I src/headers -t $(SYS) -Cl -O -Or
-LDFLAGS_LNX=-C lynx.cfg -t $(SYS) $(SYS).lib
-LDFLAGS_BLL=-C lynx_bll.cfg -t $(SYS) $(SYS).lib
+CFLAGS=$(SEGMENTS) -I src/headers -t $(SYS)   -Cl -O -Or
+LDFLAGS_LNX=-C lynx.cfg -t $(SYS)   $(SYS).lib -m lynx.map
+#LDFLAGS_BLL=-C lynx_bll.cfg -t $(SYS) $(SYS).lib
 # default bit depth is 1-bit per pixel
 SPRFLAGS=-t6 -p2 -s4 -a000015
 SPRFLAGS_BASE=-t6 -p2 -s4 
@@ -66,12 +66,27 @@ $(BUILD_DIR)/%.o: %.s
 	@$(AS) $(ASFLAGS) $< -o $@
 
 # == C sources to assembly intermediate files to C objects
+# File C nella cartella principale
 C_SOURCES = $(wildcard $(SOURCE_DIR)/c/*.c)
 C_OBJECTS = $(patsubst $(SOURCE_DIR)/c/%.c, $(BUILD_DIR)/%.o, $(C_SOURCES))
-$(BUILD_DIR)/%.o: %.c
-	@$(ECHO) == Compiling $< =\> $@
+
+# File C nella sottocartella maps
+MAP_SOURCES = $(wildcard $(SOURCE_DIR)/c/maps/*.c)
+MAP_OBJECTS = $(patsubst $(SOURCE_DIR)/c/maps/%.c, $(BUILD_DIR)/maps_%.o, $(MAP_SOURCES))
+
+# Regola per i file nella cartella principale
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/c/%.c
+	@mkdir -p $(dir $@)
+	@$(ECHO) == Compiling $< -> $@
 	@$(CC) $(CFLAGS) $< -o $(BUILD_DIR)/$*.s
 	@$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@
+
+# Regola per i file nella sottocartella maps (con prefisso per evitare conflitti)
+$(BUILD_DIR)/maps_%.o: $(SOURCE_DIR)/c/maps/%.c
+	@mkdir -p $(dir $@)
+	@$(ECHO) == Compiling $< -> $@
+	@$(CC) $(CFLAGS) $< -o $(BUILD_DIR)/maps_$*.s
+	@$(AS) $(ASFLAGS) $(BUILD_DIR)/maps_$*.s -o $@
 
 # == Bitmap files to intermediate assembly to bitmap objects
 BMP_SOURCES = $(wildcard $(SOURCE_DIR)/images/*.bmp)
@@ -140,7 +155,7 @@ $(BUILD_DIR)/%.o: %.bmp
 #		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 #		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
 #	elif echo "$*" | grep -q '^tile1'; then \
-#		$(ECHO) "== Converting tile $< to $@"; \
+#		$(ECHO) "== Converting tile $< to $@"; ${MAP_OBJECTS}\
 #		$(SPRPCK) -t6 -p2 -s1  -a000000 $< $@ > /dev/null; \
 #		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 #		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
@@ -153,20 +168,20 @@ $(BUILD_DIR)/%.o: %.bmp
 ####################################################################################################
 
 # == Link all objects to final binary - LNX
-$(BIN_LNX): $(BMP_OBJECTS) $(ASM_OBJECTS) $(C_OBJECTS)
+$(BIN_LNX):  ${MAP_OBJECTS} $(BMP_OBJECTS) $(ASM_OBJECTS) $(C_OBJECTS) 
 	@$(ECHO) == Linking binary executable to $@
-	@$(CL) $(LDFLAGS_LNX) $^ -o $@
+	@$(CL)  $(LDFLAGS_LNX) $^ -o $@
 
 # == Link all objects to final binary - O
-$(BIN_BLL): $(BMP_OBJECTS) $(ASM_SOURCES_NOHDR) $(C_OBJECTS)
-	@$(ECHO) == Linking binary executable to $@
-	@$(CL) $(LDFLAGS_BLL) $^ -o $@
+#$(BIN_BLL): $(BMP_OBJECTS) $(ASM_SOURCES_NOHDR) $(C_OBJECTS)
+#	@$(ECHO) == Linking binary executable to $@
+#	@$(CL) $(LDFLAGS_BLL) $^ -o $@
 
 mkbuild:
 	@mkdir -p build
 	
-all: mkbuild $(BIN_LNX) $(BIN_BLL)
+all: mkbuild $(BIN_LNX) #$(BIN_BLL)
 
 clean:
 	@$(ECHO) == Cleaning up
-	@$(RM) -rf $(BUILD_DIR) $(BIN_LNX) $(BIN_BLL)
+	@$(RM) -rf $(BUILD_DIR) $(BIN_LNX) #$(BIN_BLL)

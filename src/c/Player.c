@@ -175,9 +175,9 @@ void check_world_collision() {
 		tile_x = check_x / TILE_SIZE;
 		tile_y = (player.y + player.height/2) / TILE_SIZE;
 
-		if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH)
+		if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w)
 		{
-			tile_index = level_foregound_map[tile_y][tile_x];
+			tile_index =  level.fg_map[tile_y*level.map_w+tile_x];//  level_foregound_map[tile_y][tile_x];
 			tile_info = tileinfo_get(tile_index);
 
 			if (tile_info->type == TILE_SOLID)
@@ -232,8 +232,8 @@ void check_world_collision() {
 			tile_x = center_x / TILE_SIZE;
 			tile_y = feet_y / TILE_SIZE;
 
-			if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-				tile_index = level_foregound_map[tile_y][tile_x];
+			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
+				tile_index =level.fg_map[tile_y*level.map_w+tile_x];// level_foregound_map[tile_y][tile_x];
 				tile_info = tileinfo_get(tile_index);
 
 				if (tile_info->type == TILE_SOLID) {
@@ -272,8 +272,8 @@ void check_world_collision() {
 			tile_x = center_x / TILE_SIZE;
 			tile_y = head_y / TILE_SIZE;
 
-			if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-				tile_index = level_foregound_map[tile_y][tile_x];
+			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
+				tile_index = level.fg_map[tile_y*level.map_w+tile_x];//level_foregound_map[tile_y][tile_x];
 				tile_info = tileinfo_get(tile_index);
 
 				if (tile_info->type == TILE_SOLID) {
@@ -297,8 +297,8 @@ void player_adjust_to_ground(void) {
 	tile_x = player.x / TILE_SIZE;
 	tile_y = (player.y + player.height) / TILE_SIZE;
 
-	if (tile_y >= 0 && tile_y < MAP_HEIGHT && tile_x >= 0 && tile_x < MAP_WIDTH) {
-		s16 tile_index = level_foregound_map[tile_y][tile_x];
+	if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
+		s16 tile_index =level.fg_map[tile_y*level.map_w+tile_x];// level_foregound_map[tile_y][tile_x];
 		TileInfo* tile_info = tileinfo_get(tile_index);
 
 		if (tile_info->type == TILE_PLATFORM) {
