@@ -16,9 +16,23 @@
 static TileInfo tile_info_table[256];
 
 
+
+typedef enum {
+    EMPTY			= 0,
+    Z1L1_PLANE_GRASS,
+	PLAYER_RUNNING,
+	PLAYER_BRAKING,
+    PLAYER_JUMPING,
+	PLAYER_RUN_JUMPING,
+    PLAYER_SHOOTING,
+	PLAYER_SPINDASH,
+    PLAYER_HURT,
+    PLAYER_DEAD
+} TileName;
+
 /* Inizializza la tabella delle tile */
 void tileinfo_init_table(void) {
-    int i,x;
+    int i,x,y;
 
     /* Inizializza tutto a vuoto */
     for (i = 0; i < 256; i++) {
@@ -32,65 +46,184 @@ void tileinfo_init_table(void) {
         }
     }
 
-    /* ESEMPI: Configura alcune tile */
 
 
-    /* Tile 1: Piattaforma semplice (piena) GIALLO */
-    tile_info_table[1].type = TILE_PLATFORM;
-    tile_info_table[1].colorDepth = BPP_4;
-    tile_info_table[1].bitmap = (unsigned char*)LEVEL_1_PLATFORM[0];
+
+    /* Tile 1: Piattaforma erba */
+    tile_info_table[Z1L1_PLANE_GRASS].type = TILE_PLATFORM;
+    tile_info_table[Z1L1_PLANE_GRASS].colorDepth = BPP_4;
+    tile_info_table[Z1L1_PLANE_GRASS].bitmap = (unsigned char*)LEVEL_1_PLATFORM[0];
     /* Height map per tile piena (tutta a 15) */
     for ( x = 0; x < 16; x++) {
-        tile_info_table[1].height_map[x] = 15;
+        tile_info_table[Z1L1_PLANE_GRASS].height_map[x] = 10;
     }
-
-    /* Tile 1: Piattaforma semplice (piena) VERDE*/
-    tile_info_table[2].type = TILE_PLATFORM;
+    /* Tile 1: ombra erba  0-1 */
+    tile_info_table[2].type = TILE_BACKGROUND;
     tile_info_table[2].colorDepth = BPP_4;
-    tile_info_table[2].bitmap = (unsigned char*)LEVEL_1_PLATFORM[1];
+    tile_info_table[2].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[0];
 
-    /* Height map per salita: da 0 a 15 in 16 passi */
-    for ( x = 0; x < 16; x++) {
-        tile_info_table[2].height_map[x] = 15; /* 0, 1, 2, ..., 15 */
-    }
 
-    /* Tile 3: Piattaforma con discesa  */
-    tile_info_table[3].type = TILE_PLATFORM;
+    /* Tile 3: ombra erba 0-2  */
+    tile_info_table[3].type = TILE_BACKGROUND;
     tile_info_table[3].colorDepth = BPP_4;
-    tile_info_table[3].bitmap = (unsigned char*)LEVEL_1_PLATFORM[2]; /* Stessa bitmap di 2 */
-    tile_info_table[3].is_mirrored = 0;
-    /* Height map per salita: da 0 a 15  */
-    for ( x = 0; x < 16; x++) {
-        tile_info_table[3].height_map[x] = x; /* 0, 1, 2, ..., 15 */
-    }
+    tile_info_table[3].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[1];
 
-    /* Tile 3: Piattaforma con discesa (specchiata) */
-    tile_info_table[4].type = TILE_PLATFORM;
+    /* Tile 3: quadrettato scuro */
+    tile_info_table[4].type = TILE_BACKGROUND;
     tile_info_table[4].colorDepth = BPP_4;
-    tile_info_table[4].bitmap = (unsigned char*)LEVEL_1_PLATFORM[2]; /* Stessa bitmap di 2 */
-    tile_info_table[4].is_mirrored = 1; /* Specchiata */
-    /* Height map per discesa: da 15 a 0 (verrà invertita da is_mirrored) */
-    for ( x = 0; x < 16; x++) {
-        tile_info_table[4].height_map[x] = x; /* 0, 1, 2, ..., 15 */
-    }
+    tile_info_table[4].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[2];
 
 
-    /* Tile 5: Solida (muro) - nessuna height_map necessaria */
+    /* Tile 3: quadrettato muro scuro con erba  solido*/
     tile_info_table[5].type = TILE_SOLID;
     tile_info_table[5].colorDepth = BPP_4;
-    tile_info_table[5].bitmap = (unsigned char*)LEVEL_1_WALL[0];
+    tile_info_table[5].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[3];
 
+
+    /* Tile 3: quadrettato muro scuro con erba  piattaforma*/
+    tile_info_table[6].type = TILE_PLATFORM;
+    tile_info_table[6].colorDepth = BPP_4;
+    tile_info_table[6].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[3];
+    /* Height map per tile piena (tutta a 15) */
+    for ( x = 0; x < 16; x++) {
+        tile_info_table[6].height_map[x] = 10;
+    }
+
+
+
+
+
+    /* muro scuro destro solido intero */
+    tile_info_table[7].type = TILE_SOLID;
+    tile_info_table[7].colorDepth = BPP_4;
+    tile_info_table[7].bitmap = (unsigned char*)LEVEL_1_WALL[0];
+
+
+    /* muro scuro destro attraversabile  intero */
+    tile_info_table[8].type = TILE_BACKGROUND;
+    tile_info_table[8].colorDepth = BPP_4;
+    tile_info_table[8].bitmap = (unsigned char*)LEVEL_1_WALL[0];
+
+
+
+    /* muro scuro destro con erba  solido intero */
+    tile_info_table[8].type = TILE_SOLID;
+    tile_info_table[8].colorDepth = BPP_4;
+    tile_info_table[8].bitmap = (unsigned char*)LEVEL_1_WALL[1];
+
+
+    /* muro scuro destro con erba attraversabile  intero */
+    tile_info_table[9].type = TILE_BACKGROUND;
+    tile_info_table[9].colorDepth = BPP_4;
+    tile_info_table[9].bitmap = (unsigned char*)LEVEL_1_WALL[1];
+
+
+    /* TERMINALE ERBA ALTO DX */
+    tile_info_table[10].type = TILE_PLATFORM;
+    tile_info_table[10].colorDepth = BPP_4;
+    tile_info_table[10].bitmap = (unsigned char*)LEVEL_1_PLATFORM[1];
+    /* Height map per tile piena (tutta a 15) */
+
+    for ( x = 0; x < 16; x++) {
+        tile_info_table[10].height_map[x] = 10;
+    }
+
+
+
+
+    //avvallamento da due sx parte prima
+    tile_info_table[11].type = TILE_PLATFORM;
+    tile_info_table[11].colorDepth = BPP_4;
+    tile_info_table[11].bitmap = (unsigned char*)LEVEL_1_PLATFORM[2];
+    /* Height map per tile piena (tutta a 15) */
+    y=0;
+    for ( x = 0; x < 16; x++) {
+    	if(x<8)y=2;
+    	else y=4;
+        tile_info_table[11].height_map[x] = 10-y;
+    }
+
+
+    //avvallamento da due sx parte seconda
+    tile_info_table[12].type = TILE_PLATFORM;
+    tile_info_table[12].colorDepth = BPP_4;
+    tile_info_table[12].bitmap = (unsigned char*)LEVEL_1_PLATFORM[3];
+    /* Height map per tile piena (tutta a 15) */
+    //tile_info_table[12].height_map = {8,8,8,8,8,8,8,8,6,6,6,6,6,6,6,6};
+
+    y=0;
+    for ( x = 0; x < 16; x++) {
+    	if(x<8)y=6;
+    	else y=8;
+        tile_info_table[12].height_map[x] = 10-y;
+    }
+
+
+    //avvallamento da due dx parte seconda
+    tile_info_table[13].type = TILE_PLATFORM;
+    tile_info_table[13].colorDepth = BPP_4;
+    tile_info_table[13].bitmap = (unsigned char*)LEVEL_1_PLATFORM[3];
+    tile_info_table[13].is_mirrored=1;
+    /* Height map per tile piena (tutta a 15) */
+    y=0;
+    for ( x = 0; x < 16; x++) {
+      	if(x<8)y=6;
+        else y=8;
+        tile_info_table[13].height_map[x] = 10-y;
+    }
+
+
+    //avvallamento da due dx parte seconda
+    tile_info_table[14].type = TILE_PLATFORM;
+    tile_info_table[14].colorDepth = BPP_4;
+    tile_info_table[14].bitmap = (unsigned char*)LEVEL_1_PLATFORM[2];
+    tile_info_table[14].is_mirrored=1;
+    /* Height map per tile piena (tutta a 15) */
+    y=0;
+    for ( x = 0; x < 16; x++) {
+      	if(x<8)y=2;
+        else y=4;
+        tile_info_table[14].height_map[x] = 10-y;
+    }
+
+
+
+    /* erba sotto avvallamento da due sx*/
+    tile_info_table[15].type = TILE_BACKGROUND;
+    tile_info_table[15].colorDepth = BPP_4;
+    tile_info_table[15].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[4];
+
+    /* erba sotto avvallamento da due dx*/
+    tile_info_table[16].type = TILE_BACKGROUND;
+    tile_info_table[16].colorDepth = BPP_4;
+    tile_info_table[16].is_mirrored=1;
+    tile_info_table[16].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[4];
+
+
+
+    //totem
+    tile_info_table[99].type = TILE_BACKGROUND;
+    tile_info_table[99].colorDepth = BPP_4;
+    tile_info_table[99].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[5];
+
+//    //palma
+//    tile_info_table[100].type = TILE_BACKGROUND;
+//    tile_info_table[100].colorDepth = BPP_4;
+//    tile_info_table[100].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[6];
 
     /* Tile 6: Sfondo (nuvole) */
-    tile_info_table[6].type = TILE_BACKGROUND;
-    tile_info_table[6].colorDepth = BPP_4;
-    tile_info_table[6].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[0];
+//    tile_info_table[6].type = TILE_BACKGROUND;
+//    tile_info_table[6].colorDepth = BPP_4;
+//    tile_info_table[6].bitmap = (unsigned char*)LEVEL_1_BACKGROUND[0];
+
+
+
 
 
     /* Tile 100: Sfondo (nuvole) */
-    tile_info_table[100].type = TILE_BACKGROUND;
-    tile_info_table[100].colorDepth = BPP_4;
-    tile_info_table[100].bitmap = (unsigned char*)LEVEL_1_PRX[0];
+//    tile_info_table[100].type = TILE_BACKGROUND;
+//    tile_info_table[100].colorDepth = BPP_4;
+//    tile_info_table[100].bitmap = (unsigned char*)LEVEL_1_PRX[0];
 
 
     // === AUTO-GENERATED TILE INFO (COMPILER SAFE) ===

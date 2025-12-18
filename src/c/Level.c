@@ -15,7 +15,10 @@ void level_init(void) {
 	short y;
 	short j;
 
-	lynx_load(1);
+	lynx_load(1);//livello
+	lynx_load(2);//player
+	lynx_load(3);//sfondo
+	lynx_load(4);//background
 
 	level.fg_map = &Z1L1_FG_MAP[0];// //Z1L1_FG_ADDR;
 	level.bg_map = &Z1L1_BG_MAP[0];//  Z1L1_BG_ADDR;
@@ -191,7 +194,8 @@ void level_draw() {
 			tile_info = tileinfo_get(tile_index);
 
 
-			if (tile_info->type == TILE_BACKGROUND) {  // Background tiles
+			if ( tile_info->type == TILE_BACKGROUND)//tile_info->type != TILE_EMPTY)//
+			{  // Background tiles
 				int sprite_x = x - start_tile_x;
 				int sprite_y = y - start_tile_y;
 
@@ -237,6 +241,7 @@ void level_draw() {
 
 
 	// PIATTAFORME E MURI
+
 	for (y = start_tile_y; y < end_tile_y; y++) {
 		for (x = start_tile_x; x < end_tile_x; x++) {
 			tile_index =level.fg_map[y*level.map_w+x];//; FG_MAP[y][x];
@@ -317,7 +322,7 @@ void level_update_camera( u16 player_x, u16 player_y) {
 
 	/* Segui il player mantenendolo al centro */
 	level.camera.x = player_x - center_x;
-	level.camera.y =  player_y  - center_y ;
+	level.camera.y =  player_y  - center_y + 16  ;
 
 	/* Limita la camera ai bordi del livello */
 	level_width_px =  level.map_w * TILE_SIZE;

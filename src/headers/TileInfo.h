@@ -31,6 +31,7 @@ typedef struct {
 	u8 is_flipped;        // 1 = tile specchiata verticalmente
 	unsigned char* bitmap; // Puntatore ai dati bitmap
 	char* palette;
+
 } TileInfo;
 
 /* Dichiarazioni pubbliche */

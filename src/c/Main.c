@@ -62,9 +62,11 @@ static void __fastcall__ storyScreen();
 static void __fastcall__ resetGame();
 //__fastcall__
 static void __fastcall__ updateAndDrawGame();
+//static void __fastcall__ initPlayerFrames();
 
-static void __fastcall__ initPlayerFrames();
 
+static void  updateAndDrawGame();
+static void  resetGame();
 
 // ----------------------------------------------------------------------------
 // CODE
@@ -177,7 +179,7 @@ static void __fastcall__ storyScreen() {
 
 
 
-static void __fastcall__ resetGame() {
+static void  resetGame() {
 
 
 	// Inizializza il livello
@@ -198,21 +200,10 @@ u8 frame_count = 0;
 u8 effect_counter =0;
 static clock_t last_time = 0;
 static u16 fps = 0;
- void measure_performance() {
-
-	//frame_count++;
-
-	if (clock2() - last_time >= 75) { // ~1 secondo a 75Hz
-		fps = frame_count;
-		frame_count = 0;
-		last_time = clock2();
-
-		// Mostra FPS (top-right corner)
-	}
-}
 
 
-static void __fastcall__ updateAndDrawGame() {
+
+static void  updateAndDrawGame() {
 	player_handle_user_input(SUZY.joystick);
 	// Aggiorna logica ogni frame
 	player_update();
@@ -220,7 +211,7 @@ static void __fastcall__ updateAndDrawGame() {
 	level_update_camera(player.x, player.y);
 
 	// DISEGNA solo ogni 2 frame (30 FPS ancora fluido)
-	if (frame_count++ % FRAME_DIVIDER == 0)
+	if ((frame_count++ & 1) == 0)//% FRAME_DIVIDER
 	{
 		AG_WAIT_LCD();
 		level_draw();

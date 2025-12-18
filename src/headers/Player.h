@@ -15,22 +15,22 @@
 
 
 // Dichiarazioni dei frame (definite altrove)
-extern unsigned char sonic_run_1[];
-extern unsigned char sonic_run_2[];
-extern unsigned char sonic_run_3[];
-extern unsigned char sonic_run_4[];
-
-extern unsigned char sonic_brake_1[];
-extern unsigned char sonic_brake_2[];
-
-extern unsigned char sonic_jump_1[];
-extern unsigned char sonic_jump_2[];
-
-
-extern unsigned char sonic_idle_1[];
-extern unsigned char sonic_idle_2[];
-extern unsigned char sonic_idle_3[];
-extern unsigned char sonic_idle_4[];
+//extern unsigned char sonic_run_1[];
+//extern unsigned char sonic_run_2[];
+//extern unsigned char sonic_run_3[];
+//extern unsigned char sonic_run_4[];
+//
+//extern unsigned char sonic_brake_1[];
+//extern unsigned char sonic_brake_2[];
+//
+//extern unsigned char sonic_jump_1[];
+//extern unsigned char sonic_jump_2[];
+//
+//
+//extern unsigned char sonic_idle_1[];
+//extern unsigned char sonic_idle_2[];
+//extern unsigned char sonic_idle_3[];
+//extern unsigned char sonic_idle_4[];
 
 
 static const s8 DEFAULT_SPEED = 4;

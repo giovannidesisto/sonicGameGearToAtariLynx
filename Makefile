@@ -115,28 +115,28 @@ $(BUILD_DIR)/%.o: %.bmp
 		$(ECHO) "== Converting tile $< to $@"; \
 		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
-		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "ZONE1LEVEL1FG_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
 	elif echo "$*" | grep -q '^wall'; then \
 		$(ECHO) "== Converting tile $< to $@"; \
 		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
-		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "ZONE1LEVEL1FG_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
 	elif echo "$*" | grep -q '^prx'; then \
 		$(ECHO) "== Converting tile $< to $@"; \
 		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
-		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "ZONE1BG_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
 	elif echo "$*" | grep -q '^for'; then \
 		$(ECHO) "== Converting tile $< to $@"; \
 		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
-		$(ECHO) '.segment "RODATA"' >> $(BUILD_DIR)/$*.s; \
+		$(ECHO) '.segment "ZONE1LEVEL1FG_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
 	fi	

@@ -10,10 +10,20 @@
         .import         __BANK0BLOCKSIZE__
         .import		__VIDEO__
         .import		__STACKSIZE__
+        
         .import		__MAPS_SIZE__
         .import		__MAPS_START__
+        
         .import		__PLAYERGFX_SIZE__
-        .import		__PLAYERGFX_START__        
+        .import		__PLAYERGFX_START__
+        
+        .import		__ZONE1LEVEL1FG_SIZE__
+        .import		__ZONE1LEVEL1FG_START__
+        
+        .import		__ZONE1BG_SIZE__
+        .import		__ZONE1BG_START__
+                    
+                
         .export         __DEFDIR__: absolute = 1
 
 
@@ -55,6 +65,12 @@ entry off0, len0, off1, block1, len1,__MAPS_SIZE__, __MAPS_START__
 
 ; Entry 2 player sprites
 entry off1, len1, off2, block2, len2,__PLAYERGFX_SIZE__, __PLAYERGFX_START__
+
+; Entry 3 zone 1 level 1 sprites
+entry off2, len2, off3, block3, len3,__ZONE1LEVEL1FG_SIZE__, __ZONE1LEVEL1FG_START__
+
+; Entry 4 zone 1 back ground
+entry off3, len3, off4, block4, len4,__ZONE1BG_SIZE__, __ZONE1BG_START__
 
 
 __DIRECTORY_END__:

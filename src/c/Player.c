@@ -12,7 +12,7 @@ extern Level level;
 
 extern Player player;
 void player_init(){
-	lynx_load(2);
+	//lynx_load(2);
 
 	player.x =TILE_SIZE+PLAYER_HEIGHT;
 	player.y = 0;//(MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*2;//va infondo alla mappa, considerato che lo y0 e in alto
