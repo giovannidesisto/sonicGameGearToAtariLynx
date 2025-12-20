@@ -201,6 +201,46 @@ void tileinfo_init_table(void) {
 
 
 
+
+    /* muro chiaro SX solido intero */
+       tile_info_table[17].type = TILE_SOLID;
+       tile_info_table[17].colorDepth = BPP_4;
+       tile_info_table[17].bitmap = (unsigned char*)LEVEL_1_WALL[2];
+
+
+       /* muro chiaro SX attraversabile  intero */
+       tile_info_table[18].type = TILE_BACKGROUND;
+       tile_info_table[18].colorDepth = BPP_4;
+       tile_info_table[18].bitmap = (unsigned char*)LEVEL_1_WALL[2];
+
+
+       /* TERMINALE ERBA ALTO DX */
+       tile_info_table[19].type = TILE_PLATFORM;
+       tile_info_table[19].colorDepth = BPP_4;
+       tile_info_table[19].bitmap = (unsigned char*)LEVEL_1_PLATFORM[1];
+       tile_info_table[19].is_mirrored=1;
+       /* Height map per tile piena (tutta a 15) */
+
+       for ( x = 0; x < 16; x++) {
+           tile_info_table[19].height_map[x] = 10;
+       }
+
+
+
+
+       /* TERMINALE ERBA ALTO DX */
+       tile_info_table[20].type = TILE_PLATFORM;
+       tile_info_table[20].colorDepth = BPP_4;
+       tile_info_table[20].bitmap = (unsigned char*)LEVEL_1_WALL[3];
+       ;
+       /* Height map per tile piena (tutta a 15) */
+
+       for ( x = 0; x < 16; x++) {
+           tile_info_table[20].height_map[x] = 10;
+       }
+
+
+
     //totem
     tile_info_table[99].type = TILE_BACKGROUND;
     tile_info_table[99].colorDepth = BPP_4;

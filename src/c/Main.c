@@ -65,7 +65,7 @@ static void __fastcall__ updateAndDrawGame();
 //static void __fastcall__ initPlayerFrames();
 
 
-static void  updateAndDrawGame();
+static void  __fastcall__  updateAndDrawGame();
 static void  resetGame();
 
 // ----------------------------------------------------------------------------
@@ -203,23 +203,23 @@ static u16 fps = 0;
 
 
 
-static void  updateAndDrawGame() {
+static void  __fastcall__  updateAndDrawGame() {
 	player_handle_user_input(SUZY.joystick);
 	// Aggiorna logica ogni frame
 	player_update();
 	player_animate();
-	level_update_camera(player.x, player.y);
+	level_update_camera();
 
 	// DISEGNA solo ogni 2 frame (30 FPS ancora fluido)
-	if ((frame_count++ & 1) == 0)//% FRAME_DIVIDER
+	//if ((frame_count++ & 1) == 0)//% FRAME_DIVIDER
 	{
 		AG_WAIT_LCD();
 		level_draw();
 		tgi_updatedisplay();
-		if(effect_counter <EFFECT_TOGGLE_VALUE*2)
-			effect_counter++;
-		else
-			effect_counter=0;
+//		if(effect_counter <EFFECT_TOGGLE_VALUE*2)
+//			effect_counter++;
+//		else
+//			effect_counter=0;
 	}
 
 }

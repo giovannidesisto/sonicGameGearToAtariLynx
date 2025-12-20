@@ -19,6 +19,13 @@
 //#define RES24 1
 //#define RES16 1
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+#define IMAX(a,b) ((a) > (b) ? (a) : (b))
+
+#define SCREEN_WIDTH 160
+#define SCREEN_HEIGHT 102
+
+
 
 
 #ifdef RES32

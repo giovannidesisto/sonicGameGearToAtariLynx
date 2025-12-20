@@ -5,7 +5,6 @@
  *      Author: giovanni-gds
  */
 #include "Utils.h"
-#define IMAX(a,b) ((a) > (b) ? (a) : (b))
 
 SCB_REHV_PAL* prev_sprite = NULL;
 SCB_REHV_PAL* first_sprite = NULL;

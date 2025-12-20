@@ -33,7 +33,8 @@
 //extern unsigned char sonic_idle_4[];
 
 
-static const s8 DEFAULT_SPEED = 4;
+static const u8 MAX_RUN_SPEED = 16;
+static const u8 MAX_WALK_SPEED = 8;
 static const s8 DEFAULT_JUMP_POWER = -14;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 
@@ -119,6 +120,10 @@ typedef struct Player{
     // Proprietà fisiche
     u8 width;
     u8 height;
+
+    u8 width_half;
+    u8 height_half;
+
     u8 jump_force;
     u8 gravity;
     u8 is_grounded;

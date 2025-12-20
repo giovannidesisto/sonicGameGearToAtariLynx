@@ -32,7 +32,9 @@ static unsigned char* LEVEL_1_BACKGROUND[] = {
 //TILE SOLIDE, su tutti i 4 lati
 static unsigned char* LEVEL_1_WALL[] = {
 		wall_001,
-		wall_002
+		wall_002,
+		wall_003,
+		wall_004
 };
 
 

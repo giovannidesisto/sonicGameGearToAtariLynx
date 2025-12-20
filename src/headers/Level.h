@@ -9,14 +9,6 @@
 
 /* Definizioni costanti */
 
-#define SCREEN_WIDTH 160
-#define SCREEN_HEIGHT 102
-
-
-//dimensione della mappa in sprites
-#define MAP_WIDTH  24
-#define MAP_HEIGHT 17
-
 
 /*
 numero di sprite necessarie per disegnare il livello
@@ -31,8 +23,8 @@ su piattaforme che lo portano in alto)
 
 //extern u16 BCKG_MAP[MAP_HEIGHT][MAP_WIDTH];
 
-static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
-static SCB_REHV_PAL SCB_PRX_MATRIX[TILES_Y][TILES_X];
+//static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
+//static SCB_REHV_PAL SCB_PRX_MATRIX[TILES_Y][TILES_X];
 /*
 typedef enum {
     TPVP_UP = 2,
@@ -47,6 +39,8 @@ typedef enum {
 
 
 typedef struct {
+	u8 center_x;
+	u8 center_y;
 	u16 x;        /* Posizione X della camera (in pixel world) */
 	u16 y;        /* Posizione Y della camera (in pixel world) */
 	u8 width;    /* Larghezza della viewport (solitamente SCREEN_WIDTH) */
@@ -67,6 +61,12 @@ typedef struct {
 	u8 current_level;
 	u8* fg_map;
 	u8* bg_map;
+
+	/* Limita la camera ai bordi del livello */
+	u16 level_width_px; //=  level.map_w * TILE_SIZE;
+	u16 level_height_px ;//= level.map_h * TILE_SIZE;
+
+
 	Camera camera;                            /* Camera per lo scroll */
 } Level;
 
@@ -82,7 +82,7 @@ void level_draw();
 
 
 void level_init_camera();
-void level_update_camera(u16 player_x, u16 player_y);
+void level_update_camera();
 int level_world_to_screen_x (int world_x);
 int level_world_to_screen_y( int world_y);
 

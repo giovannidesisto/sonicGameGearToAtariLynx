@@ -67,7 +67,8 @@ extern const unsigned char bck_004[];
 extern const unsigned char wall_001[];
 //termine muro scuro DX
 extern const unsigned char wall_002[];
-
+extern const unsigned char wall_003[];
+extern const unsigned char wall_004[];
 
 
 extern const unsigned char prx_001[];

@@ -19,7 +19,8 @@ void player_init(){
 
 	player.width=PLAYER_WIDTH;
 	player.height=PLAYER_HEIGHT;
-
+	player.width_half=PLAYER_WIDTH/2;
+	player.height_half=PLAYER_HEIGHT/2;
 
 	//quindi sottrae l'altezza della tail del terreno e l'altezza della tail del personaggio
 	player.vx = 0;
@@ -106,15 +107,24 @@ void  player_animate() {
 		//player.sprite.data = (unsigned char*)current_animation[0];
 		break;
 	case PLAYER_WALKING:
-		current_animation = player.walk_frames;
-		frame_count = player.walk_frame_count;
-		player.animation_speed = 4;  // Normale
+		if(ABS(player.vx)<MAX_WALK_SPEED){
+			current_animation = player.jump_frames;
+			frame_count = player.jump_frame_count;
+
+		}
+		else{
+
+			current_animation = player.walk_frames;
+			frame_count = player.walk_frame_count;
+
+		}
+		player.animation_speed = 2;  // Normale
 		break;
 	case PLAYER_JUMPING:
 	case PLAYER_RUN_JUMPING:
 		current_animation = player.jump_frames;
 		frame_count = player.jump_frame_count;
-		player.animation_speed = 4;  // Più veloce
+		player.animation_speed = 2;  // Più veloce
 		break;
 	case PLAYER_BRAKING:
 		current_animation = player.brake_frames;
@@ -173,9 +183,9 @@ void check_world_collision() {
 
 	/* 1. COLLISIONI ORIZZONTALI */
 	if (player.vx != 0) {
-		s16 check_x = (player.vx > 0) ? (new_x + player.width/2) : (new_x - player.width/2);
+		s16 check_x = (player.vx > 0) ? (new_x + player.width_half) : (new_x - player.width_half);
 		tile_x = check_x / TILE_SIZE;
-		tile_y = (player.y + player.height/2) / TILE_SIZE;
+		tile_y = (player.y + player.height_half) / TILE_SIZE;
 
 		if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w)
 		{
@@ -185,16 +195,16 @@ void check_world_collision() {
 			if (tile_info->type == TILE_SOLID)
 			{
 				if (player.vx > 0) {
-					player.x = tile_x * TILE_SIZE - (player.width/2);
+					player.x = tile_x * TILE_SIZE - (player.width_half);
 				} else {
-					player.x = (tile_x + 1) * TILE_SIZE + (player.width/2);
+					player.x = (tile_x + 1) * TILE_SIZE + (player.width_half);
 				}
 				player.vx = 0;
 				new_x = player.x;
 			}
 			else if(tile_info->type == TILE_PLATFORM)
 			{
-				s16 feet_y = new_y + player.height;
+		//		s16 feet_y = new_y + player.height;
 
 				u8 local_x = new_x - (tile_x * TILE_SIZE);
 				u8 terrain_height = tileinfo_get_height_at(tile_info, local_x);
@@ -208,7 +218,7 @@ void check_world_collision() {
 					 */
 					u16 ground_y = (tile_y * TILE_SIZE) + (15 - terrain_height);
 
-					if (feet_y >= ground_y) {
+					if ((new_y + player.height) >= ground_y) {
 						player.y = ground_y - player.height;
 						player.is_grounded = 1;
 						player.is_jumping = 0;
@@ -293,29 +303,29 @@ void check_world_collision() {
 }
 
 void player_adjust_to_ground(void) {
-	s16 tile_x ,tile_y;
-	if (!player.is_grounded) return;
-
-	tile_x = player.x / TILE_SIZE;
-	tile_y = (player.y + player.height) / TILE_SIZE;
-
-	if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
-		s16 tile_index =level.fg_map[tile_y*level.map_w+tile_x];// level_foregound_map[tile_y][tile_x];
-		TileInfo* tile_info = tileinfo_get(tile_index);
-
-		if (tile_info->type == TILE_PLATFORM) {
-			u8 local_x = player.x - (tile_x * TILE_SIZE);
-			u8 terrain_height = tileinfo_get_height_at(tile_info, local_x);
-
-			if (terrain_height > 0) {
-				u16 correct_y = (tile_y * TILE_SIZE) + (15 - terrain_height) - player.height;
-
-				if (player.y != correct_y) {
-					player.y = correct_y;
-				}
-			}
-		}
-	}
+//	s16 tile_x ,tile_y;
+//	if (!player.is_grounded) return;
+//
+//	tile_x = player.x / TILE_SIZE;
+//	tile_y = (player.y + player.height) / TILE_SIZE;
+//
+//	if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
+//		s16 tile_index =level.fg_map[tile_y*level.map_w+tile_x];// level_foregound_map[tile_y][tile_x];
+//		TileInfo* tile_info = tileinfo_get(tile_index);
+//
+//		if (tile_info->type == TILE_PLATFORM) {
+//			u8 local_x = player.x - (tile_x * TILE_SIZE);
+//			u8 terrain_height = tileinfo_get_height_at(tile_info, local_x);
+//
+//			if (terrain_height > 0) {
+//				u16 correct_y = (tile_y * TILE_SIZE) + (15 - terrain_height) - player.height;
+//
+//				if (player.y != correct_y) {
+//					player.y = correct_y;
+//				}
+//			}
+//		}
+//	}
 }
 
 void player_update() {
@@ -352,7 +362,9 @@ void player_handle_user_input(u8 key){
 
 	case AG_JOY_LEFT:
 		/* Cammina a sinistra */
-		player.vx = -1 * DEFAULT_SPEED ;
+		if(player.vx>0)player.vx=0;
+		if(ABS(player.vx)<MAX_RUN_SPEED)player.vx--;
+		//player.vx = -1 * DEFAULT_SPEED ;
 		player.direction = DIR_LEFT;
 		if (player.is_grounded) {
 			if(player.state !=PLAYER_WALKING)player.animation_timer=player.animation_speed;
@@ -361,7 +373,10 @@ void player_handle_user_input(u8 key){
 		break;
 	case AG_JOY_RIGHT:
 		/* Cammina a destra */
-		player.vx = DEFAULT_SPEED;
+
+		if(player.vx<0)player.vx=0;
+		if(ABS(player.vx)<MAX_RUN_SPEED)player.vx++;
+
 		player.direction = DIR_RIGHT;
 		if (player.is_grounded) {
 			if(player.state !=PLAYER_WALKING)player.animation_timer=player.animation_speed;
@@ -380,7 +395,9 @@ void player_handle_user_input(u8 key){
 		if(player.state !=PLAYER_JUMPING)player.animation_timer=player.animation_speed;
 		player.state = PLAYER_JUMPING;
 		player.vy = DEFAULT_JUMP_POWER;
-		player.vx = -1*DEFAULT_SPEED;
+		/* Cammina a sinistra */
+		if(player.vx>0)player.vx=0;
+		if(ABS(player.vx)<MAX_RUN_SPEED)player.vx--;
 	}
 	break;
 	case AG_JOY_A | AG_JOY_RIGHT:
@@ -391,7 +408,8 @@ void player_handle_user_input(u8 key){
 		if(player.state !=PLAYER_JUMPING)player.animation_timer=player.animation_speed;
 		player.state = PLAYER_JUMPING;
 		player.vy = DEFAULT_JUMP_POWER;
-		player.vx = DEFAULT_SPEED;
+		if(player.vx<0)player.vx=0;
+		if(ABS(player.vx)<MAX_RUN_SPEED)player.vx++;
 	}
 	break;
 
