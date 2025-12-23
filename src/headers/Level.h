@@ -7,10 +7,20 @@
 #include "maps/Level1_maps.h"
 
 
-#define MAP_BUF_PAD 4
-#define MAP_BUF_PAD_HALF MAP_BUF_PAD/2
-#define MAP_BUF_W      TILES_X+MAP_BUF_PAD   // sbordo dx/sx
-#define MAP_BUF_H      MAP_HEIGHT// TILES_Y
+//#define MAP_BUF_PAD 4
+//#define MAP_BUF_PAD_HALF MAP_BUF_PAD/2
+//#define MAP_BUF_W      TILES_X+MAP_BUF_PAD   // sbordo dx/sx
+
+
+#define MAP_BUF_W   16          // POTENZA DI 2 (OBBLIGATORIO)
+#define TILE_SHIFT 4 //log2(TILE_SIZE)
+#define MAP_BUF_H   17//TILES_Y
+#define MAP_BUF_MASK (MAP_BUF_W - 1)
+#define MAP_SBORDA ((MAP_BUF_W - TILES_X) / 2)
+
+
+
+//#define MAP_BUF_H      MAP_HEIGHT// TILES_Y
 #define MAX_ACTIVE_SPRITES  TILES_Y*TILES_X*2
 
 static u8 map_buf[MAP_BUF_H][MAP_BUF_W]={0};
@@ -48,8 +58,9 @@ typedef struct {
 	u16 level_width_px; //=  level.map_w * TILE_SIZE;
 	u16 level_height_px ;//= level.map_h * TILE_SIZE;
 
-	u16 map_buf_origin_x;
-	u16 map_buf_origin_y;
+	s16 map_buf_origin_x;
+	s16 map_buf_origin_y;
+	u8 map_buf_col0;
 
 
 	Camera camera;                            /* Camera per lo scroll */

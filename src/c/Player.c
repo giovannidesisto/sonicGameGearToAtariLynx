@@ -14,8 +14,8 @@ extern Player player;
 void player_init(){
 	//lynx_load(2);
 
-	player.x =TILE_SIZE+PLAYER_HEIGHT;
-	player.y =0;//(MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*11;//va infondo alla mappa, considerato che lo y0 e in alto
+	player.x =PLAYER_WIDTH*4;//+PLAYER_HEIGHT;
+	player.y =PLAYER_HEIGHT*2;//(MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*11;//va infondo alla mappa, considerato che lo y0 e in alto
 
 	player.width=PLAYER_WIDTH;
 	player.height=PLAYER_HEIGHT;

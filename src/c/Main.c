@@ -186,7 +186,7 @@ static void  resetGame() {
 	level_load(1);
 
 	// Inizializza il livello
-	level_init();
+	//level_init();
 
 
 	/* Inizializza il player alla posizione di partenza */
