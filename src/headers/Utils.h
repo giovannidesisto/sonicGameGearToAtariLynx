@@ -26,8 +26,6 @@
 #define SCREEN_HEIGHT 102
 
 
-
-
 #ifdef RES32
 	#define RATIO 1
 	#define SCALE 1
@@ -56,10 +54,22 @@
 
 #endif
 
-#define EFFECT_TOGGLE_VALUE 10
-#define FRAME_DIVIDER 2
+
+
+
+
+
+
+
+
+//#define EFFECT_TOGGLE_VALUE 10
+//#define FRAME_DIVIDER 2
+
+
+
 extern SCB_REHV_PAL* prev_sprite;
 extern SCB_REHV_PAL* first_sprite;
+
 extern u8 frame_count;
 extern u8 effect_counter;
 

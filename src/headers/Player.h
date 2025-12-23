@@ -33,7 +33,7 @@
 //extern unsigned char sonic_idle_4[];
 
 
-static const u8 MAX_RUN_SPEED = 16;
+static const u8 MAX_RUN_SPEED = 14;
 static const u8 MAX_WALK_SPEED = 8;
 static const s8 DEFAULT_JUMP_POWER = -14;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;

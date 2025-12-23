@@ -7,42 +7,24 @@
 #include "maps/Level1_maps.h"
 
 
-/* Definizioni costanti */
+#define MAP_BUF_PAD 4
+#define MAP_BUF_PAD_HALF MAP_BUF_PAD/2
+#define MAP_BUF_W      TILES_X+MAP_BUF_PAD   // sbordo dx/sx
+#define MAP_BUF_H      MAP_HEIGHT// TILES_Y
+#define MAX_ACTIVE_SPRITES  TILES_Y*TILES_X*2
 
-
-/*
-numero di sprite necessarie per disegnare il livello
-sbordano di 8 pixel per lato orizzontalmente e di 5 pixel per lato verticalmente,
-nell'ottica di gestire in continuità l'aggiornamento della capera che insegue il player
-non solo durante lo scorrimeto verticale del gioco ma anche durante lo scorrimento verticale (es se sale
-su piattaforme che lo portano in alto)
- */
-
-
-//extern u16 FG_MAP[MAP_HEIGHT][MAP_WIDTH];
-
-//extern u16 BCKG_MAP[MAP_HEIGHT][MAP_WIDTH];
-
-//static SCB_REHV_PAL SCB_MATRIX[TILES_Y][TILES_X];
-//static SCB_REHV_PAL SCB_PRX_MATRIX[TILES_Y][TILES_X];
-/*
-typedef enum {
-    TPVP_UP = 2,
-	TPVP_DOWN = 3,
-	TPVP_SIDE = 4,
-	TPVP_SAME_DESC=5, //gestione discese
-	TPVP_SAME_ASC=6 //gestione salite
-} TailPositionVsPlayer;
- */
-
-
+static u8 map_buf[MAP_BUF_H][MAP_BUF_W]={0};
+static SCB_REHV_PAL sprite_pool[MAX_ACTIVE_SPRITES];
+static u8 sprite_used[MAX_ACTIVE_SPRITES];
 
 
 typedef struct {
+	u16 prev_tile_x;
+	u16 prev_tile_y;
 	u8 center_x;
 	u8 center_y;
-	u16 x;        /* Posizione X della camera (in pixel world) */
-	u16 y;        /* Posizione Y della camera (in pixel world) */
+	s16 x;        /* Posizione X della camera (in pixel world) */
+	s16 y;        /* Posizione Y della camera (in pixel world) */
 	u8 width;    /* Larghezza della viewport (solitamente SCREEN_WIDTH) */
 	u8 height;   /* Altezza della viewport (solitamente SCREEN_HEIGHT) */
 } Camera;
@@ -59,18 +41,19 @@ typedef struct {
 	u16 map_w;
 	u8  map_h;
 	u8 current_level;
-	u8* fg_map;
+	u8* fg_map; //punta alla porzione decompressa di mappa
 	u8* bg_map;
 
 	/* Limita la camera ai bordi del livello */
 	u16 level_width_px; //=  level.map_w * TILE_SIZE;
 	u16 level_height_px ;//= level.map_h * TILE_SIZE;
 
+	u16 map_buf_origin_x;
+	u16 map_buf_origin_y;
+
 
 	Camera camera;                            /* Camera per lo scroll */
 } Level;
-
-
 
 
 
@@ -85,6 +68,6 @@ void level_init_camera();
 void level_update_camera();
 int level_world_to_screen_x (int world_x);
 int level_world_to_screen_y( int world_y);
-
+u8 level_get_tile(u16 world_x, u16 world_y);
 
 #endif /* LEVEL_H */

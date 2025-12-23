@@ -15,7 +15,7 @@ void player_init(){
 	//lynx_load(2);
 
 	player.x =TILE_SIZE+PLAYER_HEIGHT;
-	player.y = 0;//(MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*2;//va infondo alla mappa, considerato che lo y0 e in alto
+	player.y =0;//(MAP_HEIGHT * TILE_SIZE)-TILE_SIZE*11;//va infondo alla mappa, considerato che lo y0 e in alto
 
 	player.width=PLAYER_WIDTH;
 	player.height=PLAYER_HEIGHT;
@@ -189,7 +189,13 @@ void check_world_collision() {
 
 		if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w)
 		{
-			tile_index =  level.fg_map[tile_y*level.map_w+tile_x];//  level_foregound_map[tile_y][tile_x];
+
+
+//			u16 bx = tile_x - level.map_buf_origin_x;
+//			u16 by = tile_y - level.map_buf_origin_y;
+
+
+			tile_index = level_get_tile(tile_x * TILE_SIZE, tile_y * TILE_SIZE);//level.fg_map[tile_y*level.map_w+tile_x];//
 			tile_info = tileinfo_get(tile_index);
 
 			if (tile_info->type == TILE_SOLID)
@@ -245,7 +251,7 @@ void check_world_collision() {
 			tile_y = feet_y / TILE_SIZE;
 
 			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
-				tile_index =level.fg_map[tile_y*level.map_w+tile_x];// level_foregound_map[tile_y][tile_x];
+				tile_index = level_get_tile(tile_x * TILE_SIZE, tile_y * TILE_SIZE);//level.fg_map[tile_y*level.map_w+tile_x];//
 				tile_info = tileinfo_get(tile_index);
 
 				if (tile_info->type == TILE_SOLID) {
@@ -285,7 +291,7 @@ void check_world_collision() {
 			tile_y = head_y / TILE_SIZE;
 
 			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
-				tile_index = level.fg_map[tile_y*level.map_w+tile_x];//level_foregound_map[tile_y][tile_x];
+				tile_index =level_get_tile(tile_x * TILE_SIZE, tile_y * TILE_SIZE);// level.fg_map[tile_y*level.map_w+tile_x];//
 				tile_info = tileinfo_get(tile_index);
 
 				if (tile_info->type == TILE_SOLID) {
@@ -300,6 +306,9 @@ void check_world_collision() {
 	/* 3. APPLICA MOVIMENTO */
 	player.x = new_x;
 	player.y = new_y;
+
+
+
 }
 
 void player_adjust_to_ground(void) {

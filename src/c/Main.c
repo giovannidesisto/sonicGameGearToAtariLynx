@@ -182,11 +182,12 @@ static void __fastcall__ storyScreen() {
 static void  resetGame() {
 
 
+	/* Carica il livello 1 */
+	level_load(1);
+
 	// Inizializza il livello
 	level_init();
 
-	/* Carica il livello 1 */
-	level_load(1);
 
 	/* Inizializza il player alla posizione di partenza */
 	player_init();//level.start_x, level.start_y);
