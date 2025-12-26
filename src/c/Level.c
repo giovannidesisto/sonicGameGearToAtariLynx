@@ -28,250 +28,206 @@ static void release_all_sprites(void) {
 		sprite_used[i] = 0;
 	}
 }
-void decompress_column(const u8 *data, u16 offset, u8 *out, u8 start, u8 height, u8 stride) {
-    u8 val, cnt, i;
-    u16 idx = offset;
-    u8 out_y = start;
-    while (out_y < start + height) {
-        val = data[idx++];
-        cnt = data[idx++];
-        for (i = 0; i < cnt && out_y < start + height; i++) {
-            out[out_y * stride] = val;
-            out_y++;
-        }
-    }
-}
-//
-//
-//void update_map_columns(u8 start_col, u8 end_col) {
-//    u8 i;
-//    for(i = start_col; i < end_col; i++) {
-//        decompress_column(
-//            Z1L1_FG_MAP_RLE_DATA,
-//            Z1L1_FG_MAP_RLE_OFFS[i],
-//			//FIXME 23
-//            &map_buf[0][i], // modulo se buffer circolare
-//            0,
-//            MAP_BUF_H,
-//            MAP_BUF_W   // stride
-//        );
-//    }
-//}
 
-//
+
+u8 level_get_tile_abs(u16 tile_x, u16 tile_y)
+{
+	s16 bx = tile_x - level.map_buf_origin_x;
+	s16 by = tile_y - level.map_buf_origin_y;
+
+	if ((u16)bx >= MAP_BUF_W || (u16)by >= MAP_BUF_H)
+		return TILE_EMPTY;
+
+	// applica circolarità
+	bx += level.map_buf_col0;
+	if (bx >= MAP_BUF_W) bx -= MAP_BUF_W;
+
+	by += level.map_buf_row0;
+	if (by >= MAP_BUF_H) by -= MAP_BUF_H;
+
+	return map_buf[by][bx];
+}
+
+
+
 //u8 level_get_tile(u16 world_x, u16 world_y)
 //{
-//    /* 1. world_x/world_y sono world VISIBILI (relativi alla viewport) */
-//    u16 abs_world_x = world_x;
-//    u16 abs_world_y = world_y;
+//	u16 tile_x = world_x >> TILE_SHIFT;
+//	u16 tile_y = world_y >> TILE_SHIFT;
 //
-//    /* 2. converti in coordinate tile world */
-//    u16 tile_x = abs_world_x / TILE_SIZE;
-//    u16 tile_y = abs_world_y / TILE_SIZE;
+//	s16 bx = tile_x - level.map_buf_origin_x;
+//	s16 by = tile_y - level.map_buf_origin_y;
 //
-//    /* 3. traduci in coordinate buffer */
-//    s16 bx = (s16)tile_x - (s16)level.map_buf_origin_x;
-//    s16 by = (s16)tile_y - (s16)level.map_buf_origin_y;
+//	if ((u16)bx >= MAP_BUF_W || (u16)by >= MAP_BUF_H)
+//		return TILE_EMPTY;
 //
-//    /* 4. fuori dal buffer */
-//    if (bx < 0 || bx >= MAP_BUF_W ||
-//        by < 0 || by >= MAP_BUF_H)
-//        return TILE_EMPTY;
+//	// applica circolarità
+//	bx += level.map_buf_col0;
+//	if (bx >= MAP_BUF_W) bx -= MAP_BUF_W;
 //
-//    /* 5. fuori dalla mappa */
-//    if (tile_x >= level.map_w || tile_y >= level.map_h)
-//        return TILE_EMPTY;
+//	by += level.map_buf_row0;
+//	if (by >= MAP_BUF_H) by -= MAP_BUF_H;
 //
-//    /* 6. accesso al buffer */
-//    return map_buf[by][bx];
-//
+//	return map_buf[by][bx];
 //}
 
- u8 level_get_tile(u16 world_x, u16 world_y)
-{
+static inline u8 decompress_rle_get_value(
+    const u8 *data,
+    u16 offset,
+    u16 col_idx
+) {
+    const u8 *p = data + offset;
+    u16 col = 0;
 
-	u8 bx;
-	u16 tile_x = world_x >> TILE_SHIFT;   // TILE_SHIFT = log2(TILE_SIZE)
-    u16 tile_y = world_y >> TILE_SHIFT;
+    for (;;) {
+        u8 val = *p++;
+        u8 cnt = *p++;
 
-    /* fuori verticale */
-    if (tile_y >= MAP_BUF_H)
-        return TILE_EMPTY;
-
-//    /* fuori orizzontale dal buffer */
-    if (
-    		//FIXME da verificare
-    		//tile_x < level.map_buf_origin_x
-    		//||
-    		tile_x >= level.map_buf_origin_x + MAP_BUF_W
-		)
-        return TILE_EMPTY;
-
-    /* traduzione world → buffer */
-    bx = (level.map_buf_col0 + (tile_x - level.map_buf_origin_x)) & MAP_BUF_MASK;
-
-    return map_buf[tile_y][bx];
+        col += cnt;
+        if (col > col_idx)
+            return val;
+    }
 }
 
-//
-//
-//static void shift_buffer_right_and_load_prev(void)
-//{
-//    s16 x, y;
-//    s16 new_world_col;
-//
-//    /* 1. shift a destra */
-//    for (y = 0; y < MAP_BUF_H; y++) {
-//        for (x = MAP_BUF_W - 1; x > 0; x--) {
-//            map_buf[y][x] = map_buf[y][x - 1];
-//        }
-//    }
-//
-//    /* 2. nuova colonna world da caricare */
-//    new_world_col = level.map_buf_origin_x - 1;
-//
-//    if (new_world_col >= 0) {
-//        decompress_column(
-//            Z1L1_FG_MAP_RLE_DATA,
-//            Z1L1_FG_MAP_RLE_OFFS[new_world_col],
-//            &map_buf[0][0],
-//            0,
-//            MAP_BUF_H,
-//            MAP_BUF_W
-//        );
-//    } else {
-//        /* fuori mappa → riempi di TILE_EMPTY */
-//        for (y = 0; y < MAP_BUF_H; y++) {
-//            map_buf[y][0] = TILE_EMPTY;
-//        }
-//    }
-//
-//    /* 3. aggiorna origine */
-//    level.map_buf_origin_x--;
-//}
-//
-//
-//
-//static void shift_buffer_left_and_load_next(void)
-//{
-//    u8 x, y;
-//    u16 new_world_col;
-//
-//    /* 1. shift a sinistra */
-//    for (y = 0; y < MAP_BUF_H; y++) {
-//        for (x = 0; x < MAP_BUF_W - 1; x++) {
-//            map_buf[y][x] = map_buf[y][x + 1];
-//        }
-//    }
-//
-//    /* 2. nuova colonna world da caricare */
-//    new_world_col = level.map_buf_origin_x + MAP_BUF_W;
-//
-//    if (new_world_col < level.map_w) {
-//        decompress_column(
-//            Z1L1_FG_MAP_RLE_DATA,
-//            Z1L1_FG_MAP_RLE_OFFS[new_world_col],
-//            &map_buf[0][MAP_BUF_W - 1],
-//            0,
-//            MAP_BUF_H,
-//            MAP_BUF_W
-//        );
-//    } else {
-//        /* fuori mappa → riempi di TILE_EMPTY */
-//        for (y = 0; y < MAP_BUF_H; y++) {
-//            map_buf[y][MAP_BUF_W - 1] = TILE_EMPTY;
-//        }
-//    }
-//
-//    /* 3. aggiorna origine */
-//    level.map_buf_origin_x++;
-//}
-//
 
 
 
 static inline void level_init_map_streaming(void)
 {
-    u8 i, y;
-    u16 start_tile_x = level.camera.x / TILE_SIZE;
+	u8 i, y;
+	u16 start_tile_x = level.camera.x >> TILE_SHIFT;/// TILE_SIZE;
 
-    /* sbordo simmetrico */
-   level.map_buf_origin_x = start_tile_x - (MAP_BUF_W - TILES_X) / 2;
-    if ((s16)level.map_buf_origin_x < 0)
-    	level.map_buf_origin_x = 0;
+	/* sbordo simmetrico */
+	level.map_buf_origin_x = start_tile_x - ((MAP_BUF_W - TILES_X)  >>1);
+	if ((s16)level.map_buf_origin_x < 0)
+		level.map_buf_origin_x = 0;
 
-    level.map_buf_col0 = 0;
+	level.map_buf_col0 = 0;
 
-    for (i = 0; i < MAP_BUF_W; i++) {
-        u16 world_col = level.map_buf_origin_x + i;
+	for (i = 0; i < MAP_BUF_W; i++) {
+		u16 world_col = level.map_buf_origin_x + i; // colonna del mondo
 
-        if (world_col < level.map_w) {
-            decompress_column(
-                Z1L1_FG_MAP_RLE_DATA,
-                Z1L1_FG_MAP_RLE_OFFS[world_col],
-                &map_buf[0][i],
-                0,
-                MAP_BUF_H,
-                MAP_BUF_W
-            );
-        } else {
-            for (y = 0; y < MAP_BUF_H; y++)
-                map_buf[y][i] = TILE_EMPTY;
-        }
-    }
+		for (y = 0; y < MAP_BUF_H; y++) {
+			u16 world_row = y; // riga del mondo (aggiusta con map_buf_origin_y se scroll verticale)
+
+			if (world_row < level.map_h && world_col < level.map_w) {
+				map_buf[y][i] = decompress_rle_get_value(
+						Z1L1_FG_MAP_RLE_DATA,
+						Z1L1_FG_MAP_RLE_OFFS[world_row],
+						world_col
+				);
+			} else {
+				map_buf[y][i] = TILE_EMPTY;
+			}
+		}
+	}
 }
-
-
 
 
 static inline void stream_scroll_right(void)
 {
-    u8 write_col;
-    u16 new_world_col;
+	u8 write_col,y;
+	u16 new_world_col;
 
-    level.map_buf_origin_x++;
-    level.map_buf_col0 = (level.map_buf_col0 + 1) & MAP_BUF_MASK;
+	level.map_buf_origin_x++;
+	level.map_buf_col0 = (level.map_buf_col0 + 1) & MAP_BUF_MASK;
 
-    /* scriviamo nell'ultima colonna logica */
-    write_col = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
-    new_world_col = level.map_buf_origin_x + MAP_BUF_W - 1;
+	/* scriviamo nell'ultima colonna logica */
+	write_col = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
+	new_world_col = level.map_buf_origin_x + MAP_BUF_W - 1;
 
-    if (new_world_col < level.map_w) {
-        decompress_column(
-            Z1L1_FG_MAP_RLE_DATA,
-            Z1L1_FG_MAP_RLE_OFFS[new_world_col],
-            &map_buf[0][write_col],
-            0,
-            MAP_BUF_H,
-            MAP_BUF_W
-        );
-    }
+	if (new_world_col < level.map_w) {
+		for ( y = 0; y < MAP_BUF_H; y++) {
+			u16 world_row = y; // oppure level.map_buf_origin_y + y se scroll verticale
+			map_buf[y][write_col] = decompress_rle_get_value(
+					Z1L1_FG_MAP_RLE_DATA,
+					Z1L1_FG_MAP_RLE_OFFS[world_row],
+					new_world_col
+			);
+		}
+	}
 }
-
-
 
 static inline void stream_scroll_left(void)
 {
-    u8 write_col;
-    u16 new_world_col;
+	u8 write_col,y;
+	u16 new_world_col;
 
-    level.map_buf_origin_x--;
-    level.map_buf_col0 = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
+	level.map_buf_origin_x--;
+	level.map_buf_col0 = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
 
-    write_col = level.map_buf_col0;
-    new_world_col = level.map_buf_origin_x;
+	write_col = level.map_buf_col0;
+	new_world_col = level.map_buf_origin_x;
 
-    if ((s16)new_world_col >= 0) {
-        decompress_column(
-            Z1L1_FG_MAP_RLE_DATA,
-            Z1L1_FG_MAP_RLE_OFFS[new_world_col],
-            &map_buf[0][write_col],
-            0,
-            MAP_BUF_H,
-            MAP_BUF_W
-        );
-    }
+	if ((s16)new_world_col >= 0) {
+		for ( y = 0; y < MAP_BUF_H; y++) {
+			u16 world_row = y; // oppure level.map_buf_origin_y + y
+			map_buf[y][write_col] = decompress_rle_get_value(
+					Z1L1_FG_MAP_RLE_DATA,
+					Z1L1_FG_MAP_RLE_OFFS[world_row],
+					new_world_col
+			);
+		}
+	}
 }
+
+
+static inline void stream_scroll_up(void)
+{
+	u8 x,write_row;
+	// decrementa la posizione della mappa nel mondo
+	if (level.map_buf_origin_y == 0)
+		return; // già al bordo superiore
+
+	level.map_buf_origin_y--;
+	level.map_buf_row0 = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
+
+	// la riga logica da aggiornare nel buffer circolare
+	write_row = level.map_buf_row0;
+
+	for ( x = 0; x < MAP_BUF_W; x++) {
+		u16 world_col = level.map_buf_origin_x + x;
+		u16 world_row = level.map_buf_origin_y;
+
+		if (world_row < level.map_h && world_col < level.map_w) {
+			map_buf[write_row][x] = decompress_rle_get_value(
+					Z1L1_FG_MAP_RLE_DATA,
+					Z1L1_FG_MAP_RLE_OFFS[world_row],
+					world_col
+			);
+		} else {
+			map_buf[write_row][x] = TILE_EMPTY;
+		}
+	}
+}
+
+
+static inline void stream_scroll_down(void)
+{
+
+	u8 x,write_row;
+	level.map_buf_origin_y++;
+	level.map_buf_row0 = (level.map_buf_row0 + 1) & MAP_BUF_MASK;
+
+	write_row = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
+
+	for ( x = 0; x < MAP_BUF_W; x++) {
+		u16 world_col = level.map_buf_origin_x + x;
+		u16 world_row = level.map_buf_origin_y + MAP_BUF_H - 1;
+
+		if (world_row < level.map_h && world_col < level.map_w) {
+			map_buf[write_row][x] = decompress_rle_get_value(
+					Z1L1_FG_MAP_RLE_DATA,
+					Z1L1_FG_MAP_RLE_OFFS[world_row],
+					world_col
+			);
+		} else {
+			map_buf[write_row][x] = TILE_EMPTY;
+		}
+	}
+}
+
+
 
 /* Inizializza il sistema di sprite */
 void level_init(void) {
@@ -285,20 +241,6 @@ void level_init(void) {
 	//identifica le coordinate x/y mondo nel buffer attuale
 	level.map_buf_origin_x = 0;
 	level.map_buf_origin_y = 0;
-
-
-	/*
-	for(i = 0; i < MAP_BUF_W; i++) {
-	    decompress_column(
-	        Z1L1_FG_MAP_RLE_DATA,
-	        Z1L1_FG_MAP_RLE_OFFS[i],
-	        &map_buf[0][i], //il primo indice indica la Y, si deve usare la y del view port per ottimizzare la  dimensione della mappa in memoria.
-	        0,
-	        MAP_BUF_H,
-	        MAP_BUF_W   // stride per andare giù nella colonna
-	    );
-	}
-*/
 
 
 	level.fg_map = map_buf;
@@ -367,96 +309,101 @@ void level_load(u8 level_num) {
 
 
 void level_draw() {
-    u16 x, y, start_tile_x, start_tile_y, end_tile_x, end_tile_y, tile_index,dx;
+	u16 x, y, start_tile_x, start_tile_y, end_tile_x, end_tile_y, tile_index,dx,dy;
 
 
-    SCB_REHV_PAL* sprite;
-    SCB_REHV_PAL* prev_sprite ;
-    SCB_REHV_PAL* first_sprite;
-    TileInfo* tile_info;
+	SCB_REHV_PAL* sprite;
+	SCB_REHV_PAL* prev_sprite ;
+	SCB_REHV_PAL* first_sprite;
+	TileInfo* tile_info;
 
-    release_all_sprites();
+	release_all_sprites();
 
-    // Calcola la porzione visibile
-    start_tile_x = level.camera.x / TILE_SIZE;
-    start_tile_y = level.camera.y / TILE_SIZE;
+	// Calcola la porzione visibile
+	start_tile_x = level.camera.x / TILE_SIZE;
+	start_tile_y = level.camera.y / TILE_SIZE;
 
-    end_tile_x   = start_tile_x + TILES_X;
-    end_tile_y   = start_tile_y + TILES_Y;
+	end_tile_x   = start_tile_x + TILES_X;
+	end_tile_y   = start_tile_y + TILES_Y;
 
-    // Limita ai bordi della mappa
-    if(end_tile_x > level.map_w) end_tile_x = level.map_w;
-    if(end_tile_y > level.map_h) end_tile_y = level.map_h;
+	// Limita ai bordi della mappa
+	if(end_tile_x > level.map_w) end_tile_x = level.map_w;
+	if(end_tile_y > level.map_h) end_tile_y = level.map_h;
 
-    // Aggiornamento dinamico colonne se la camera si è mossa
-    dx = start_tile_x - level.camera.prev_tile_x;
-    if(dx != 0)
-    {
-//            /* scroll a destra */
-//            while (start_tile_x > level.map_buf_origin_x+MAP_BUF_PAD_HALF)// + 2)
-//                shift_buffer_left_and_load_next();
-//
-//            // Scorrimento a sinistra: decomprimi nuove colonne a sx
-//           // update_map_columns(start_tile_x, level.camera.prev_tile_x);
-//            /* scroll a sinistra */
-//            while (start_tile_x < level.map_buf_origin_x+MAP_BUF_PAD_HALF)// + 2)
-//                shift_buffer_right_and_load_prev();
+	// Aggiornamento dinamico colonne se la camera si è mossa
+	dx = start_tile_x - level.camera.prev_tile_x;
+	//aggiorno il buffer solo se necessario
+	if(dx != 0  && ABS(dx)>MAP_SBORDA_X)
+	{
 
-    	while (start_tile_x > level.map_buf_origin_x + MAP_SBORDA)
-    	    stream_scroll_right();
+		while (start_tile_x > level.map_buf_origin_x + MAP_SBORDA_X)
+			stream_scroll_right();
 
-    	while (start_tile_x < level.map_buf_origin_x + MAP_SBORDA)
-    	    stream_scroll_left();
+		while (start_tile_x < level.map_buf_origin_x + MAP_SBORDA_X)
+			stream_scroll_left();
 
-        level.camera.prev_tile_x = start_tile_x;
+		level.camera.prev_tile_x = start_tile_x;
 
-    }
+	}
 
 
 
-    // Inizia con lo sfondo
-    agSprBackground.penpal[0] = 0x09;
-    prev_sprite = &agSprBackground;
-    first_sprite = prev_sprite;
+	// Calcola lo scostamento verticale
+	dy = start_tile_y - level.camera.prev_tile_y;
+	if (dy != 0)
+	{
+		while (start_tile_y > level.map_buf_origin_y)
+			stream_scroll_down();  // aggiorna riga intera, stride non necessario
 
-    // Render foreground tiles visibili
-    for(y = start_tile_y; y < end_tile_y; y++) {
-        for(x = start_tile_x; x < end_tile_x; x++) {
-            tile_index =   level_get_tile(x*TILE_SIZE,y*TILE_SIZE);//level.fg_map[y*MAP_BUF_W + x]; // accesso row-major
-            tile_info = tileinfo_get(tile_index);
+		while (start_tile_y < level.map_buf_origin_y   )
+			stream_scroll_up();    // aggiorna riga intera, stride non necessario
 
-            if(tile_info->type != TILE_EMPTY) {
-                int world_x = x * TILE_SIZE;
-                int world_y = y * TILE_SIZE;
-                int screen_x = world_x - level.camera.x;
-                int screen_y = world_y - level.camera.y;
+		level.camera.prev_tile_y = start_tile_y;
+	}
 
-                sprite = get_free_sprite();
-                if(!sprite) return;
+	// Inizia con lo sfondo
+	agSprBackground.penpal[0] = 0x09;
+	prev_sprite = &agSprBackground;
+	first_sprite = prev_sprite;
 
-                sprite->data = (unsigned char*) tile_info->bitmap;
-                sprite->vpos = screen_y;
-                if(tile_info->is_mirrored) {
-                    sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
-                    sprite->hpos = screen_x + TILE_SIZE - 1;
-                } else {
-                    sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
-                    sprite->hpos = screen_x;
-                }
+	// Render foreground tiles visibili
+	for(y = start_tile_y; y < end_tile_y; y++) {
+		for(x = start_tile_x; x < end_tile_x; x++) {
+			tile_index =   level_get_tile_abs(x,y);//level.fg_map[y*MAP_BUF_W + x]; // accesso row-major
+			tile_info = tileinfo_get(tile_index);
 
-                // Aggiungi alla lista sprite
-                prev_sprite->next = sprite;
-                prev_sprite = sprite;
-            }
-        }
-    }
+			if(tile_info->type != TILE_EMPTY) {
+				int world_x = x * TILE_SIZE;
+				int world_y = y * TILE_SIZE;
+				int screen_x = world_x - level.camera.x;
+				int screen_y = world_y - level.camera.y;
 
-    // Aggiungi il player sopra tutto
-    player.visible_spc.sprite.next = NULL;
-    prev_sprite->next = &player.visible_spc.sprite;
+				sprite = get_free_sprite();
+				if(!sprite) return;
 
-    // Disegna tutta la lista
-    tgi_sprite(first_sprite);
+				sprite->data = (unsigned char*) tile_info->bitmap;
+				sprite->vpos = screen_y;
+				if(tile_info->is_mirrored) {
+					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
+					sprite->hpos = screen_x + TILE_SIZE - 1;
+				} else {
+					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
+					sprite->hpos = screen_x;
+				}
+
+				// Aggiungi alla lista sprite
+				prev_sprite->next = sprite;
+				prev_sprite = sprite;
+			}
+		}
+	}
+
+	// Aggiungi il player sopra tutto
+	player.visible_spc.sprite.next = NULL;
+	prev_sprite->next = &player.visible_spc.sprite;
+
+	// Disegna tutta la lista
+	tgi_sprite(first_sprite);
 
 
 

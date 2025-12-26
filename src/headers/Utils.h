@@ -20,7 +20,10 @@
 //#define RES16 1
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
-#define IMAX(a,b) ((a) > (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define MIN(a,b) ((a) > (b) ? (b) : (a))
+
+
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 102
@@ -33,8 +36,8 @@
 	#define TILE_SIZE 16
 	#define PLAYER_WIDTH 16
 	#define PLAYER_HEIGHT 32
-	#define TILES_X  12 //11//11
-	#define TILES_Y  10 //8//8
+	#define TILES_X  11 //11//11
+	#define TILES_Y  8 //8//8
 #elif RES24
 	#define RATIO 1
 	#define SCALE 3

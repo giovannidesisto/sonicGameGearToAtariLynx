@@ -5,22 +5,26 @@ from pathlib import Path
 U8_TYPES = ("u8", "uint8_t")
 
 
-def rle_encode_column(col):
+# ---------- RLE helpers ----------
+
+def rle_encode(seq):
     out = []
-    prev = col[0]
-    count = 1
+    prev = seq[0]
+    cnt = 1
 
-    for v in col[1:]:
-        if v == prev and count < 255:
-            count += 1
+    for v in seq[1:]:
+        if v == prev and cnt < 255:
+            cnt += 1
         else:
-            out.append((prev, count))
+            out.append((prev, cnt))
             prev = v
-            count = 1
+            cnt = 1
 
-    out.append((prev, count))
+    out.append((prev, cnt))
     return out
 
+
+# ---------- C parser ----------
 
 def extract_u8_arrays(text):
     pattern = re.compile(
@@ -43,7 +47,7 @@ def extract_u8_arrays(text):
                 brace -= 1
             i += 1
 
-        body = text[start:i-1]
+        body = text[start:i - 1]
         rows_raw = re.findall(r'\{([^{}]*)\}', body)
 
         matrix = []
@@ -51,64 +55,86 @@ def extract_u8_arrays(text):
             values = [int(v.strip(), 0) for v in row.split(',') if v.strip()]
             matrix.append(values)
 
-        if not matrix:
-            continue
-
-        rows = len(matrix)
-        cols = len(matrix[0])
-        arrays.append((name, rows, cols, matrix))
+        if matrix:
+            arrays.append((name, len(matrix), len(matrix[0]), matrix))
 
     return arrays
 
 
-def compress_array(rows, cols, matrix):
-    cols_rle = []
+# ---------- Compression ----------
+
+def compress_columns(rows, cols, matrix):
+    rle = []
     for c in range(cols):
         col = [matrix[r][c] for r in range(rows)]
-        cols_rle.append(rle_encode_column(col))
-    return cols_rle
+        rle.append(rle_encode(col))
+    return rle
 
+
+def compress_rows(rows, cols, matrix):
+    rle = []
+    for r in range(rows):
+        rle.append(rle_encode(matrix[r]))
+    return rle
+
+
+def flatten_rle(rle_list):
+    offs = []
+    data = []
+    offset = 0
+
+    for rle in rle_list:
+        offs.append(offset)
+        for v, cnt in rle:
+            data.append(v)
+            data.append(cnt)
+            offset += 2
+
+    return offs, data
+
+
+# ---------- C generation ----------
 
 def generate_c(arrays):
     out = []
-    out.append("// FILE GENERATO AUTOMATICAMENTE (RLE verticale)\n")
-    out.append("// Target: Atari Lynx - 65SC02\n\n")
+    out.append("// FILE GENERATO AUTOMATICAMENTE\n")
+    out.append("// RLE colonne + righe\n")
+    out.append("// Target: Atari Lynx (65SC02)\n\n")
     out.append("#include <stdint.h>\n\n")
 
     for name, rows, cols, matrix in arrays:
-        cols_rle = compress_array(rows, cols, matrix)
+        col_rle = compress_columns(rows, cols, matrix)
+        row_rle = compress_rows(rows, cols, matrix)
 
-        offs = []
-        data = []
+        col_offs, col_data = flatten_rle(col_rle)
+        row_offs, row_data = flatten_rle(row_rle)
 
-        offset = 0
-        for col in cols_rle:
-            offs.append(offset)
-            for v, r in col:
-                data.append(v)
-                data.append(r)
-                offset += 2
-
-        original_size = rows * cols
-        compressed_size = len(data)
+        orig_size = rows * cols
 
         out.append(f"// ===== {name} =====\n")
-        out.append(f"// Dimensioni: {rows} x {cols}\n")
-        out.append(f"// Size originale: {original_size} byte\n")
-        out.append(f"// Size compressa: {compressed_size} byte\n")
-        out.append(f"// Rapporto: {compressed_size / original_size:.2f}\n")
+        out.append(f"// Size originale : {orig_size} byte\n")
+        out.append(f"// Col RLE size   : {len(col_data)} byte\n")
+        out.append(f"// Row RLE size   : {len(row_data)} byte\n\n")
 
-        if compressed_size > original_size:
-            out.append("// NOTE: compressione peggiorativa\n")
-
-        # OFFSETS
-        out.append(f"const uint16_t {name}_RLE_OFFS[{cols}] = {{\n    ")
-        out.append(", ".join(str(o) for o in offs))
+        # ---- COLUMN ----
+        out.append(f"const uint16_t {name}_RLE_COL_OFFS[{cols}] = {{\n    ")
+        out.append(", ".join(map(str, col_offs)))
         out.append("\n};\n\n")
 
-        # DATA
-        out.append(f"const uint8_t {name}_RLE_DATA[] = {{\n    ")
-        for i, b in enumerate(data):
+        out.append(f"const uint8_t {name}_RLE_COL_DATA[] = {{\n    ")
+        for i, b in enumerate(col_data):
+            out.append(f"{b}, ")
+            if (i + 1) % 16 == 0:
+                out.append("\n    ")
+        out.append("\n};\n\n")
+
+        # ---- ROW ----
+        out.append(f"const uint16_t {name}_RLE_ROW_OFFS[{rows}] = {{\n    ")
+        out.append(", ".join(map(str, row_offs)))
+        out.append("\n};\n\n")
+
+        out.append(f"const uint8_t {name}_RLE_ROW_DATA[] = {{\n    ")
+        for i, b in enumerate(row_data):
             out.append(f"{b}, ")
             if (i + 1) % 16 == 0:
                 out.append("\n    ")
@@ -116,6 +142,8 @@ def generate_c(arrays):
 
     return "".join(out)
 
+
+# ---------- main ----------
 
 def main():
     if len(sys.argv) != 3:
@@ -127,10 +155,10 @@ def main():
 
     if not arrays:
         print("Nessun array u8 bidimensionale trovato.")
-        sys.exit(0)
+        return
 
     Path(sys.argv[2]).write_text(generate_c(arrays))
-    print(f"Generati {len(arrays)} array compressi.")
+    print(f"Generate {len(arrays)} mappe RLE.")
 
 
 if __name__ == "__main__":

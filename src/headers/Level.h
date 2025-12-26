@@ -14,14 +14,14 @@
 
 #define MAP_BUF_W   16          // POTENZA DI 2 (OBBLIGATORIO)
 #define TILE_SHIFT 4 //log2(TILE_SIZE)
-#define MAP_BUF_H   17//TILES_Y
+#define MAP_BUF_H   16//TILES_Y
 #define MAP_BUF_MASK (MAP_BUF_W - 1)
-#define MAP_SBORDA ((MAP_BUF_W - TILES_X) / 2)
-
+#define MAP_SBORDA_X ((MAP_BUF_W - TILES_X) >> 1)
+#define MAP_SBORDA_Y ((MAP_BUF_H - TILES_Y) >> 1)
 
 
 //#define MAP_BUF_H      MAP_HEIGHT// TILES_Y
-#define MAX_ACTIVE_SPRITES  TILES_Y*TILES_X*2
+#define MAX_ACTIVE_SPRITES  TILES_Y*TILES_X
 
 static u8 map_buf[MAP_BUF_H][MAP_BUF_W]={0};
 static SCB_REHV_PAL sprite_pool[MAX_ACTIVE_SPRITES];
@@ -61,7 +61,7 @@ typedef struct {
 	s16 map_buf_origin_x;
 	s16 map_buf_origin_y;
 	u8 map_buf_col0;
-
+	u8 map_buf_row0;
 
 	Camera camera;                            /* Camera per lo scroll */
 } Level;
@@ -79,6 +79,6 @@ void level_init_camera();
 void level_update_camera();
 int level_world_to_screen_x (int world_x);
 int level_world_to_screen_y( int world_y);
-u8 level_get_tile(u16 world_x, u16 world_y);
-
+//u8 level_get_tile(u16 world_x, u16 world_y);
+u8 level_get_tile_abs(u16 world_x, u16 world_y);
 #endif /* LEVEL_H */
