@@ -12,25 +12,25 @@ extern Player player;
 
 
 static inline void rle_rowcache_reset(
-    RLE_RowCache *c,
-    const u8 *data,
-    u16 offset
+		RLE_RowCache *c,
+		const u8 *data,
+		u16 offset
 ) {
-    c->ptr = data + offset;
-    c->next_col = 0;
-    c->value = 0;
+	c->ptr = data + offset;
+	c->next_col = 0;
+	c->value = 0;
 }
 
 
 static inline u8 rle_rowcache_get(
-    RLE_RowCache *c,
-    u16 col
+		RLE_RowCache *c,
+		u16 col
 ) {
-    while (col >= c->next_col) {
-        c->value = *c->ptr++;
-        c->next_col += *c->ptr++;
-    }
-    return c->value;
+	while (col >= c->next_col) {
+		c->value = *c->ptr++;
+		c->next_col += *c->ptr++;
+	}
+	return c->value;
 }
 
 
@@ -77,21 +77,21 @@ u8 level_get_tile_abs(u16 tile_x, u16 tile_y)
 
 
 static inline u8 decompress_rle_get_value(
-    const u8 *data,
-    u16 offset,
-    u16 col_idx
+		const u8 *data,
+		u16 offset,
+		u16 col_idx
 ) {
-    const u8 *p = data + offset;
-    u16 col = 0;
+	const u8 *p = data + offset;
+	u16 col = 0;
 
-    for (;;) {
-        u8 val = *p++;
-        u8 cnt = *p++;
+	for (;;) {
+		u8 val = *p++;
+		u8 cnt = *p++;
 
-        col += cnt;
-        if (col > col_idx)
-            return val;
-    }
+		col += cnt;
+		if (col > col_idx)
+			return val;
+	}
 }
 
 
@@ -130,44 +130,44 @@ static inline void level_init_map_streaming(void)
 
 static inline void stream_scroll_right(void)
 {
-    u8 write_col;
-    u8 y;
-    u16 new_world_col;
-    u16 world_row;
-    u8 by;
+	u8 write_col;
+	u8 y;
+	u16 new_world_col;
+	u16 world_row;
+	u8 by;
 
-    /* Avanza origine mondo */
-    level.map_buf_origin_x++;
+	/* Avanza origine mondo */
+	level.map_buf_origin_x++;
 
-    /* Avanza colonna circolare */
-    level.map_buf_col0 = (level.map_buf_col0 + 1) & MAP_BUF_MASK;
+	/* Avanza colonna circolare */
+	level.map_buf_col0 = (level.map_buf_col0 + 1) & MAP_BUF_MASK;
 
-    /* Colonna fisica da scrivere */
-    write_col = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
+	/* Colonna fisica da scrivere */
+	write_col = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
 
-    /* Colonna mondo da caricare */
-    new_world_col = level.map_buf_origin_x + MAP_BUF_W - 1;
+	/* Colonna mondo da caricare */
+	new_world_col = level.map_buf_origin_x + MAP_BUF_W - 1;
 
-    if (new_world_col >= level.map_w)
-        return;
+	if (new_world_col >= level.map_w)
+		return;
 
-    for (y = 0; y < MAP_BUF_H; y++) {
+	for (y = 0; y < MAP_BUF_H; y++) {
 
-        world_row = level.map_buf_origin_y + y;
-        if (world_row >= level.map_h) {
-            by = (level.map_buf_row0 + y) & MAP_BUF_MASK;
-            map_buf[by][write_col] = TILE_EMPTY;
-            continue;
-        }
+		world_row = level.map_buf_origin_y + y;
+		if (world_row >= level.map_h) {
+			by = (level.map_buf_row0 + y) & MAP_BUF_MASK;
+			map_buf[by][write_col] = TILE_EMPTY;
+			continue;
+		}
 
-        by = (level.map_buf_row0 + y) & MAP_BUF_MASK;
+		by = (level.map_buf_row0 + y) & MAP_BUF_MASK;
 
-        map_buf[by][write_col] = decompress_rle_get_value(
-            Z1L1_FG_MAP_RLE_DATA,
-            Z1L1_FG_MAP_RLE_OFFS[world_row],
-            new_world_col
-        );
-    }
+		map_buf[by][write_col] = decompress_rle_get_value(
+				Z1L1_FG_MAP_RLE_DATA,
+				Z1L1_FG_MAP_RLE_OFFS[world_row],
+				new_world_col
+		);
+	}
 }
 
 
@@ -209,37 +209,37 @@ static inline void stream_scroll_right(void)
 
 static inline void stream_scroll_left(void)
 {
-    u8 write_col;
-    u8 y;
-    u16 new_world_col;
+	u8 write_col;
+	u8 y;
+	u16 new_world_col;
 
-    /* Retrocede origine mondo */
-    if (level.map_buf_origin_x == 0)
-        return;
+	/* Retrocede origine mondo */
+	if (level.map_buf_origin_x == 0)
+		return;
 
-    level.map_buf_origin_x--;
-    level.map_buf_col0 = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
+	level.map_buf_origin_x--;
+	level.map_buf_col0 = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
 
-    /* Colonna fisica da scrivere (prima logica) */
-    write_col = level.map_buf_col0;
-    new_world_col = level.map_buf_origin_x;
+	/* Colonna fisica da scrivere (prima logica) */
+	write_col = level.map_buf_col0;
+	new_world_col = level.map_buf_origin_x;
 
-    for (y = 0; y < MAP_BUF_H; y++) {
+	for (y = 0; y < MAP_BUF_H; y++) {
 
-        u16 world_row = level.map_buf_origin_y + y;
-        u8  phys_row  = (y + level.map_buf_row0) & MAP_BUF_MASK;
+		u16 world_row = level.map_buf_origin_y + y;
+		u8  phys_row  = (y + level.map_buf_row0) & MAP_BUF_MASK;
 
-        if (world_row < level.map_h) {
-            map_buf[phys_row][write_col] =
-                decompress_rle_get_value(
-                    Z1L1_FG_MAP_RLE_DATA,
-                    Z1L1_FG_MAP_RLE_OFFS[world_row],
-                    new_world_col
-                );
-        } else {
-            map_buf[phys_row][write_col] = TILE_EMPTY;
-        }
-    }
+		if (world_row < level.map_h) {
+			map_buf[phys_row][write_col] =
+					decompress_rle_get_value(
+							Z1L1_FG_MAP_RLE_DATA,
+							Z1L1_FG_MAP_RLE_OFFS[world_row],
+							new_world_col
+					);
+		} else {
+			map_buf[phys_row][write_col] = TILE_EMPTY;
+		}
+	}
 }
 
 
@@ -247,33 +247,33 @@ static inline void stream_scroll_left(void)
 
 static inline void stream_scroll_up(void)
 {
-    u8 x, write_row, write_col;
-    u16 world_row, world_col;
+	u8 x, write_row, write_col;
+	u16 world_row, world_col;
 
-    if (level.map_buf_origin_y == 0)
-        return;
+	if (level.map_buf_origin_y == 0)
+		return;
 
-    level.map_buf_origin_y--;
-    level.map_buf_row0 = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
+	level.map_buf_origin_y--;
+	level.map_buf_row0 = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
 
-    write_row = level.map_buf_row0;
-    world_row = level.map_buf_origin_y;
+	write_row = level.map_buf_row0;
+	world_row = level.map_buf_origin_y;
 
-    for (x = 0; x < MAP_BUF_W; x++) {
-        world_col = level.map_buf_origin_x + x;
-        write_col = (x + level.map_buf_col0) & MAP_BUF_MASK;
+	for (x = 0; x < MAP_BUF_W; x++) {
+		world_col = level.map_buf_origin_x + x;
+		write_col = (x + level.map_buf_col0) & MAP_BUF_MASK;
 
-        if (world_row < level.map_h && world_col < level.map_w) {
-            map_buf[write_row][write_col] =
-                decompress_rle_get_value(
-                    Z1L1_FG_MAP_RLE_DATA,
-                    Z1L1_FG_MAP_RLE_OFFS[world_row],
-                    world_col
-                );
-        } else {
-            map_buf[write_row][write_col] = TILE_EMPTY;
-        }
-    }
+		if (world_row < level.map_h && world_col < level.map_w) {
+			map_buf[write_row][write_col] =
+					decompress_rle_get_value(
+							Z1L1_FG_MAP_RLE_DATA,
+							Z1L1_FG_MAP_RLE_OFFS[world_row],
+							world_col
+					);
+		} else {
+			map_buf[write_row][write_col] = TILE_EMPTY;
+		}
+	}
 }
 
 
@@ -281,30 +281,30 @@ static inline void stream_scroll_up(void)
 
 static inline void stream_scroll_down(void)
 {
-    u8 x, write_row, write_col;
-    u16 world_row, world_col;
+	u8 x, write_row, write_col;
+	u16 world_row, world_col;
 
-    level.map_buf_origin_y++;
-    level.map_buf_row0 = (level.map_buf_row0 + 1) & MAP_BUF_MASK;
+	level.map_buf_origin_y++;
+	level.map_buf_row0 = (level.map_buf_row0 + 1) & MAP_BUF_MASK;
 
-    write_row = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
-    world_row = level.map_buf_origin_y + MAP_BUF_H - 1;
+	write_row = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
+	world_row = level.map_buf_origin_y + MAP_BUF_H - 1;
 
-    for (x = 0; x < MAP_BUF_W; x++) {
-        world_col = level.map_buf_origin_x + x;
-        write_col = (x + level.map_buf_col0) & MAP_BUF_MASK;
+	for (x = 0; x < MAP_BUF_W; x++) {
+		world_col = level.map_buf_origin_x + x;
+		write_col = (x + level.map_buf_col0) & MAP_BUF_MASK;
 
-        if (world_row < level.map_h && world_col < level.map_w) {
-            map_buf[write_row][write_col] =
-                decompress_rle_get_value(
-                    Z1L1_FG_MAP_RLE_DATA,
-                    Z1L1_FG_MAP_RLE_OFFS[world_row],
-                    world_col
-                );
-        } else {
-            map_buf[write_row][write_col] = TILE_EMPTY;
-        }
-    }
+		if (world_row < level.map_h && world_col < level.map_w) {
+			map_buf[write_row][write_col] =
+					decompress_rle_get_value(
+							Z1L1_FG_MAP_RLE_DATA,
+							Z1L1_FG_MAP_RLE_OFFS[world_row],
+							world_col
+					);
+		} else {
+			map_buf[write_row][write_col] = TILE_EMPTY;
+		}
+	}
 }
 
 /* Inizializza il sistema di sprite */
@@ -316,6 +316,10 @@ void level_init(void) {
 	lynx_load(2);//player
 	lynx_load(3);//sfondo
 	lynx_load(4);//background
+
+
+
+
 	//identifica le coordinate x/y mondo nel buffer attuale
 	level.map_buf_origin_x = 0;
 	level.map_buf_origin_y = 0;
@@ -326,6 +330,16 @@ void level_init(void) {
 	level.camera.prev_tile_y=0;
 	level.map_h= MAP_HEIGHT;
 	level.map_w= MAP_WIDTH;
+
+	level.start_x =0;
+	level.start_y =level.map_h * TILE_SIZE;//level.map_h * TILE_SIZE ;
+
+	level.end_x =  level.map_w * TILE_SIZE;
+	level.end_y =  level.map_h * TILE_SIZE ;
+
+
+
+
 	/* Limita la camera ai bordi del livello */
 	level.level_width_px =  level.map_w * TILE_SIZE;
 	level.level_height_px = level.map_h * TILE_SIZE;
@@ -363,12 +377,9 @@ void level_load(u8 level_num) {
 	(void)level_num;  /* Ignorato per ora */
 
 
-	level.start_x =0;
-	level.start_y =level.map_h * TILE_SIZE;//level.map_h * TILE_SIZE ;
 
-	level.end_x =  level.map_w * TILE_SIZE;
-	level.end_y =  level.map_h * TILE_SIZE ;
 
+	level_init();
 
 	/* Inizializza la camera */
 	level_init_camera();
@@ -377,7 +388,6 @@ void level_load(u8 level_num) {
 	level_update_camera( );
 
 
-	level_init();
 }
 
 
@@ -412,20 +422,20 @@ void level_draw() {
 	dy = start_tile_y - level.camera.prev_tile_y;
 
 
-ty = level.map_buf_origin_y;
-tx = level.map_buf_origin_x;
+	ty = level.map_buf_origin_y;
+	tx = level.map_buf_origin_x;
 
 	while (start_tile_x > level.map_buf_origin_x )//+ MAP_SBORDA_X)
-	    stream_scroll_right();
+		stream_scroll_right();
 
 	while (start_tile_x < level.map_buf_origin_x )//+ MAP_SBORDA_X)
-	    stream_scroll_left();
+		stream_scroll_left();
 
 	while (start_tile_y > level.map_buf_origin_y)
-	    stream_scroll_down();
+		stream_scroll_down();
 
 	while (start_tile_y  < level.map_buf_origin_y )
-	    stream_scroll_up();
+		stream_scroll_up();
 
 	level.camera.prev_tile_y = start_tile_y;
 	level.camera.prev_tile_x = start_tile_x;
@@ -475,10 +485,9 @@ tx = level.map_buf_origin_x;
 	// Disegna tutta la lista
 	tgi_sprite(first_sprite);
 
-	printCoordsToScreen(level.map_buf_origin_x,level.map_buf_origin_y,0,0,0x0F);
-//	printCoordsToScreen(level.map_buf_col0,level.	map_buf_row0,0,10,0x0E);
-	printCoordsToScreen(start_tile_x,start_tile_y,0,20,0x0D);
-	printCoordsToScreen(tx,ty,0,30,0x0C);
+	//	printCoordsToScreen(level.map_buf_origin_x,level.map_buf_origin_y,0,0,0x0F);
+	//	printCoordsToScreen(start_tile_x,start_tile_y,0,20,0x0D);
+	//printCoordsToScreen(player.x,level.end_x,0,30,0x0C);
 
 }
 
@@ -493,26 +502,189 @@ void level_init_camera() {
 	level.camera.center_x = level.camera.width>>1;//>>1;/// 2;
 	level.camera.center_y = level.camera.height>>2;//;>>2;/// 2;
 
+
+	level.camera.dead_zone_left = 32;
+	level.camera.dead_zone_right = 32;
+	level.camera.max_inertia_pixels = 8;  /* 16 pixel di inerzia */
+	level.camera.inertia_counter = 0;
+	level.camera.inertia_x = 0;
+	level.camera.last_player_dir = 0;
+
 }
 
 
 
 /* Aggiorna la posizione della camera per seguire il player */
+//versione base senza dead zone
+//void level_update_camera( ) {
+//	u16 center_x,center_y;
+//
+//
+//	/* Segui il player mantenendolo al centro */
+//	level.camera.x = player.x - level.camera.center_x;
+//	level.camera.y =  player.y  - level.camera.center_y;
+//
+//
+//	/* Limiti orizzontali */
+//	if (level.camera.x < 0) {
+//		level.camera.x = 0;
+//	}
+//	if (level.camera.x + level.camera.width > level.level_width_px) {
+//		level.camera.x = level.level_width_px - level.camera.width;
+//	}
+//
+//	/* Limiti verticali */
+//	if (level.camera.y < 0) {
+//		level.camera.y = 0;
+//	}
+//	if (level.camera.y + level.camera.height > level.level_height_px) {
+//		level.camera.y = level.level_height_px - level.camera.height;
+//	}
+//
+//	if(level.camera.x>level.level_width_px)level.camera.x=0;
+//	if(level.camera.y>level.level_height_px)level.camera.y=0;
+//
+//	player.visible_spc.sprite.hpos = (int)(player.x - level.camera.x);
+//	player.visible_spc.sprite.vpos = (int)(player.y - level.camera.y);
+//}
+
+/* Aggiorna la posizione della camera per seguire il player */
+//versione con dead zone senza ineriza
+//void level_update_camera_old( ) {
+//	u16 player_screen_x, player_screen_y;
+//	u16 dead_zone_left, dead_zone_right;
+//	u16 dead_zone_top, dead_zone_bottom;
+//	/* Calcola la posizione del player rispetto alla camera attuale */
+//	player_screen_x = player.x - level.camera.x;
+//	player_screen_y = player.y - level.camera.y;
+//
+//	/* Definisci le dead zone (puoi renderle configurabili) */
+//	dead_zone_left = level.camera.center_x - level.camera.dead_zone_left;  /* 40px a sinistra del centro */
+//	dead_zone_right = level.camera.center_x + level.camera.dead_zone_right; /* 40px a destra del centro */
+//
+//	/* Regola la camera orizzontalmente solo se il player esce dalle dead zone */
+//	if (player_screen_x < dead_zone_left) {
+//		/* Player troppo a sinistra: sposta la camera a sinistra */
+//		level.camera.x = player.x - dead_zone_left;
+//	}
+//	else if (player_screen_x > dead_zone_right) {
+//		/* Player troppo a destra: sposta la camera a destra */
+//		level.camera.x = player.x - dead_zone_right;
+//	}
+//
+//
+//	level.camera.y = player.y - level.camera.center_y;
+//
+//	/* Limiti orizzontali */
+//	if (level.camera.x < 0) {
+//		level.camera.x = 0;
+//	}
+//	if (level.camera.x + level.camera.width > level.level_width_px) {
+//		level.camera.x = level.level_width_px - level.camera.width;
+//	}
+//
+//	/* Limiti verticali */
+//	if (level.camera.y < 0) {
+//		level.camera.y = 0;
+//	}
+//	if (level.camera.y + level.camera.height > level.level_height_px) {
+//		level.camera.y = level.level_height_px - level.camera.height;
+//	}
+//
+//	/* Aggiorna posizione sprite del player (relative alla camera) */
+//	player.visible_spc.sprite.hpos = (int)(player.x - level.camera.x);
+//	player.visible_spc.sprite.vpos = (int)(player.y - level.camera.y);
+//}
+
+
+
+static u8 inertia_dir = 0;          /* Direzione inerzia: 0=none, 1=dx, 2=sx */
+static u8 inertia_counter = 0;      /* Pixel rimanenti */
+static u8 player_was_moving = 0;    /* Player si muoveva nel frame precedente? */
+static u8 last_move_dir = 0;        /* Ultima direzione di movimento */
 void level_update_camera( ) {
-	u16 center_x,center_y;//,level_width_px,level_height_px;
+
+	u8 player_is_moving;
+	u8 current_dir;
+	u16 player_screen_x;
+	u16 dead_zone_left, dead_zone_right;
+
+	/* Calcoli iniziali */
+	player_screen_x = player.x - level.camera.x;
+	dead_zone_left = level.camera.center_x - level.camera.dead_zone_left;
+	dead_zone_right = level.camera.center_x + level.camera.dead_zone_right;
+
+	/* Stato corrente */
+	current_dir = (player.vx > 0) ? 1 : (player.vx < 0) ? 2 : 0;
+	player_is_moving = (current_dir != 0);
+
+	/* DETECTION: Quando iniziare una nuova inerzia */
+	if (player_is_moving && !player_was_moving) {
+		/* Player ha INIZIATO a muoversi (da fermo a movimento) */
+		inertia_dir = current_dir;
+		inertia_counter = level.camera.max_inertia_pixels;
+		last_move_dir = current_dir;
+	}
+	else if (player_is_moving && player_was_moving && current_dir != last_move_dir) {
+		/* Player ha CAMBIATO DIREZIONE (da dx a sx o viceversa) */
+		inertia_dir = current_dir;
+		inertia_counter = level.camera.max_inertia_pixels;
+		last_move_dir = current_dir;
+	}
+	else if (!player_is_moving && player_was_moving) {
+		/* Player si è FERMATO */
+		inertia_dir = last_move_dir;  /* Continua nell'ultima direzione */
+		inertia_counter = level.camera.max_inertia_pixels;
+	}
+
+	/* Aggiorna stato per il prossimo frame */
+	player_was_moving = player_is_moving;
+	if (player_is_moving) {
+		last_move_dir = current_dir;
+	}
+
+	/* APPLICA INERZIA */
+	if (inertia_counter > 0) {
+		if (inertia_dir == 1) {  /* Destra */
+			if (level.camera.x + level.camera.width < level.level_width_px) {
+				if(inertia_counter>6)level.camera.x+=2;
+				level.camera.x++;
+			}
+		}
+		else if (inertia_dir == 2) {  /* Sinistra */
+			if (level.camera.x > 0) {
+				if(inertia_counter>6)level.camera.x-=2;
+				level.camera.x--;
+			}
+		}
+		inertia_counter--;
+	}
+	/* COMPORTAMENTO DEAD ZONE (solo se nessuna inerzia) */
+	else if (inertia_counter == 0) {
+		inertia_dir = 0;  /* Resetta direzione inerzia */
+
+		if (player_screen_x < dead_zone_left) {
+			level.camera.x = player.x - dead_zone_left;
+		}
+		else if (player_screen_x > dead_zone_right) {
+			level.camera.x = player.x - dead_zone_right;
+		}
+	}
 
 
-	/* Segui il player mantenendolo al centro */
-	level.camera.x = player.x - level.camera.center_x;
-	level.camera.y =  player.y  - level.camera.center_y;
 
+	level.camera.y = player.y - level.camera.center_y;
 
 	/* Limiti orizzontali */
 	if (level.camera.x < 0) {
 		level.camera.x = 0;
+		inertia_counter = 0;
+		inertia_dir = 0;
 	}
 	if (level.camera.x + level.camera.width > level.level_width_px) {
 		level.camera.x = level.level_width_px - level.camera.width;
+		inertia_counter = 0;
+		inertia_dir = 0;
 	}
 
 	/* Limiti verticali */
@@ -523,25 +695,7 @@ void level_update_camera( ) {
 		level.camera.y = level.level_height_px - level.camera.height;
 	}
 
-	if(level.camera.x>level.level_width_px)level.camera.x=0;
-	if(level.camera.y>level.level_height_px)level.camera.y=0;
-
-	player.visible_spc.sprite.hpos = (int)(player.x - level.camera.x);//level_world_to_screen_x(player.x);
-	player.visible_spc.sprite.vpos = (int)(player.y - level.camera.y);//level_world_to_screen_y(player.y);
-
+	/* Aggiorna posizione sprite del player */
+	player.visible_spc.sprite.hpos = (int)(player.x - level.camera.x);
+	player.visible_spc.sprite.vpos = (int)(player.y - level.camera.y);
 }
-
-
-
-///* Converti coordinate world a screen X */
-//int level_world_to_screen_x( int world_x) {
-//	return (int)(world_x - level.camera.x);
-//}
-//
-///* Converti coordinate world a screen Y */
-//int level_world_to_screen_y( int world_y) {
-//	return (int)(world_y - level.camera.y);
-//}
-
-
-

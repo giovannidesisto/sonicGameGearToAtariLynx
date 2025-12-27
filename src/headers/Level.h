@@ -18,8 +18,8 @@
 #define MAP_BUF_MASK (MAP_BUF_W - 1)
 
 
-#define MAP_SBORDA_X ((MAP_BUF_W - TILES_X) >> 1)
-#define MAP_SBORDA_Y ((MAP_BUF_H - TILES_Y) >> 1)
+//#define MAP_SBORDA_X ((MAP_BUF_W - TILES_X) >> 1)
+//#define MAP_SBORDA_Y ((MAP_BUF_H - TILES_Y) >> 1)
 
 
 //#define MAP_BUF_H      MAP_HEIGHT// TILES_Y
@@ -37,16 +37,38 @@ typedef struct {
 } RLE_RowCache;
 
 
+//typedef struct {
+//	u16 prev_tile_x;
+//	u16 prev_tile_y;
+//	u8 center_x;
+//	u8 center_y;
+//	s16 x;        /* Posizione X della camera (in pixel world) */
+//	s16 y;        /* Posizione Y della camera (in pixel world) */
+//	u8 width;    /* Larghezza della viewport (solitamente SCREEN_WIDTH) */
+//	u8 height;   /* Altezza della viewport (solitamente SCREEN_HEIGHT) */
+//} Camera;
+
+
+/* Struttura Camera estesa */
 typedef struct {
-	u16 prev_tile_x;
-	u16 prev_tile_y;
-	u8 center_x;
-	u8 center_y;
-	s16 x;        /* Posizione X della camera (in pixel world) */
-	s16 y;        /* Posizione Y della camera (in pixel world) */
-	u8 width;    /* Larghezza della viewport (solitamente SCREEN_WIDTH) */
-	u8 height;   /* Altezza della viewport (solitamente SCREEN_HEIGHT) */
+    u16 prev_tile_x;
+    u16 prev_tile_y;
+    u8 center_x;
+    u8 center_y;
+    s16 x;                   /* Posizione X della camera (in pixel world) */
+    s16 y;                   /* Posizione Y della camera (in pixel world) */
+    u8 width;               /* Larghezza della viewport */
+    u8 height;              /* Altezza della viewport */
+
+    /* Nuovi campi per dead zone e inerzia */
+    u8 dead_zone_left;      /* Dead zone sinistra dal centro */
+    u8 dead_zone_right;     /* Dead zone destra dal centro */
+    s8 inertia_x;           /* Inerzia orizzontale (-127 a +127) */
+    u8 inertia_counter;     /* Contatore per l'inerzia */
+    u8 max_inertia_pixels;  /* Pixel massimi di inerzia (default 16) */
+    u8 last_player_dir;     /* Ultima direzione del player (0=fermo, 1=dx, 2=sx) */
 } Camera;
+
 
 /* Struttura livello */
 typedef struct {

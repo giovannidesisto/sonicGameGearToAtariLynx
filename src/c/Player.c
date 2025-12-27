@@ -165,254 +165,261 @@ void  player_animate() {
 }
 
 
-void check_world_collision_old(void)
-{
-    /* DICHIARAZIONE DI TUTTE LE VARIABILI ALL'INIZIO */
-    s16 new_x;
-    s16 new_y;
-    s16 old_x;
-    s16 old_y;
-    s16 old_feet;
-    s16 new_feet;
-    s16 left_x;
-    s16 right_x;
-    s16 tx;
-    s16 ty;
-    TileInfo* ti;
-    u8 local_x;
-    u8 h;
-    s16 ground_y;
-    s16 i;
-    s16 dir;
-    s16 check_x;
-    s16 player_left;
-    s16 player_right;
-    s16 player_top;
-    s16 player_bottom;
-    s16 tile_left;
-    s16 tile_right;
-    s16 tile_top;
-    s16 tile_bottom;
-    s16 start_tx;
-    s16 end_tx;
-    s16 start_ty;
-    s16 end_ty;
-    s16 check_points[3];
-    s16 steps;
-    s16 step;
-    s16 current_x;
-    s16 current_y;
-    s16 current_left;
-    s16 current_right;
-    s16 test_tile;
-    s16 check_ty_start;
-    s16 check_ty_end;
-    s16 temp;
-    s16 platform_checks[5];
-    s16 check_ty;
 
-    /* INIZIALIZZAZIONE */
-    old_x = player.x;
-    old_y = player.y;
-    old_feet = old_y + player.height;
 
-    new_x = old_x + player.vx;
-    new_y = old_y + player.vy;
-    new_feet = new_y + player.height;
 
-    player.is_grounded = 0;
 
-    /* ============================================== */
-    /* 1. COLLISIONI ORIZZONTALI (ENTRAMBE LE DIREZIONI) */
-    /* ============================================== */
-    if (player.vx != 0) {
-        dir = (player.vx > 0) ? 1 : -1;
-        steps = (player.vx < 0) ? -player.vx : player.vx;
 
-        /* Controlla ogni pixel nel percorso */
-        for (step = 1; step <= steps; step++) {
-            current_x = old_x + (dir * step);
-            current_left = current_x - player.width_half;
-            current_right = current_x + player.width_half - 1;
 
-            /* A seconda della direzione, controlla il bordo corretto */
-            if (dir > 0) {
-                /* DESTRA: controlla bordo destro */
-                test_tile = current_right >> TILE_SHIFT;
-            } else {
-                /* SINISTRA: controlla bordo sinistro */
-                test_tile = current_left >> TILE_SHIFT;
-            }
-
-            /* Controlla 3 punti verticali (alto, centro, basso) */
-            check_points[0] = old_y;
-            check_points[1] = old_y + (player.height / 2);
-            check_points[2] = old_y + player.height - 1;
-
-            for (i = 0; i < 3; i++) {
-                ty = check_points[i] >> TILE_SHIFT;
-
-                if (test_tile < 0 || test_tile >= level.map_w ||
-                    ty < 0 || ty >= level.map_h)
-                    continue;
-
-                ti = tileinfo_get(level_get_tile_abs(test_tile, ty));
-
-                if (ti->type == TILE_SOLID) {
-                    if (dir > 0) {
-                        /* Collisione a DESTRA */
-                        new_x = (test_tile * TILE_SIZE) - player.width_half - 1;
-                    } else {
-                        /* Collisione a SINISTRA */
-                        new_x = ((test_tile + 1) * TILE_SIZE) + player.width_half;
-                    }
-                    player.vx = 0;
-                    goto h_done;
-                }
-            }
-        }
-    }
-
-h_done:
-
-    /* ============================================== */
-    /* 2. COLLISIONI VERTICALI SOLID */
-    /* ============================================== */
-    if (player.vy != 0) {
-        dir = (player.vy > 0) ? 1 : -1;
-        steps = (player.vy < 0) ? -player.vy : player.vy;
-
-        /* Controlla ogni pixel nel percorso */
-        for (step = 1; step <= steps; step++) {
-            current_y = old_y + (dir * step);
-
-            /* A seconda della direzione, controlla il bordo corretto */
-            if (dir > 0) {
-                /* CADUTA: controlla i piedi */
-                test_tile = (current_y + player.height - 1) >> TILE_SHIFT;
-            } else {
-                /* SALTO: controlla la testa */
-                test_tile = current_y >> TILE_SHIFT;
-            }
-
-            /* Controlla 3 punti orizzontali (sinistra, centro, destra) */
-            check_points[0] = new_x - player.width_half;
-            check_points[1] = new_x;
-            check_points[2] = new_x + player.width_half - 1;
-
-            for (i = 0; i < 3; i++) {
-                tx = check_points[i] >> TILE_SHIFT;
-
-                if (tx < 0 || tx >= level.map_w ||
-                    test_tile < 0 || test_tile >= level.map_h)
-                    continue;
-
-                ti = tileinfo_get(level_get_tile_abs(tx, test_tile));
-
-                if (ti->type == TILE_SOLID) {
-                    if (dir > 0) {
-                        /* Atterraggio su tile solida */
-                        new_y = (test_tile * TILE_SIZE) - player.height;
-                        player.vy = 0;
-                        player.is_grounded = 1;
-                        player.is_jumping = 0;
-                    } else {
-                        /* Colpisce il soffitto */
-                        new_y = ((test_tile + 1) * TILE_SIZE);
-                        player.vy = 0;
-                    }
-                    goto v_done;
-                }
-            }
-        }
-    }
-
-v_done:
-
-    /* ============================================== */
-    /* 3. COLLISIONI CON PIATTAFORME (FIXED) */
-    /* ============================================== */
-    if (player.vy >= 0) {
-        /* Ricalcola new_feet dopo eventuali correzioni */
-        new_feet = new_y + player.height;
-
-        /* Controlla la tile direttamente sotto i piedi */
-        ty = (new_feet >> TILE_SHIFT);
-
-        left_x = new_x - player.width_half;
-        right_x = new_x + player.width_half - 1;
-
-        /* Controlla anche la tile sopra, nel caso di movimento veloce */
-        check_ty_start = ((old_feet) >> TILE_SHIFT);
-        check_ty_end = ty;
-
-        /* Assicurati che start <= end */
-        if (check_ty_start > check_ty_end) {
-            temp = check_ty_start;
-            check_ty_start = check_ty_end;
-            check_ty_end = temp;
-        }
-
-        /* Controlla ogni tile verticale nel percorso */
-        for (check_ty = check_ty_start; check_ty <= check_ty_end; check_ty++) {
-            start_tx = (left_x >> TILE_SHIFT);
-            end_tx = (right_x >> TILE_SHIFT);
-
-            for (tx = start_tx; tx <= end_tx; tx++) {
-                if (tx < 0 || tx >= level.map_w || check_ty < 0 || check_ty >= level.map_h)
-                    continue;
-
-                ti = tileinfo_get(level_get_tile_abs(tx, check_ty));
-
-                if (ti->type == TILE_PLATFORM) {
-                    /* Controlla 5 punti lungo la larghezza */
-                    platform_checks[0] = left_x;
-                    platform_checks[1] = left_x + (player.width_half / 2);
-                    platform_checks[2] = new_x;
-                    platform_checks[3] = right_x - (player.width_half / 2);
-                    platform_checks[4] = right_x;
-
-                    for (i = 0; i < 5; i++) {
-                        check_x = platform_checks[i];
-
-                        /* Verifica che questo punto sia nella tile corrente */
-                        if ((check_x >> TILE_SHIFT) != tx) continue;
-
-                        local_x = check_x & 0x0F;
-                        h = ti->height_map[local_x];
-
-                        if (h > 0) {
-                            ground_y = (check_ty * TILE_SIZE) + (15 - h);
-
-                            /* CONDIZIONE CORRETTA per piattaforme:
-                               1. I piedi erano STRETTAMENTE SOPRA la piattaforma
-                               2. I piedi sono ORA SOTTO o SULLA piattaforma
-                            */
-                            if (old_feet < ground_y) {
-                                /* Prima era sopra: continua */
-                            } else if (new_feet >= ground_y) {
-                                /* Ora è sotto/sulla: ATTERRA */
-                                new_y = ground_y - player.height;
-                                player.vy = 0;
-                                player.is_grounded = 1;
-                                player.is_jumping = 0;
-                                goto p_done;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-p_done:
-
-    /* ============================================== */
-    /* 4. APPLICA POSIZIONE FINALE */
-    /* ============================================== */
-    player.x = new_x;
-    player.y = new_y;
-}
+//
+//void check_world_collision(void)
+//{
+//    /* DICHIARAZIONE DI TUTTE LE VARIABILI ALL'INIZIO */
+//    s16 new_x;
+//    s16 new_y;
+//    s16 old_x;
+//    s16 old_y;
+//    s16 old_feet;
+//    s16 left_x;
+//    s16 new_feet;
+//    s16 right_x;
+//    s16 tx;
+//    s16 ty;
+//    TileInfo* ti;
+//    u8 local_x;
+//    u8 h;
+//    s16 ground_y;
+//    s16 i;
+//    s16 dir;
+//    s16 check_x;
+//    s16 player_left;
+//    s16 player_right;
+//    s16 player_top;
+//    s16 player_bottom;
+//    s16 tile_left;
+//    s16 tile_right;
+//    s16 tile_top;
+//    s16 tile_bottom;
+//    s16 start_tx;
+//    s16 end_tx;
+//    s16 start_ty;
+//    s16 end_ty;
+//    s16 check_points[3];
+//    s16 steps;
+//    s16 step;
+//    s16 current_x;
+//    s16 current_y;
+//    s16 current_left;
+//    s16 current_right;
+//    s16 test_tile;
+//    s16 check_ty_start;
+//    s16 check_ty_end;
+//    s16 temp;
+//    s16 platform_checks[5];
+//    s16 check_ty;
+//
+//    /* INIZIALIZZAZIONE */
+//    old_x = player.x;
+//    old_y = player.y;
+//    old_feet = old_y + player.height;
+//
+//    new_x = old_x + player.vx;
+//    new_y = old_y + player.vy;
+//    new_feet = new_y + player.height;
+//
+//    player.is_grounded = 0;
+//
+//    /* ============================================== */
+//    /* 1. COLLISIONI ORIZZONTALI (ENTRAMBE LE DIREZIONI) */
+//    /* ============================================== */
+//    if (player.vx != 0) {
+//        dir = (player.vx > 0) ? 1 : -1;
+//        steps = (player.vx < 0) ? -player.vx : player.vx;
+//
+//        /* Controlla ogni pixel nel percorso */
+//        for (step = 1; step <= steps; step++) {
+//            current_x = old_x + (dir * step);
+//            current_left = current_x - player.width_half;
+//            current_right = current_x + player.width_half - 1;
+//
+//            /* A seconda della direzione, controlla il bordo corretto */
+//            if (dir > 0) {
+//                /* DESTRA: controlla bordo destro */
+//                test_tile = current_right >> TILE_SHIFT;
+//            } else {
+//                /* SINISTRA: controlla bordo sinistro */
+//                test_tile = current_left >> TILE_SHIFT;
+//            }
+//
+//            /* Controlla 3 punti verticali (alto, centro, basso) */
+//            check_points[0] = old_y;
+//            check_points[1] = old_y + (player.height_half);
+//            check_points[2] = old_y + player.height - 1;
+//
+//            for (i = 0; i < 3; i++) {
+//                ty = check_points[i] >> TILE_SHIFT;
+//
+//                if (test_tile < 0 || test_tile >= level.map_w ||
+//                    ty < 0 || ty >= level.map_h)
+//                    continue;
+//
+//                ti = tileinfo_get(level_get_tile_abs(test_tile, ty));
+//
+//                if (ti->type == TILE_SOLID) {
+//                    if (dir > 0) {
+//                        /* Collisione a DESTRA */
+//                        new_x = (test_tile <<TILE_SHIFT) - player.width_half - 1;
+//                    } else {
+//                        /* Collisione a SINISTRA */
+//                        new_x = ((test_tile + 1) <<TILE_SHIFT) + player.width_half;
+//                    }
+//                    player.vx = 0;
+//                    goto h_done;
+//                }
+//            }
+//        }
+//    }
+//
+//h_done:
+//
+//    /* ============================================== */
+//    /* 2. COLLISIONI VERTICALI SOLID */
+//    /* ============================================== */
+//    if (player.vy != 0) {
+//        dir = (player.vy > 0) ? 1 : -1;
+//        steps = (player.vy < 0) ? -player.vy : player.vy;
+//
+//        /* Controlla ogni pixel nel percorso */
+//        for (step = 1; step <= steps; step++) {
+//            current_y = old_y + (dir * step);
+//
+//            /* A seconda della direzione, controlla il bordo corretto */
+//            if (dir > 0) {
+//                /* CADUTA: controlla i piedi */
+//                test_tile = (current_y + player.height - 1) >> TILE_SHIFT;
+//            } else {
+//                /* SALTO: controlla la testa */
+//                test_tile = current_y >> TILE_SHIFT;
+//            }
+//
+//            /* Controlla 3 punti orizzontali (sinistra, centro, destra) */
+//            check_points[0] = new_x - player.width_half;
+//            check_points[1] = new_x;
+//            check_points[2] = new_x + player.width_half - 1;
+//
+//            for (i = 0; i < 3; i++) {
+//                tx = check_points[i] >> TILE_SHIFT;
+//
+//                if (tx < 0 || tx >= level.map_w ||
+//                    test_tile < 0 || test_tile >= level.map_h)
+//                    continue;
+//
+//                ti = tileinfo_get(level_get_tile_abs(tx, test_tile));
+//
+//                if (ti->type == TILE_SOLID) {
+//                    if (dir > 0) {
+//                        /* Atterraggio su tile solida */
+//                        new_y = (test_tile <<TILE_SHIFT) - player.height;
+//                        player.vy = 0;
+//                        player.is_grounded = 1;
+//                        player.is_jumping = 0;
+//                    } else {
+//                        /* Colpisce il soffitto */
+//                        new_y = ((test_tile + 1) <<TILE_SHIFT);
+//                        player.vy = 0;
+//                    }
+//                    goto v_done;
+//                }
+//            }
+//        }
+//    }
+//
+//v_done:
+//
+//    /* ============================================== */
+//    /* 3. COLLISIONI CON PIATTAFORME (FIXED) */
+//    /* ============================================== */
+//    if (player.vy >= 0) {
+//        /* Ricalcola new_feet dopo eventuali correzioni */
+//        new_feet = new_y + player.height;
+//
+//        /* Controlla la tile direttamente sotto i piedi */
+//        ty = (new_feet >> TILE_SHIFT);
+//
+//        left_x = new_x - player.width_half;
+//        right_x = new_x + player.width_half - 1;
+//
+//        /* Controlla anche la tile sopra, nel caso di movimento veloce */
+//        check_ty_start = ((old_feet) >> TILE_SHIFT);
+//        check_ty_end = ty;
+//
+//        /* Assicurati che start <= end */
+//        if (check_ty_start > check_ty_end) {
+//            temp = check_ty_start;
+//            check_ty_start = check_ty_end;
+//            check_ty_end = temp;
+//        }
+//
+//        /* Controlla ogni tile verticale nel percorso */
+//        for (check_ty = check_ty_start; check_ty <= check_ty_end; check_ty++) {
+//            start_tx = (left_x >> TILE_SHIFT);
+//            end_tx = (right_x >> TILE_SHIFT);
+//
+//            for (tx = start_tx; tx <= end_tx; tx++) {
+//                if (tx < 0 || tx >= level.map_w || check_ty < 0 || check_ty >= level.map_h)
+//                    continue;
+//
+//                ti = tileinfo_get(level_get_tile_abs(tx, check_ty));
+//
+//                if (ti->type == TILE_PLATFORM) {
+//                    /* Controlla 5 punti lungo la larghezza */
+//                    platform_checks[0] = left_x;
+//                    platform_checks[1] = left_x + (player.width_half >> 1);
+//                    platform_checks[2] = new_x;
+//                    platform_checks[3] = right_x - (player.width_half >> 1);
+//                    platform_checks[4] = right_x;
+//
+//                    for (i = 0; i < 5; i++) {
+//                        check_x = platform_checks[i];
+//
+//                        /* Verifica che questo punto sia nella tile corrente */
+//                        if ((check_x >> TILE_SHIFT) != tx) continue;
+//
+//                        local_x = check_x & 0x0F;
+//                        h = ti->height_map[local_x];
+//
+//                        if (h > 0) {
+//                            ground_y = (check_ty <<TILE_SHIFT) + (15 - h);
+//
+//                            /* CONDIZIONE CORRETTA per piattaforme:
+//                               1. I piedi erano STRETTAMENTE SOPRA la piattaforma
+//                               2. I piedi sono ORA SOTTO o SULLA piattaforma
+//                            */
+//                            if (old_feet < ground_y) {
+//                                /* Prima era sopra: continua */
+//                            } else if (new_feet >= ground_y) {
+//                                /* Ora è sotto/sulla: ATTERRA */
+//                                new_y = ground_y - player.height;
+//                                player.vy = 0;
+//                                player.is_grounded = 1;
+//                                player.is_jumping = 0;
+//                                goto p_done;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//p_done:
+//
+//    /* ============================================== */
+//    /* 4. APPLICA POSIZIONE FINALE */
+//    /* ============================================== */
+//    player.x = new_x;
+//    player.y = new_y;
+//}
 
 
 void check_world_collision() {
@@ -446,9 +453,9 @@ void check_world_collision() {
 			if (tile_info->type == TILE_SOLID)
 			{
 				if (player.vx > 0) {
-					player.x = tile_x * TILE_SIZE - (player.width_half);
+					player.x = (tile_x << TILE_SHIFT) - (player.width_half);
 				} else {
-					player.x = (tile_x + 1) * TILE_SIZE + (player.width_half);
+					player.x = ((tile_x + 1) << TILE_SHIFT) + (player.width_half);
 				}
 				player.vx = 0;
 				new_x = player.x;
@@ -467,7 +474,7 @@ void check_world_collision() {
 					   - terrain_height = 0: fondo della tile (y = tile_top + 15)
 					   ground_y = tile_top + (15 - terrain_height)
 					 */
-					u16 ground_y = (tile_y * TILE_SIZE) + (15 - terrain_height);
+					u16 ground_y = (tile_y << TILE_SHIFT) + (15 - terrain_height);
 
 					if ((new_y + player.height) >= ground_y) {
 						player.y = ground_y - player.height;
@@ -507,7 +514,7 @@ void check_world_collision() {
 					new_y = player.y;
 				}
 				else if (tile_info->type == TILE_PLATFORM) {
-					u8 local_x = center_x - (tile_x * TILE_SIZE);
+					u8 local_x = center_x - (tile_x << TILE_SHIFT);
 					u8 terrain_height = tileinfo_get_height_at(tile_info, local_x); // 0-15
 
 					if (terrain_height > 0) {
@@ -517,7 +524,7 @@ void check_world_collision() {
 
                            ground_y = tile_top + (15 - terrain_height)
 						 */
-						u16 ground_y = (tile_y * TILE_SIZE) + (15 - terrain_height);
+						u16 ground_y = (tile_y << TILE_SHIFT) + (15 - terrain_height);
 
 						if (feet_y >= ground_y) {
 							player.y = ground_y - player.height;
@@ -540,7 +547,7 @@ void check_world_collision() {
 				tile_info = tileinfo_get(tile_index);
 
 				if (tile_info->type == TILE_SOLID) {
-					player.y = (tile_y + 1) * TILE_SIZE;
+					player.y = (tile_y + 1) << TILE_SHIFT;
 					player.vy = 0;
 					new_y = player.y;
 				}
@@ -551,14 +558,12 @@ void check_world_collision() {
 	/* 3. APPLICA MOVIMENTO */
 	player.x = new_x;
 	player.y = new_y;
-
-
-
 }
 
 void player_update() {
-	if(player.x < TILE_SIZE) player.x = TILE_SIZE;
-	else if(player.x > level.end_x - (TILE_SIZE)) player.x = level.end_x - (TILE_SIZE);
+//	if(player.x < player.width) player.x = player.width;
+//	else if(player.x > level.end_x-player.width) player.x = level.end_x-player.width;
+
 
 	/* Applica gravità */
 	if(!player.is_grounded) {
@@ -567,6 +572,16 @@ void player_update() {
 	}
 
 	check_world_collision();
+
+    /* DOPO: Limita la posizione del player */
+    if(player.x < player.width) {
+        player.x = player.width;
+        player.vx = 0;  /* Importante: ferma anche la velocità orizzontale */
+    }
+    else if(player.x > level.end_x - player.width) {
+        player.x = level.end_x - player.width;
+        player.vx = 0;  /* Importante: ferma anche la velocità orizzontale */
+    }
 
 }
 
