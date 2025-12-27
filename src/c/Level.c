@@ -9,6 +9,31 @@ extern Player player;
 
 
 
+
+
+static inline void rle_rowcache_reset(
+    RLE_RowCache *c,
+    const u8 *data,
+    u16 offset
+) {
+    c->ptr = data + offset;
+    c->next_col = 0;
+    c->value = 0;
+}
+
+
+static inline u8 rle_rowcache_get(
+    RLE_RowCache *c,
+    u16 col
+) {
+    while (col >= c->next_col) {
+        c->value = *c->ptr++;
+        c->next_col += *c->ptr++;
+    }
+    return c->value;
+}
+
+
 /* Prende uno sprite libero dal pool */
 static SCB_REHV_PAL* get_free_sprite(void) {
 	u8 i;
@@ -145,6 +170,41 @@ static inline void stream_scroll_right(void)
     }
 }
 
+
+
+//static RLE_RowCache cache[MAP_BUF_H];
+//static inline void stream_scroll_right(void)
+//{
+//    u8 write_col, y;
+//    u16 new_world_col;
+//    u16 world_row;
+//
+//
+//    level.map_buf_origin_x++;
+//    level.map_buf_col0 = (level.map_buf_col0 + 1) & MAP_BUF_MASK;
+//
+//    write_col = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
+//    new_world_col = level.map_buf_origin_x + MAP_BUF_W - 1;
+//
+//    if (new_world_col >= level.map_w)
+//        return;
+//
+//    /* RESET CACHE PER QUESTA COLONNA */
+//    for (y = 0; y < MAP_BUF_H; y++) {
+//        world_row = level.map_buf_origin_y + y;
+//        rle_rowcache_reset(
+//            &cache[y],
+//            Z1L1_FG_MAP_RLE_DATA,
+//            Z1L1_FG_MAP_RLE_OFFS[world_row]
+//        );
+//    }
+//
+//    /* FETCH */
+//    for (y = 0; y < MAP_BUF_H; y++) {
+//        map_buf[y][write_col] =
+//            rle_rowcache_get(&cache[y], new_world_col);
+//    }
+//}
 
 
 static inline void stream_scroll_left(void)

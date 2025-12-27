@@ -31,6 +31,13 @@ static u8 sprite_used[MAX_ACTIVE_SPRITES];
 
 
 typedef struct {
+    const u8 *ptr;   // puntatore nello stream RLE
+    u16 next_col;         // colonna raggiunta (esclusiva)
+    u8 value;        // valore corrente
+} RLE_RowCache;
+
+
+typedef struct {
 	u16 prev_tile_x;
 	u16 prev_tile_y;
 	u8 center_x;
