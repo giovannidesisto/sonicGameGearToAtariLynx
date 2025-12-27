@@ -12,10 +12,12 @@
 //#define MAP_BUF_W      TILES_X+MAP_BUF_PAD   // sbordo dx/sx
 
 
-#define MAP_BUF_W   16          // POTENZA DI 2 (OBBLIGATORIO)
+#define MAP_BUF_W  16// 16          // POTENZA DI 2 (OBBLIGATORIO)
 #define TILE_SHIFT 4 //log2(TILE_SIZE)
-#define MAP_BUF_H   16//TILES_Y
+#define MAP_BUF_H   16//16//TILES_Y
 #define MAP_BUF_MASK (MAP_BUF_W - 1)
+
+
 #define MAP_SBORDA_X ((MAP_BUF_W - TILES_X) >> 1)
 #define MAP_SBORDA_Y ((MAP_BUF_H - TILES_Y) >> 1)
 

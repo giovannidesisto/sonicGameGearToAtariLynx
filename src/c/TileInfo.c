@@ -209,7 +209,7 @@ void tileinfo_init_table(void) {
 
 
        /* muro chiaro SX attraversabile  intero */
-       tile_info_table[18].type = TILE_BACKGROUND;
+       tile_info_table[18].type = TILE_SOLID;
        tile_info_table[18].colorDepth = BPP_4;
        tile_info_table[18].bitmap = (unsigned char*)LEVEL_1_WALL[2];
 

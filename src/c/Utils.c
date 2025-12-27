@@ -105,7 +105,7 @@ int s16_to_ascii(short value, char *dest) {
 void printS16(s16 value,u8 print_x, u8 print_y,u8 color){
 	char arrToPrint[16]={0};
 	short pos=0;
-	arrToPrint[pos++]='x';
+//	arrToPrint[pos++]='x';
 	pos += s16_to_ascii(value, (char*)&arrToPrint[pos]);
 	agSetFontColor(color);
 	agDrawText(print_x, print_y, arrToPrint);
@@ -114,7 +114,7 @@ void printS16(s16 value,u8 print_x, u8 print_y,u8 color){
 void printExadec(s16 value,u8 print_x, u8 print_y,u8 color){
 	char arrToPrint[16]={0};
 	short pos=0;
-	arrToPrint[pos++]='x';
+//	arrToPrint[pos++]='x';
 	pos += u8_to_hex_ascii(value, (char*)&arrToPrint[pos]);
 	agSetFontColor(color);
 	agDrawText(print_x, print_y, arrToPrint);
@@ -123,7 +123,7 @@ void printExadec(s16 value,u8 print_x, u8 print_y,u8 color){
 void printU16(u16 value,u8 print_x, u8 print_y,u8 color){
 	char arrToPrint[16]={0};
 	short pos=0;
-	arrToPrint[pos++]='x';
+//	arrToPrint[pos++]='x';
 	pos += u16_to_ascii(value, (char*)&arrToPrint[pos]);
 	agSetFontColor(color);
 	agDrawText(print_x, print_y, arrToPrint);
