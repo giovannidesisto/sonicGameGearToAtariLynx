@@ -56,9 +56,7 @@ extern const unsigned char bck_005[];
 
 
 
-//totem
-extern const unsigned char bck_099[];
-//extern const unsigned char bck_100[];
+
 
 //erba con  muro scuro destro
 extern const unsigned char bck_004[];

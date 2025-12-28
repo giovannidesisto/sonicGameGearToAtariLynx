@@ -33,8 +33,8 @@
 //extern unsigned char sonic_idle_4[];
 
 
-static const u8 MAX_RUN_SPEED = 14;
-static const u8 MAX_WALK_SPEED = 8;
+static const u8 MAX_RUN_SPEED = 14;//14;
+static const u8 MAX_WALK_SPEED = 8;//8;
 static const s8 DEFAULT_JUMP_POWER = -14;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 
@@ -89,11 +89,11 @@ typedef enum {
     DIR_DOWN
 } PlayerDirection;
 
-typedef struct {
-    u8 deposit;
-    u8 last_deposit;
-    u8 collision_frame_delay;
-} CollisionState;
+//typedef struct {
+//    u8 deposit;
+//    u8 last_deposit;
+//    u8 collision_frame_delay;
+//} CollisionState;
 
 // Struttura principale del player
 typedef struct Player{
@@ -151,7 +151,7 @@ typedef struct Player{
     u8 rings;
     u8 ground_level;
 
-    CollisionState collision;
+    //CollisionState collision;
 
     s16 xOnSprite;
     s16 tx;

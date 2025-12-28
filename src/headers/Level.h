@@ -12,29 +12,17 @@
 //#define MAP_BUF_W      TILES_X+MAP_BUF_PAD   // sbordo dx/sx
 
 
-#define MAP_BUF_W  16// 16          // POTENZA DI 2 (OBBLIGATORIO)
-#define TILE_SHIFT 4 //log2(TILE_SIZE)
-#define MAP_BUF_H   16//16//TILES_Y
-#define MAP_BUF_MASK (MAP_BUF_W - 1)
-
-
-//#define MAP_SBORDA_X ((MAP_BUF_W - TILES_X) >> 1)
-//#define MAP_SBORDA_Y ((MAP_BUF_H - TILES_Y) >> 1)
-
-
-//#define MAP_BUF_H      MAP_HEIGHT// TILES_Y
-#define MAX_ACTIVE_SPRITES  TILES_Y*TILES_X
 
 static u8 map_buf[MAP_BUF_H][MAP_BUF_W]={0};
 static SCB_REHV_PAL sprite_pool[MAX_ACTIVE_SPRITES];
 static u8 sprite_used[MAX_ACTIVE_SPRITES];
 
 
-typedef struct {
-    const u8 *ptr;   // puntatore nello stream RLE
-    u16 next_col;         // colonna raggiunta (esclusiva)
-    u8 value;        // valore corrente
-} RLE_RowCache;
+//typedef struct {
+//    const u8 *ptr;   // puntatore nello stream RLE
+//    u16 next_col;         // colonna raggiunta (esclusiva)
+//    u8 value;        // valore corrente
+//} RLE_RowCache;
 
 
 //typedef struct {
@@ -53,10 +41,12 @@ typedef struct {
 typedef struct {
     u16 prev_tile_x;
     u16 prev_tile_y;
+
     u8 center_x;
     u8 center_y;
     s16 x;                   /* Posizione X della camera (in pixel world) */
     s16 y;                   /* Posizione Y della camera (in pixel world) */
+
     u8 width;               /* Larghezza della viewport */
     u8 height;              /* Altezza della viewport */
 

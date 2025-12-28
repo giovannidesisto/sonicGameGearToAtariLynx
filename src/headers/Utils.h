@@ -11,10 +11,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "TileInfo.h"
-#define DEBUG_BUFFER_SIZE 512
-#define DEBUG_BUFFER ((char*)0xFA00)
+//#define DEBUG_BUFFER_SIZE 512
+//#define DEBUG_BUFFER ((char*)0xFA00)
 //extern char DEBUG_BUFFER[DEBUG_BUFFER_SIZE] ;
-
 #define RES32
 //#define RES24 1
 //#define RES16 1
@@ -30,30 +29,45 @@
 
 
 #ifdef RES32
-	#define RATIO 1
-	#define SCALE 1
-	#define SCALE_DIVIDER 1
-	#define TILE_SIZE 16
-	#define PLAYER_WIDTH 16
-	#define PLAYER_HEIGHT 32
-	#define TILES_X  11 //11//11
-	#define TILES_Y  8 //8//8
+#define RATIO 1
+#define SCALE 1
+#define SCALE_DIVIDER 1
+#define PLAYER_WIDTH 16
+#define PLAYER_HEIGHT 32
+
+#define TILE_SIZE 16// 16
+
+#define TILES_X  11//11
+#define TILES_Y  8//8
+
+#define MAP_BUF_W  16// 16          // POTENZA DI 2 (OBBLIGATORIO)
+#define MAP_BUF_H  16//16//TILES_Y
+#define TILE_SHIFT 4//4 //log2(TILE_SIZE)
+
+#define MAP_BUF_MASK (MAP_BUF_W - 1)
+
+
+
+#define MAX_ACTIVE_SPRITES  (TILES_Y*TILES_X)
+
+
+
 #elif RES24
-	#define RATIO 1
-	#define SCALE 3
-	#define SCALE_DIVIDER 4
-	#define TILE_SIZE 24
-	#define PLAYER_WIDTH 12
-	#define TILES_X  9//11//11
-	#define TILES_Y  6 //8//8
+#define RATIO 1
+#define SCALE 3
+#define SCALE_DIVIDER 4
+#define TILE_SIZE 24
+#define PLAYER_WIDTH 12
+#define TILES_X  9//11//11
+#define TILES_Y  6 //8//8
 #elif RES16
-	#define RATIO 1
-	#define SCALE 1
-	#define SCALE_DIVIDER 2
-	#define TILE_SIZE 16
-	#define PLAYER_WIDTH 8
-	#define TILES_X  11//11//11
-	#define TILES_Y  8 //8//8
+#define RATIO 1
+#define SCALE 1
+#define SCALE_DIVIDER 2
+#define TILE_SIZE 16
+#define PLAYER_WIDTH 8
+#define TILES_X  11//11//11
+#define TILES_Y  8 //8//8
 
 #endif
 
@@ -81,9 +95,9 @@ void printCoordsToScreen(u16 x, u16 y,u8 print_x, u8 print_y,u8 color);
 void printU16(u16 value,u8 print_x, u8 print_y,u8 color);
 void printS16(s16 value,u8 print_x, u8 print_y,u8 color);
 void printExadec(s16 value,u8 print_x, u8 print_y,u8 color);
-int iabs(int v);
-void debug_init(void);
-void debug_print(const char *str);
+//int iabs(int v);
+//void debug_init(void);
+//void debug_print(const char *str);
 #endif /* UTILS_H */
 
 

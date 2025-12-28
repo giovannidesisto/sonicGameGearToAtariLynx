@@ -23,9 +23,7 @@ static unsigned char* LEVEL_1_BACKGROUND[] = {
 		bck_002,
 		bck_001,
 		bck_004,
-		bck_005, //erba avvallamento da 2 in terra
-
-		bck_099
+		bck_005
 };
 
 

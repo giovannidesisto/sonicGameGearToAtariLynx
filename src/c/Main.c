@@ -212,7 +212,7 @@ static void  __fastcall__  updateAndDrawGame() {
 	level_update_camera();
 
 	// DISEGNA solo ogni 2 frame (30 FPS ancora fluido)
-	//if ((frame_count++ & 1) == 0)//% FRAME_DIVIDER
+	//if((frame_count++ & 1) == 0)//% FRAME_DIVIDER
 	{
 		AG_WAIT_LCD();
 		level_draw();
