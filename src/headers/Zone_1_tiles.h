@@ -10,7 +10,7 @@
 #include "SpriteRepo.h"
 
 //PIATTAFORME e muri solidi
-static unsigned char* LEVEL_1_PLATFORM[] = {
+static const unsigned char* LEVEL_1_PLATFORM[] = {
 		for_001,
 		for_002,
 		for_003,
@@ -18,7 +18,7 @@ static unsigned char* LEVEL_1_PLATFORM[] = {
 };
 
 //ALBERI, FIORI DI SFONDO
-static unsigned char* LEVEL_1_BACKGROUND[] = {
+static const unsigned char* LEVEL_1_BACKGROUND[] = {
 		bck_003,
 		bck_002,
 		bck_001,
@@ -28,7 +28,7 @@ static unsigned char* LEVEL_1_BACKGROUND[] = {
 
 
 //TILE SOLIDE, su tutti i 4 lati
-static unsigned char* LEVEL_1_WALL[] = {
+static const unsigned char* LEVEL_1_WALL[] = {
 		wall_001,
 		wall_002,
 		wall_003,
@@ -37,7 +37,7 @@ static unsigned char* LEVEL_1_WALL[] = {
 
 
 //SFONDO IN PARALLASSE
-static unsigned char* LEVEL_1_PRX[] = {
+static const unsigned char* LEVEL_1_PRX[] = {
 		prx_001,
 		prx_002
 };

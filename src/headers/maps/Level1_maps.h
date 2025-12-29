@@ -9,8 +9,7 @@
 
 #define MAP_WIDTH  97//49
 #define MAP_HEIGHT 26//17
-//#define Z1L1_FG_ADDR 0x0200
-//#define Z1L1_BG_ADDR Z1L1_FG_ADDR +  (MAP_WIDTH*Z1L1_BG_ADDR)
+
 typedef unsigned char u8;
 
 

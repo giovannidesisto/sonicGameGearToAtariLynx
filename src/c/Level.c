@@ -2,9 +2,6 @@
 #include "Level.h"
 #include "Player.h"
 
-
-
-extern Level level;
 extern Player player;
 
 
@@ -48,6 +45,9 @@ static void release_all_sprites(void) {
 }
 
 
+/**
+ * FIXME non funziona l'inlining
+ */
 u8 level_get_tile_abs(u16 tile_x, u16 tile_y)
 {
 	s16 bx = tile_x - level.map_buf_origin_x;
@@ -68,28 +68,7 @@ u8 level_get_tile_abs(u16 tile_x, u16 tile_y)
 
 
 
-
-static inline u8 decompress_rle_get_value(
-		const u8 *data,
-		u16 offset,
-		u16 col_idx
-) {
-	const u8 *p = data + offset;
-	u16 col = 0;
-
-	for (;;) {
-		u8 val = *p++;
-		u8 cnt = *p++;
-
-		col += cnt;
-		if (col > col_idx)
-			return val;
-	}
-}
-
-
-
-static inline void level_init_map_streaming(void)
+static void level_init_map_streaming(void)
 {
 	u8 i, y;
 	u16 start_tile_x = level.camera.x >> TILE_SHIFT;/// TILE_SIZE;
@@ -121,189 +100,16 @@ static inline void level_init_map_streaming(void)
 }
 
 
-static inline void stream_scroll_right(void)
-{
-	u8 write_col;
-	u8 y;
-	u16 new_world_col;
-	u16 world_row;
-	u8 by;
-
-	/* Avanza origine mondo */
-	level.map_buf_origin_x++;
-
-	/* Avanza colonna circolare */
-	level.map_buf_col0 = (level.map_buf_col0 + 1) & MAP_BUF_MASK;
-
-	/* Colonna fisica da scrivere */
-	write_col = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
-
-	/* Colonna mondo da caricare */
-	new_world_col = level.map_buf_origin_x + MAP_BUF_W - 1;
-
-	if (new_world_col >= level.map_w)
-		return;
-
-	for (y = 0; y < MAP_BUF_H; y++) {
-
-		world_row = level.map_buf_origin_y + y;
-		if (world_row >= level.map_h) {
-			by = (level.map_buf_row0 + y) & MAP_BUF_MASK;
-			map_buf[by][write_col] = TILE_EMPTY;
-			continue;
-		}
-
-		by = (level.map_buf_row0 + y) & MAP_BUF_MASK;
-
-		map_buf[by][write_col] = decompress_rle_get_value(
-				Z1L1_FG_MAP_RLE_DATA,
-				Z1L1_FG_MAP_RLE_OFFS[world_row],
-				new_world_col
-		);
-	}
-}
-
-
-
-//static RLE_RowCache cache[MAP_BUF_H];
-//static inline void stream_scroll_right(void)
-//{
-//    u8 write_col, y;
-//    u16 new_world_col;
-//    u16 world_row;
-//
-//
-//    level.map_buf_origin_x++;
-//    level.map_buf_col0 = (level.map_buf_col0 + 1) & MAP_BUF_MASK;
-//
-//    write_col = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
-//    new_world_col = level.map_buf_origin_x + MAP_BUF_W - 1;
-//
-//    if (new_world_col >= level.map_w)
-//        return;
-//
-//    /* RESET CACHE PER QUESTA COLONNA */
-//    for (y = 0; y < MAP_BUF_H; y++) {
-//        world_row = level.map_buf_origin_y + y;
-//        rle_rowcache_reset(
-//            &cache[y],
-//            Z1L1_FG_MAP_RLE_DATA,
-//            Z1L1_FG_MAP_RLE_OFFS[world_row]
-//        );
-//    }
-//
-//    /* FETCH */
-//    for (y = 0; y < MAP_BUF_H; y++) {
-//        map_buf[y][write_col] =
-//            rle_rowcache_get(&cache[y], new_world_col);
-//    }
-//}
-
-
-static inline void stream_scroll_left(void)
-{
-	u8 write_col;
-	u8 y;
-	u16 new_world_col;
-
-	/* Retrocede origine mondo */
-	if (level.map_buf_origin_x == 0)
-		return;
-
-	level.map_buf_origin_x--;
-	level.map_buf_col0 = (level.map_buf_col0 + MAP_BUF_W - 1) & MAP_BUF_MASK;
-
-	/* Colonna fisica da scrivere (prima logica) */
-	write_col = level.map_buf_col0;
-	new_world_col = level.map_buf_origin_x;
-
-	for (y = 0; y < MAP_BUF_H; y++) {
-
-		u16 world_row = level.map_buf_origin_y + y;
-		u8  phys_row  = (y + level.map_buf_row0) & MAP_BUF_MASK;
-
-		if (world_row < level.map_h) {
-			map_buf[phys_row][write_col] =
-					decompress_rle_get_value(
-							Z1L1_FG_MAP_RLE_DATA,
-							Z1L1_FG_MAP_RLE_OFFS[world_row],
-							new_world_col
-					);
-		} else {
-			map_buf[phys_row][write_col] = TILE_EMPTY;
-		}
-	}
-}
 
 
 
 
-static inline void stream_scroll_up(void)
-{
-	u8 x, write_row, write_col;
-	u16 world_row, world_col;
 
-	if (level.map_buf_origin_y == 0)
-		return;
-
-	level.map_buf_origin_y--;
-	level.map_buf_row0 = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
-
-	write_row = level.map_buf_row0;
-	world_row = level.map_buf_origin_y;
-
-	for (x = 0; x < MAP_BUF_W; x++) {
-		world_col = level.map_buf_origin_x + x;
-		write_col = (x + level.map_buf_col0) & MAP_BUF_MASK;
-
-		if (world_row < level.map_h && world_col < level.map_w) {
-			map_buf[write_row][write_col] =
-					decompress_rle_get_value(
-							Z1L1_FG_MAP_RLE_DATA,
-							Z1L1_FG_MAP_RLE_OFFS[world_row],
-							world_col
-					);
-		} else {
-			map_buf[write_row][write_col] = TILE_EMPTY;
-		}
-	}
-}
-
-
-
-
-static inline void stream_scroll_down(void)
-{
-	u8 x, write_row, write_col;
-	u16 world_row, world_col;
-
-	level.map_buf_origin_y++;
-	level.map_buf_row0 = (level.map_buf_row0 + 1) & MAP_BUF_MASK;
-
-	write_row = (level.map_buf_row0 + MAP_BUF_H - 1) & MAP_BUF_MASK;
-	world_row = level.map_buf_origin_y + MAP_BUF_H - 1;
-
-	for (x = 0; x < MAP_BUF_W; x++) {
-		world_col = level.map_buf_origin_x + x;
-		write_col = (x + level.map_buf_col0) & MAP_BUF_MASK;
-
-		if (world_row < level.map_h && world_col < level.map_w) {
-			map_buf[write_row][write_col] =
-					decompress_rle_get_value(
-							Z1L1_FG_MAP_RLE_DATA,
-							Z1L1_FG_MAP_RLE_OFFS[world_row],
-							world_col
-					);
-		} else {
-			map_buf[write_row][write_col] = TILE_EMPTY;
-		}
-	}
-}
 
 /* Inizializza il sistema di sprite */
 void level_init(void) {
 
-	u8 i,y;
+	u8 i;//,y;
 
 	lynx_load(1);//livello
 	lynx_load(2);//player
@@ -318,7 +124,7 @@ void level_init(void) {
 	level.map_buf_origin_y = 0;
 
 
-	level.fg_map = map_buf;
+    //level.fg_map = map_buf;
 	level.camera.prev_tile_x=0;
 	level.camera.prev_tile_y=0;
 	level.map_h= MAP_HEIGHT;
@@ -365,7 +171,7 @@ void level_init(void) {
 
 /* Carica un livello */
 void level_load(u8 level_num) {
-	u8 x, y;
+	//u8 x, y;
 	/* Per ora carica solo la mappa di default */
 	(void)level_num;  /* Ignorato per ora */
 
@@ -384,10 +190,7 @@ void level_load(u8 level_num) {
 }
 
 
-static inline s16 parallax_x(s16 cam_x, u8 shift)
-{
-    return cam_x >> shift;   // /2, /4, /8
-}
+
 
 
 static void draw_parallax_layer(
@@ -424,7 +227,7 @@ static void draw_parallax_layer(
             spr->hpos = offset_x + x * TILE_SIZE;
             spr->vpos = fixed_y + y * TILE_SIZE;
 
-            (*pprev)->next = spr;
+            (*pprev)->next = (char *)spr;
             *pprev = spr;
         }
     }
@@ -516,7 +319,7 @@ void level_draw(void)
                 sprite->next    = NULL;
 
                 if (!bg0_head) bg0_head = sprite;
-                else bg0_tail->next = sprite;
+                else bg0_tail->next = (char *)sprite;
                 bg0_tail = sprite;
             }
         }
@@ -551,7 +354,7 @@ void level_draw(void)
                     sprite->next    = NULL;
 
                     if (!bg1_head) bg1_head = sprite;
-                    else bg1_tail->next = sprite;
+                    else bg1_tail->next =  (char *) sprite;
                     bg1_tail = sprite;
                 }
             }
@@ -593,7 +396,7 @@ void level_draw(void)
 
 
                 if (!fg_head) fg_head = sprite;
-                else fg_tail->next = sprite;
+                else fg_tail->next = (char *)sprite;
                 fg_tail = sprite;
             }
         }
@@ -605,7 +408,7 @@ void level_draw(void)
     agSprBackground.next = bg0_head ? bg0_head :
                            bg1_head ? bg1_head :
                            fg_head  ? fg_head  :
-                           &player.visible_spc.sprite;
+                        		   &player.visible_spc.sprite;
 
     if (bg0_tail)
         bg0_tail->next = bg1_head ? bg1_head :
@@ -629,122 +432,7 @@ void level_draw(void)
 }
 
 
-//
-//void level_draw_old() {
-//	u16 x, y, start_tile_x, start_tile_y, end_tile_x, end_tile_y, tile_index,dx,dy,ty,tx;
-//
-//	u16 ctr;
-//	SCB_REHV_PAL* sprite;
-//	SCB_REHV_PAL* prev_sprite ;
-//	SCB_REHV_PAL* first_sprite;
-//	TileInfo* tile_info;
-//	ctr=0;
-//	release_all_sprites();
-//
-//	// Calcola la porzione visibile
-//	start_tile_x = level.camera.x >> TILE_SHIFT;//  /TILE_SIZE;
-//	start_tile_y = level.camera.y >> TILE_SHIFT; // TILE_SIZE;
-//
-//	end_tile_x   = start_tile_x + TILES_X;
-//	end_tile_y   = start_tile_y + TILES_Y;
-//
-//	// Limita ai bordi della mappa
-//	if(end_tile_x > level.map_w) end_tile_x = level.map_w;
-//	if(end_tile_y > level.map_h) end_tile_y = level.map_h;
-//
-//	// Aggiornamento dinamico colonne se la camera si è mossa
-//	dx = start_tile_x - level.camera.prev_tile_x;
-//	dy = start_tile_y - level.camera.prev_tile_y;
-//
-//
-//	ty = level.map_buf_origin_y;
-//	tx = level.map_buf_origin_x;
-//
-//	while (start_tile_x > level.map_buf_origin_x )//+ MAP_SBORDA_X)
-//		stream_scroll_right();
-//
-//	while (start_tile_x < level.map_buf_origin_x )//+ MAP_SBORDA_X)
-//		stream_scroll_left();
-//
-//	while (start_tile_y > level.map_buf_origin_y)
-//		stream_scroll_down();
-//
-//	while (start_tile_y  < level.map_buf_origin_y )
-//		stream_scroll_up();
-//
-//	level.camera.prev_tile_y = start_tile_y;
-//	level.camera.prev_tile_x = start_tile_x;
-//
-//
-//	// Inizia con lo sfondo
-//	agSprBackground.penpal[0] = 0x09;
-//	prev_sprite = &agSprBackground;
-//	first_sprite = prev_sprite;
-//
-//	draw_parallax_layer(
-//	    &bg0_map[0][0],
-//	    BG0_W,
-//	    BG0_H,
-//	    parallax_x(level.camera.x, 2), // /8
-//	    0,                             // Y fissa
-//	    &prev_sprite
-//	);
-//
-//	draw_parallax_layer(
-//	    &bg1_map[0][0],
-//	    BG1_W,
-//	    BG1_H,
-//	    parallax_x(level.camera.x, 1), // /4
-//	    16,
-//	    &prev_sprite
-//	);
-//
-//
-//	// Render foreground tiles visibili
-//	for(y = start_tile_y; y < end_tile_y; y++) {
-//		for(x = start_tile_x; x < end_tile_x; x++) {
-//			tile_index =   level_get_tile_abs(x,y);//level.fg_map[y*MAP_BUF_W + x]; // accesso row-major
-//			tile_info = tileinfo_get(tile_index);
-//
-//			if(tile_info->type != TILE_EMPTY) {
-//				int world_x = x * TILE_SIZE;
-//				int world_y = y * TILE_SIZE;
-//				int screen_x = world_x - level.camera.x;
-//				int screen_y = world_y - level.camera.y;
-//
-//				sprite = get_free_sprite();
-//				if(!sprite) return;
-//
-//				sprite->data = (unsigned char*) tile_info->bitmap;
-//				sprite->vpos = screen_y;
-//				if(tile_info->is_mirrored) {
-//					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
-//					sprite->hpos = screen_x + TILE_SIZE - 1;
-//				} else {
-//					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
-//					sprite->hpos = screen_x;
-//				}
-//
-//				// Aggiungi alla lista sprite
-//				prev_sprite->next = sprite;
-//				prev_sprite = sprite;
-//				ctr++;
-//			}
-//		}
-//	}
-//
-//	// Aggiungi il player sopra tutto
-//	player.visible_spc.sprite.next = NULL;
-//	prev_sprite->next = &player.visible_spc.sprite;
-//
-//	// Disegna tutta la lista
-//	tgi_sprite(first_sprite);
-//
-//	//printCoordsToScreen(level.map_buf_origin_x,level.map_buf_origin_y,0,0,0x0F);
-//    //printCoordsToScreen(start_tile_x,start_tile_y,0,20,0x0D);
-//	//printCoordsToScreen(player.x,level.end_x,0,30,0x0C);
-//	printU16(ctr,0,0,0x0f);
-//}
+
 
 
 void level_init_camera() {
@@ -869,4 +557,173 @@ void level_update_camera( ) {
 	/* Aggiorna posizione sprite del player */
 	player.visible_spc.sprite.hpos = (int)(player.x - level.camera.x);
 	player.visible_spc.sprite.vpos = (int)(player.y - level.camera.y);
+}
+
+
+
+
+
+
+void check_world_collision() {
+	s16 new_x, new_y;
+	s16 tile_x, tile_y;
+	s16 tile_index;
+	TileInfo* tile_info;
+
+	new_x = player.x + player.vx;
+	new_y = player.y + player.vy;
+
+	player.is_grounded = 0;
+
+	/* 1. COLLISIONI ORIZZONTALI */
+	if (player.vx != 0) {
+		s16 check_x = (player.vx > 0) ? (new_x + player.width_half) : (new_x - player.width_half);
+		tile_x = check_x >> TILE_SHIFT;
+		tile_y = (player.y + player.height_half) >> TILE_SHIFT;
+
+		if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w)
+		{
+
+
+//			u16 bx = tile_x - level.map_buf_origin_x;
+//			u16 by = tile_y - level.map_buf_origin_y;
+
+
+			tile_index = level_get_tile_abs(tile_x, tile_y );//level.fg_map[tile_y*level.map_w+tile_x];//
+			tile_info = tileinfo_get(tile_index);
+
+			if (tile_info->type == TILE_SOLID)
+			{
+				if (player.vx > 0) {
+					player.x = (tile_x << TILE_SHIFT) - (player.width_half);
+				} else {
+					player.x = ((tile_x + 1) << TILE_SHIFT) + (player.width_half);
+				}
+				player.vx = 0;
+				new_x = player.x;
+			}
+			else if(tile_info->type == TILE_PLATFORM)
+			{
+		//		s16 feet_y = new_y + player.height;
+
+				u8 local_x = new_x - (tile_x * TILE_SIZE);
+				u8 terrain_height = tileinfo_get_height_at(tile_info, local_x);
+
+
+				if (terrain_height > 0) {
+					/* IMPORTANTE:
+					   - terrain_height = 15: cima della tile (y = tile_top)
+					   - terrain_height = 0: fondo della tile (y = tile_top + 15)
+					   ground_y = tile_top + (15 - terrain_height)
+					 */
+					u16 ground_y = (tile_y << TILE_SHIFT) + (15 - terrain_height);
+
+					if ((new_y + player.height) >= ground_y) {
+						player.y = ground_y - player.height;
+						player.is_grounded = 1;
+						player.is_jumping = 0;
+						player.vy = 0;
+						new_y = player.y;
+					}
+				}
+			}
+		}
+	}
+
+
+
+
+
+	/* 2. COLLISIONI VERTICALI */
+	if (player.vy != 0) {
+		s16 center_x = new_x;
+
+		if (player.vy > 0) {
+			/* CADUTA - Controlla sotto */
+			s16 feet_y = new_y + player.height;
+			tile_x = center_x >> TILE_SHIFT;
+			tile_y = feet_y >> TILE_SHIFT;
+
+			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
+				tile_index = level_get_tile_abs(tile_x , tile_y);//level.fg_map[tile_y*level.map_w+tile_x];//
+				tile_info = tileinfo_get(tile_index);
+
+				if (tile_info->type == TILE_SOLID) {
+					player.y = tile_y * TILE_SIZE - player.height;
+					player.is_grounded = 1;
+					player.is_jumping = 0;
+					player.vy = 0;
+					new_y = player.y;
+				}
+				else if (tile_info->type == TILE_PLATFORM) {
+					u8 local_x = center_x - (tile_x << TILE_SHIFT);
+					u8 terrain_height = tileinfo_get_height_at(tile_info, local_x); // 0-15
+
+					if (terrain_height > 0) {
+						/* IMPORTANTE:
+                           - terrain_height = 15: cima della tile (y = tile_top)
+                           - terrain_height = 0: fondo della tile (y = tile_top + 15)
+
+                           ground_y = tile_top + (15 - terrain_height)
+						 */
+						u16 ground_y = (tile_y << TILE_SHIFT) + (15 - terrain_height);
+
+						if (feet_y >= ground_y) {
+							player.y = ground_y - player.height;
+							player.is_grounded = 1;
+							player.is_jumping = 0;
+							player.vy = 0;
+							new_y = player.y;
+						}
+					}
+				}
+			}
+		} else {
+			/* SALTO - Controlla sopra */
+			s16 head_y = new_y;
+			tile_x = center_x >> TILE_SHIFT;
+			tile_y = head_y >> TILE_SHIFT;
+
+			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
+				tile_index =level_get_tile_abs(tile_x , tile_y);// level.fg_map[tile_y*level.map_w+tile_x];//
+				tile_info = tileinfo_get(tile_index);
+
+				if (tile_info->type == TILE_SOLID) {
+					player.y = (tile_y + 1) << TILE_SHIFT;
+					player.vy = 0;
+					new_y = player.y;
+				}
+			}
+		}
+	}
+
+	/* 3. APPLICA MOVIMENTO */
+	player.x = new_x;
+	player.y = new_y;
+}
+
+
+void player_update() {
+//	if(player.x < player.width) player.x = player.width;
+//	else if(player.x > level.end_x-player.width) player.x = level.end_x-player.width;
+
+
+	/* Applica gravità */
+	if(!player.is_grounded) {
+		player.vy += player.gravity;
+		if(player.vy > 16) player.vy = 16;
+	}
+
+	check_world_collision();
+
+    /* DOPO: Limita la posizione del player */
+    if(player.x < player.width) {
+        player.x = player.width;
+        player.vx = 0;  /* Importante: ferma anche la velocità orizzontale */
+    }
+    else if(player.x > level.end_x - player.width) {
+        player.x = level.end_x - player.width;
+        player.vx = 0;  /* Importante: ferma anche la velocità orizzontale */
+    }
+
 }

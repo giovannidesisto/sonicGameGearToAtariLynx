@@ -6,8 +6,8 @@
  */
 #include "Utils.h"
 
-SCB_REHV_PAL* prev_sprite = NULL;
-SCB_REHV_PAL* first_sprite = NULL;
+//SCB_REHV_PAL* prev_sprite = NULL;
+//SCB_REHV_PAL* first_sprite = NULL;
 
 //char DEBUG_BUFFER[DEBUG_BUFFER_SIZE]={0};
 int u8_to_hex_ascii(unsigned char value, char *dest) {

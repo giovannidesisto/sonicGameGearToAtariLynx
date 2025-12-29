@@ -6,31 +6,9 @@
  */
 #ifndef PLAYER_H
 #define PLAYER_H
+#include "SpriteRepo.h"
+#include "Utils.h"
 
-
-
-
-#include "Level.h"
-
-
-
-// Dichiarazioni dei frame (definite altrove)
-//extern unsigned char sonic_run_1[];
-//extern unsigned char sonic_run_2[];
-//extern unsigned char sonic_run_3[];
-//extern unsigned char sonic_run_4[];
-//
-//extern unsigned char sonic_brake_1[];
-//extern unsigned char sonic_brake_2[];
-//
-//extern unsigned char sonic_jump_1[];
-//extern unsigned char sonic_jump_2[];
-//
-//
-//extern unsigned char sonic_idle_1[];
-//extern unsigned char sonic_idle_2[];
-//extern unsigned char sonic_idle_3[];
-//extern unsigned char sonic_idle_4[];
 
 
 static const u8 MAX_RUN_SPEED = 14;//14;
@@ -39,7 +17,7 @@ static const s8 DEFAULT_JUMP_POWER = -14;
 static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 
 // Array di puntatori ai frame per animazione
-static unsigned char* sonic_run_tiles[] = {
+static const unsigned char* sonic_run_tiles[] = {
 		sonic_run_1,
 		sonic_run_2,
 		sonic_run_3,
@@ -47,19 +25,19 @@ static unsigned char* sonic_run_tiles[] = {
 };
 
 
-static unsigned char* sonic_brake_tiles[] = {
+static const unsigned char* sonic_brake_tiles[] = {
 		sonic_brake_1,
 		sonic_brake_2
 };
 
-static unsigned char* sonic_jump_tiles[] = {
+static const unsigned char* sonic_jump_tiles[] = {
 		sonic_jump_1,
 		sonic_jump_2
 };
 
 
 // Array di puntatori ai frame per animazione
-static unsigned char* sonic_idle_tiles[] = {
+static const  unsigned char* sonic_idle_tiles[] = {
 		sonic_idle_1,
 		sonic_idle_2,
 		sonic_idle_3,
@@ -89,11 +67,7 @@ typedef enum {
     DIR_DOWN
 } PlayerDirection;
 
-//typedef struct {
-//    u8 deposit;
-//    u8 last_deposit;
-//    u8 collision_frame_delay;
-//} CollisionState;
+
 
 // Struttura principale del player
 typedef struct Player{
@@ -134,7 +108,6 @@ typedef struct Player{
     u8 shoot_cooldown;
 
     sprite_collidabile visible_spc;
-//    sprite_collidabile ghost_spc;
 
 
     // Array di frame per animazioni diverse
