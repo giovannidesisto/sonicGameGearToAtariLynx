@@ -243,12 +243,17 @@ void tileinfo_init_table(void) {
 
        tile_info_table[100].type = TILE_BACKGROUND;
        tile_info_table[100].colorDepth = BPP_4;
+       tile_info_table[100].layer = 2;
        tile_info_table[100].bitmap = (unsigned char*)LEVEL_1_PRX[0];
 
 
        tile_info_table[101].type = TILE_BACKGROUND;
        tile_info_table[101].colorDepth = BPP_4;
+       tile_info_table[101].layer = 2;
        tile_info_table[101].bitmap = (unsigned char*)LEVEL_1_PRX[1];
+
+
+
 
 
 }

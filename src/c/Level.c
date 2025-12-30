@@ -48,23 +48,23 @@ static void release_all_sprites(void) {
 /**
  * FIXME non funziona l'inlining
  */
-u8 level_get_tile_abs(u16 tile_x, u16 tile_y)
-{
-	s16 bx = tile_x - level.map_buf_origin_x;
-	s16 by = tile_y - level.map_buf_origin_y;
-
-	if ((u16)bx >= MAP_BUF_W || (u16)by >= MAP_BUF_H)
-		return TILE_EMPTY;
-
-	// applica circolarità
-	bx += level.map_buf_col0;
-	if (bx >= MAP_BUF_W) bx -= MAP_BUF_W;
-
-	by += level.map_buf_row0;
-	if (by >= MAP_BUF_H) by -= MAP_BUF_H;
-
-	return map_buf[by][bx];
-}
+//u8 level_get_tile_abs(u16 tile_x, u16 tile_y)
+//{
+//	s16 bx = tile_x - level.map_buf_origin_x;
+//	s16 by = tile_y - level.map_buf_origin_y;
+//
+//	if ((u16)bx >= MAP_BUF_W || (u16)by >= MAP_BUF_H)
+//		return TILE_EMPTY;
+//
+//	// applica circolarità
+//	bx += level.map_buf_col0;
+//	if (bx >= MAP_BUF_W) bx -= MAP_BUF_W;
+//
+//	by += level.map_buf_row0;
+//	if (by >= MAP_BUF_H) by -= MAP_BUF_H;
+//
+//	return map_buf[by][bx];
+//}
 
 
 
@@ -193,47 +193,6 @@ void level_load(u8 level_num) {
 
 
 
-static void draw_parallax_layer(
-    const u8 *map,
-    u16 map_w,
-    u16 map_h,
-    s16 parallax_x,
-    s16 fixed_y,
-    SCB_REHV_PAL **pprev
-)
-{
-    u16 x, y;
-    SCB_REHV_PAL *spr;
-    u16 start_x = parallax_x >> TILE_SHIFT;
-    s16 offset_x = -(parallax_x & (TILE_SIZE - 1));
-
-    for (y = 0; y < map_h; y++) {
-        for (x = 0; x <= TILES_X; x++) {
-
-            u16 tx = (start_x + x) % map_w;
-            u8 tile = map[y * map_w + tx];
-            TileInfo *ti = tileinfo_get(tile);
-
-            if (ti->type == TILE_EMPTY)
-                continue;
-
-            spr = get_free_sprite();
-            if (!spr) return;
-
-            spr->data = (unsigned char*)ti->bitmap;
-            spr->sprctl0 = ti->colorDepth | TYPE_BACKGROUND;
-            spr->sprctl1 = REHV | PACKED;
-
-            spr->hpos = offset_x + x * TILE_SIZE;
-            spr->vpos = fixed_y + y * TILE_SIZE;
-
-            (*pprev)->next = (char *)spr;
-            *pprev = spr;
-        }
-    }
-}
-
-
 
 
 #define PARALLAX_BG0_SHIFT 4   // 1/8
@@ -241,26 +200,37 @@ static void draw_parallax_layer(
 #define BG0_FIXED_Y 0
 #define BG1_FIXED_Y 16
 
+
+
+
+
+
 void level_draw(void)
 {
-    u16 x, y,ctr;
+    u16 x, y, ctr;
     u16 start_tile_x, start_tile_y;
     u16 end_tile_x, end_tile_y;
-
     s16 screen_x, screen_y;
+    SCB_REHV_PAL *head ;
+    SCB_REHV_PAL *tail ;
+
 
     SCB_REHV_PAL *sprite;
     SCB_REHV_PAL *first_sprite;
+
+    /* BG */
     SCB_REHV_PAL *bg0_head = NULL, *bg0_tail = NULL;
     SCB_REHV_PAL *bg1_head = NULL, *bg1_tail = NULL;
-    SCB_REHV_PAL *fg_head  = NULL, *fg_tail  = NULL;
+
+    /* FG layers */
+    SCB_REHV_PAL *fg0_head = NULL, *fg0_tail = NULL;
+    SCB_REHV_PAL *fg1_head = NULL, *fg1_tail = NULL;
+    SCB_REHV_PAL *fg2_head = NULL, *fg2_tail = NULL;
 
     TileInfo *tile_info;
     u8 tile_index;
-	ctr=0;
-    /* ===================================================== */
-    /* RESET SPRITE POOL */
-    /* ===================================================== */
+
+    ctr = 0;
     release_all_sprites();
 
     /* ===================================================== */
@@ -293,24 +263,21 @@ void level_draw(void)
     first_sprite = &agSprBackground;
 
     /* ===================================================== */
-    /* ================= BG0 (montagne) ==================== */
+    /* BG0 */
     /* ===================================================== */
     {
-        s16 par_px   = level.camera.x >> PARALLAX_BG0_SHIFT;
-        s16 tile_x0  = par_px >> TILE_SHIFT;
-        s16 px_off   = -(par_px & (TILE_SIZE - 1));
+        s16 par_px  = level.camera.x >> PARALLAX_BG0_SHIFT;
+        s16 tile_x0 = par_px >> TILE_SHIFT;
+        s16 px_off  = -(par_px & (TILE_SIZE - 1));
 
-        for (x = 0; x < TILES_X + 2; x++)
-        {
+        for (x = 0; x < TILES_X + 2; x++) {
             u16 map_x = (tile_x0 + x) % BG0_W;
-            tile_index = bg0_map[0][map_x];
-            tile_info  = tileinfo_get(tile_index);
+            tile_info = tileinfo_get(bg0_map[0][map_x]);
 
-            if (tile_info->type != TILE_EMPTY)
-            {
+            if (tile_info->type != TILE_EMPTY) {
                 sprite = get_free_sprite();
                 if (!sprite) return;
-                ctr++;
+
                 sprite->sprctl0 = tile_info->colorDepth | TYPE_BACKGROUND;
                 sprite->sprctl1 = REHV | PACKED;
                 sprite->data    = tile_info->bitmap;
@@ -319,33 +286,30 @@ void level_draw(void)
                 sprite->next    = NULL;
 
                 if (!bg0_head) bg0_head = sprite;
-                else bg0_tail->next = (char *)sprite;
+                else bg0_tail->next = (char*)sprite;
                 bg0_tail = sprite;
+                ctr++;
             }
         }
     }
 
     /* ===================================================== */
-    /* ================= BG1 (foresta) ===================== */
+    /* BG1 */
     /* ===================================================== */
     {
-        s16 par_px   = level.camera.x >> PARALLAX_BG1_SHIFT;
-        s16 tile_x0  = par_px >> TILE_SHIFT;
-        s16 px_off   = -(par_px & (TILE_SIZE - 1));
+        s16 par_px  = level.camera.x >> PARALLAX_BG1_SHIFT;
+        s16 tile_x0 = par_px >> TILE_SHIFT;
+        s16 px_off  = -(par_px & (TILE_SIZE - 1));
 
-        for (y = 0; y < BG1_H; y++)
-        {
-            for (x = 0; x < TILES_X + 2; x++)
-            {
+        for (y = 0; y < BG1_H; y++) {
+            for (x = 0; x < TILES_X + 2; x++) {
                 u16 map_x = (tile_x0 + x) % BG1_W;
-                tile_index = bg1_map[y][map_x];
-                tile_info  = tileinfo_get(tile_index);
+                tile_info = tileinfo_get(bg1_map[y][map_x]);
 
-                if (tile_info->type != TILE_EMPTY)
-                {
+                if (tile_info->type != TILE_EMPTY) {
                     sprite = get_free_sprite();
                     if (!sprite) return;
-                    ctr++;
+
                     sprite->sprctl0 = tile_info->colorDepth | TYPE_BACKGROUND;
                     sprite->sprctl1 = REHV | PACKED;
                     sprite->data    = tile_info->bitmap;
@@ -354,83 +318,114 @@ void level_draw(void)
                     sprite->next    = NULL;
 
                     if (!bg1_head) bg1_head = sprite;
-                    else bg1_tail->next =  (char *) sprite;
+                    else bg1_tail->next = (char*)sprite;
                     bg1_tail = sprite;
+                    ctr++;
                 }
             }
         }
     }
 
     /* ===================================================== */
-    /* ================= FOREGROUND ======================== */
+    /* FOREGROUND (layerizzato) */
     /* ===================================================== */
-    for (y = start_tile_y; y < end_tile_y; y++)
-    {
-        for (x = start_tile_x; x < end_tile_x; x++)
-        {
-            tile_index = level_get_tile_abs(x, y);
-            tile_info  = tileinfo_get(tile_index);
+    for (y = start_tile_y; y < end_tile_y; y++) {
+        for (x = start_tile_x; x < end_tile_x; x++) {
 
-            if (tile_info->type != TILE_EMPTY)
-            {
-                screen_x = (x << TILE_SHIFT) - level.camera.x;
-                screen_y = (y << TILE_SHIFT) - level.camera.y;
+            tile_info = tileinfo_get(level_get_tile_abs(x, y));
+            if (tile_info->type == TILE_EMPTY) continue;
 
-                sprite = get_free_sprite();
-                if (!sprite) return;
-                ctr++;
+            screen_x = (x << TILE_SHIFT) - level.camera.x;
+            screen_y = (y << TILE_SHIFT) - level.camera.y;
+
+            sprite = get_free_sprite();
+            if (!sprite) return;
+
+            sprite->sprctl1 = REHV | PACKED;
+            sprite->data    = tile_info->bitmap;
+            sprite->vpos    = screen_y;
+            sprite->next    = NULL;
+
+            if (tile_info->is_mirrored) {
+                sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
+                sprite->hpos    = screen_x + TILE_SIZE - 1;
+            } else {
                 sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
-                sprite->sprctl1 = REHV | PACKED;
-                sprite->data    = tile_info->bitmap;
                 sprite->hpos    = screen_x;
-                sprite->vpos    = screen_y;
-                sprite->next    = NULL;
-
-				if(tile_info->is_mirrored) {
-					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
-					sprite->hpos = screen_x + TILE_SIZE - 1;
-				} else {
-					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
-					sprite->hpos = screen_x;
-				}
-
-
-                if (!fg_head) fg_head = sprite;
-                else fg_tail->next = (char *)sprite;
-                fg_tail = sprite;
             }
+
+            /* -------- dispatch per layer -------- */
+            if (tile_info->layer == 0) {
+                if (!fg0_head) fg0_head = sprite;
+                else fg0_tail->next = (char*)sprite;
+                fg0_tail = sprite;
+            }
+            else if (tile_info->layer == 1) {
+                if (!fg1_head) fg1_head = sprite;
+                else fg1_tail->next = (char*)sprite;
+                fg1_tail = sprite;
+            }
+            else {
+                if (!fg2_head) fg2_head = sprite;
+                else fg2_tail->next = (char*)sprite;
+                fg2_tail = sprite;
+            }
+
+            ctr++;
         }
     }
 
     /* ===================================================== */
-    /* CONCATENAZIONE */
+    /* CONCATENAZIONE FINALE (ORDINE CORRETTO)                */
+    /* bg0 → bg1 → fg0 → fg1 → player → fg2 → NULL           */
     /* ===================================================== */
-    agSprBackground.next = bg0_head ? bg0_head :
-                           bg1_head ? bg1_head :
-                           fg_head  ? fg_head  :
-                        		   &player.visible_spc.sprite;
 
-    if (bg0_tail)
-        bg0_tail->next = bg1_head ? bg1_head :
-                         fg_head  ? fg_head  :
-                         &player.visible_spc.sprite;
+    head = &agSprBackground;
+    tail = &agSprBackground;
 
-    if (bg1_tail)
-        bg1_tail->next = fg_head ? fg_head :
-                         &player.visible_spc.sprite;
+    /* BG0 */
+    if (bg0_head) {
+        tail->next = bg0_head;
+        tail = bg0_tail;
+    }
 
-    if (fg_tail)
-        fg_tail->next = &player.visible_spc.sprite;
+    /* BG1 */
+    if (bg1_head) {
+        tail->next = bg1_head;
+        tail = bg1_tail;
+    }
 
-    player.visible_spc.sprite.next = NULL;
+    /* FG layer 0 (dietro player) */
+    if (fg0_head) {
+        tail->next = fg0_head;
+        tail = fg0_tail;
+    }
+
+    /* FG layer 1 (stesso piano player) */
+    if (fg1_head) {
+        tail->next = fg1_head;
+        tail = fg1_tail;
+    }
+
+    /* PLAYER */
+    tail->next = &player.visible_spc.sprite;
+    tail = &player.visible_spc.sprite;
+
+    /* FG layer 2 (davanti al player) */
+    if (fg2_head) {
+        tail->next = fg2_head;
+        tail = fg2_tail;
+    }
+
+    /* Fine lista */
+    tail->next = NULL;
 
     /* ===================================================== */
     /* DRAW */
     /* ===================================================== */
     tgi_sprite(first_sprite);
-	printU16(ctr,0,0,0x01);
+    printU16(ctr, 0, 0, 0x01);
 }
-
 
 
 
@@ -558,8 +553,6 @@ void level_update_camera( ) {
 	player.visible_spc.sprite.hpos = (int)(player.x - level.camera.x);
 	player.visible_spc.sprite.vpos = (int)(player.y - level.camera.y);
 }
-
-
 
 
 
@@ -727,3 +720,7 @@ void player_update() {
     }
 
 }
+
+
+
+

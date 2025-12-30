@@ -22,13 +22,18 @@ typedef enum {
 	TILE_BACKGROUND = 3 // 100-199: Sfondo (non collidibile)
 } TileType;
 
+
+
+
+
 /* Struttura informazioni tile semplificata */
 typedef struct {
 	u8 colorDepth;
 	u8 type;               // TileType
 	u8 height_map[16];     // Mappa altezze per ogni colonna (0-15, 0 = vuoto, 15 = pieno)
 	u8 is_mirrored;        // 1 = tile specchiata orizzontalmente
-//	u8 is_flipped;        // 1 = tile specchiata verticalmente
+	u8 is_flipped;         // 1 = tile specchiata verticalmente
+	u8 layer;              //definisce il layer per il foreground //0 dietro al player , 1 in linea player , 2 davanti al player
 	unsigned char* bitmap; // Puntatore ai dati bitmap
 	char* palette;
 
