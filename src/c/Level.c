@@ -1,8 +1,8 @@
 /* level.c */
 #include "Level.h"
-#include "Player.h"
-
-extern Player player;
+//#include "Player.h"
+//
+//extern Player player;
 
 
 

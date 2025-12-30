@@ -2,10 +2,14 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include "Utils.h"
+
 #include "LevelStruct.h"
+#include "PlayerStruct.h"
 #include "maps/Level1_maps.h"
 
+
+extern Player player;
+extern Level level;
 
 
 static u8 map_buf[MAP_BUF_H][MAP_BUF_W]={0};
@@ -20,7 +24,7 @@ static const u8 tile_palette[8] = {
 
 
 
-extern Level level;
+
 
 
 
