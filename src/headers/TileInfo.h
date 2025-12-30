@@ -34,6 +34,7 @@ typedef struct {
 	u8 is_mirrored;        // 1 = tile specchiata orizzontalmente
 	u8 is_flipped;         // 1 = tile specchiata verticalmente
 	u8 layer;              //definisce il layer per il foreground //0 dietro al player , 1 in linea player , 2 davanti al player
+	u8 overlay_tile;
 	unsigned char* bitmap; // Puntatore ai dati bitmap
 	char* palette;
 

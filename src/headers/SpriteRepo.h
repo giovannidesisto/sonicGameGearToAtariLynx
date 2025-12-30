@@ -30,44 +30,21 @@ extern const unsigned char sonic_idle_4[];
 
 
 
+//mattoni chiari
+extern const unsigned char fg_001[];
 //erba piatta
-extern const unsigned char for_001[];
-//termine erba DX
-extern const unsigned char for_002[];
+extern const unsigned char fg_002[];
+//erba piatta con celo
+extern const unsigned char fg_003[];
 
+extern const unsigned char palm_001[];
+extern const unsigned char palm_002[];
+extern const unsigned char palm_003[];
 
-
-//erba avvallamento da 2 SX prima
-extern const unsigned char for_003[];
-
-//erba avvallamento da 2 SX seconda
-extern const unsigned char for_004[];
-
-
-//muro pieno
-extern const unsigned char bck_001[];
-//muro con ombra
-extern const unsigned char bck_002[];
-//muro con erba
-extern const unsigned char bck_003[];
-
-//erba avvallamento da due sx
-extern const unsigned char bck_005[];
-
-
-
-
-
-//erba con  muro scuro destro
-extern const unsigned char bck_004[];
-
-//muro scuro DX
-extern const unsigned char wall_001[];
-//termine muro scuro DX
-extern const unsigned char wall_002[];
-extern const unsigned char wall_003[];
-extern const unsigned char wall_004[];
-
+extern const unsigned char palm_005[];
+extern const unsigned char palm_006[];
+extern const unsigned char palm_007[];
+extern const unsigned char palm_008[];
 
 extern const unsigned char prx_001[];
 extern const unsigned char prx_002[];

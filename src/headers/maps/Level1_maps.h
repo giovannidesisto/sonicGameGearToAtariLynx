@@ -7,8 +7,8 @@
 #ifndef LEVEL1_MAPS_H
 #define LEVEL1_MAPS_H
 
-#define MAP_WIDTH  97//49
-#define MAP_HEIGHT 26//17
+#define MAP_WIDTH  41//49
+#define MAP_HEIGHT 12//17
 
 typedef unsigned char u8;
 

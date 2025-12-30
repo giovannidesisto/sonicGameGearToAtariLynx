@@ -10,30 +10,30 @@
 #include "SpriteRepo.h"
 
 //PIATTAFORME e muri solidi
-static const unsigned char* LEVEL_1_PLATFORM[] = {
-		for_001,
-		for_002,
-		for_003,
-		for_004
-};
-
-//ALBERI, FIORI DI SFONDO
-static const unsigned char* LEVEL_1_BACKGROUND[] = {
-		bck_003,
-		bck_002,
-		bck_001,
-		bck_004,
-		bck_005
-};
-
-
-//TILE SOLIDE, su tutti i 4 lati
-static const unsigned char* LEVEL_1_WALL[] = {
-		wall_001,
-		wall_002,
-		wall_003,
-		wall_004
-};
+//static const unsigned char* LEVEL_1_PLATFORM[] = {
+//		for_001,
+//		for_002,
+//		for_003,
+//		for_004
+//};
+//
+////ALBERI, FIORI DI SFONDO
+//static const unsigned char* LEVEL_1_BACKGROUND[] = {
+//		bck_003,
+//		bck_002,
+//		bck_001,
+//		bck_004,
+//		bck_005
+//};
+//
+//
+////TILE SOLIDE, su tutti i 4 lati
+//static const unsigned char* LEVEL_1_WALL[] = {
+//		wall_001,
+//		wall_002,
+//		wall_003,
+//		wall_004
+//};
 
 
 //SFONDO IN PARALLASSE
