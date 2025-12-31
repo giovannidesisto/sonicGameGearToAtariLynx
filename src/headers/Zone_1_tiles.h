@@ -37,10 +37,10 @@
 
 
 //SFONDO IN PARALLASSE
-static const unsigned char* LEVEL_1_PRX[] = {
-		prx_001,
-		prx_002
-};
+//static const unsigned char* LEVEL_1_PRX[] = {
+//		prx_001,
+//		prx_002
+//};
 
 
 #endif /* ZONE_1_TILES */

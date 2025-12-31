@@ -7,19 +7,19 @@
 
 
 
-#define BG0_W 4
+#define BG0_W 16
 #define BG0_H 1
 
-#define BG1_W 4
+#define BG1_W 3
 #define BG1_H 2
 
 const u8 bg0_map[BG0_H][BG0_W]={
-		{100,100,100,100}
+		{100,101,0,0,0,0,100,101,0,0,0,0,0,0,0,0}
 };
 const u8 bg1_map[BG1_H][BG1_W]=
 {
-		{101,  0,101,  0},
-		{  0,101,  0,101}
+		{104,105,0},
+		{106,107,108}
 };
 
 
@@ -281,9 +281,31 @@ void level_draw(void)
 				sprite->sprctl0 = tile_info->colorDepth | TYPE_BACKGROUND;
 				sprite->sprctl1 = REHV | PACKED;
 				sprite->data    = tile_info->bitmap;
-				sprite->hpos    = px_off + (x << TILE_SHIFT);
-				sprite->vpos    = BG0_FIXED_Y;
+				sprite->hpos    = px_off + (x << TILE_SHIFT)+ (tile_info->xy_offset >> 4);
+				sprite->vpos    = BG0_FIXED_Y +(tile_info->xy_offset&0x0F);
 				sprite->next    = NULL;
+
+
+//				if (tile_info->is_mirrored) {
+//					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
+//					sprite->hpos    = screen_x + TILE_SIZE - 1  + (tile_info->xy_offset >> 4);
+//				} else {
+//					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
+//					sprite->hpos    = screen_x + (tile_info->xy_offset >> 4);
+//				}
+
+
+
+				if(tile_info->colorDepth==BPP_2){
+					sprite->penpal[0]=tile_info->palette[0];
+					sprite->penpal[1]=tile_info->palette[1];
+				}
+				else if(tile_info->colorDepth==BPP_3){
+					sprite->penpal[0]=tile_info->palette[0];
+					sprite->penpal[1]=tile_info->palette[1];
+					sprite->penpal[2]=tile_info->palette[2];
+					sprite->penpal[3]=tile_info->palette[3];
+				}
 
 				if (!bg0_head) bg0_head = sprite;
 				else bg0_tail->next = (char*)sprite;
@@ -313,12 +335,31 @@ void level_draw(void)
 					sprite->sprctl0 = tile_info->colorDepth | TYPE_BACKGROUND;
 					sprite->sprctl1 = REHV | PACKED;
 					sprite->data    = tile_info->bitmap;
-					sprite->hpos    = px_off + (x << TILE_SHIFT);
-					sprite->vpos    = BG1_FIXED_Y + (y << TILE_SHIFT);
+					sprite->hpos    = px_off + (x << TILE_SHIFT) + (tile_info->xy_offset >> 4);
+					sprite->vpos    = BG1_FIXED_Y + (y << TILE_SHIFT)  +(tile_info->xy_offset&0x0F);
 					sprite->next    = NULL;
 
 
+//					if (tile_info->is_mirrored) {
+//						sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
+//						sprite->hpos    = screen_x + TILE_SIZE - 1  + (tile_info->xy_offset >> 4);
+//					} else {
+//						sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
+//						sprite->hpos    = screen_x + (tile_info->xy_offset >> 4);
+//					}
 
+
+
+					if(tile_info->colorDepth==BPP_2){
+						sprite->penpal[0]=tile_info->palette[0];
+						sprite->penpal[1]=tile_info->palette[1];
+					}
+					else if(tile_info->colorDepth==BPP_3){
+						sprite->penpal[0]=tile_info->palette[0];
+						sprite->penpal[1]=tile_info->palette[1];
+						sprite->penpal[2]=tile_info->palette[2];
+						sprite->penpal[3]=tile_info->palette[3];
+					}
 
 					if (!bg1_head) bg1_head = sprite;
 					else bg1_tail->next = (char*)sprite;
@@ -350,17 +391,40 @@ addTile:    tile_info = tileinfo_get(tile_nr);//level_get_tile_abs(x, y));
 
 			sprite->sprctl1 = REHV | PACKED;
 			sprite->data    = tile_info->bitmap;
-			sprite->vpos    = screen_y;
+			sprite->vpos    = screen_y+ (tile_info->xy_offset & 0X0F);
 			sprite->next    = NULL;
 
 			if (tile_info->is_mirrored) {
 				sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
-				sprite->hpos    = screen_x + TILE_SIZE - 1;
+				sprite->hpos    = screen_x + TILE_SIZE - 1  + (tile_info->xy_offset >> 4);
 			} else {
 				sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
-				sprite->hpos    = screen_x;
+				sprite->hpos    = screen_x + (tile_info->xy_offset >> 4);
 			}
 
+
+
+			if(tile_info->colorDepth==BPP_2){
+				sprite->penpal[0]=tile_info->palette[0];
+				sprite->penpal[1]=tile_info->palette[1];
+			}
+			else if(tile_info->colorDepth==BPP_3){
+				sprite->penpal[0]=tile_info->palette[0];
+				sprite->penpal[1]=tile_info->palette[1];
+				sprite->penpal[2]=tile_info->palette[2];
+				sprite->penpal[3]=tile_info->palette[3];
+			}
+//			else if(tile_info->colorDepth==BPP_4){
+//				sprite->penpal[0]=tile_info->palette[0];
+//				sprite->penpal[1]=tile_info->palette[1];
+//				sprite->penpal[2]=tile_info->palette[2];
+//				sprite->penpal[3]=tile_info->palette[3];
+//
+//				sprite->penpal[4]=tile_info->palette[4];
+//				sprite->penpal[5]=tile_info->palette[5];
+//				sprite->penpal[6]=tile_info->palette[6];
+//				sprite->penpal[7]=tile_info->palette[7];
+//			}
 			/* -------- dispatch per layer -------- */
 			if (tile_info->layer == 0) {
 				if (!fg0_head) fg0_head = sprite;

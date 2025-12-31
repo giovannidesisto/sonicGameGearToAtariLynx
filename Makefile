@@ -106,28 +106,28 @@ $(BUILD_DIR)/%.o: %.bmp
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/img_ag_font5x5.s -o $@; \
 	elif echo "$*" | grep -q '^sonic'; then \
 		$(ECHO) "== Converting player $< to $@"; \
-		$(SPRPCK) -t6 -p2 -s4 -a008000 $< $@ > /dev/null; \
+		$(SPRPCK) -t6 -p2 -s3 -a008000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "PLAYERGFX_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
-	elif echo "$*" | grep -q '^fg'; then \
-		$(ECHO) "== Converting tile $< to $@"; \
-		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
+	elif echo "$*" | grep -q '^s3fg'; then \
+		$(ECHO) "== Converting tile BMP2 $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s3  -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "ZONE1LEVEL1FG_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
-	elif echo "$*" | grep -q '^palm'; then \
-		$(ECHO) "== Converting tile $< to $@"; \
-		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
+	elif echo "$*" | grep -q '^s2fg'; then \
+		$(ECHO) "== Converting tile BMP2 $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s2  -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "ZONE1LEVEL1FG_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \
 		$(AS) $(ASFLAGS) $(BUILD_DIR)/$*.s -o $@; \
-	elif echo "$*" | grep -q '^prx'; then \
-		$(ECHO) "== Converting tile $< to $@"; \
-		$(SPRPCK) -t6 -p2 -s4  -a000000 $< $@ > /dev/null; \
+	elif echo "$*" | grep -q '^s3bg'; then \
+		$(ECHO) "== Converting tile BMP2 $< to $@"; \
+		$(SPRPCK) -t6 -p2 -s3  -a000000 $< $@ > /dev/null; \
 		$(ECHO) ".global _$*" > $(BUILD_DIR)/$*.s; \
 		$(ECHO) '.segment "ZONE1BG_RODATA"' >> $(BUILD_DIR)/$*.s; \
 		$(ECHO) "_$*: .incbin \"$*.spr\"" >> $(BUILD_DIR)/$*.s; \

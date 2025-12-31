@@ -21,21 +21,24 @@ static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
 
 // Array di puntatori ai frame per animazione
 static const unsigned char* sonic_run_tiles[] = {
-		sonic_run_1,
-		sonic_run_2,
-		sonic_run_3,
-		sonic_run_4,
+		sonic_fast_1,
+		sonic_fast_2,
+		sonic_fast_3,
+		sonic_fast_4,
 };
 
 
 static const unsigned char* sonic_brake_tiles[] = {
-		sonic_brake_1,
-		sonic_brake_2
+		sonic_brake_1
 };
 
 static const unsigned char* sonic_jump_tiles[] = {
-		sonic_jump_1,
-		sonic_jump_2
+		sonic_run_1,
+		sonic_run_2,
+		sonic_run_3,
+		sonic_run_4,
+		sonic_run_5,
+		sonic_run_6
 };
 
 
@@ -45,6 +48,7 @@ static const  unsigned char* sonic_idle_tiles[] = {
 		sonic_idle_2,
 		sonic_idle_3,
 		sonic_idle_4,
+		sonic_idle_5
 };
 
 

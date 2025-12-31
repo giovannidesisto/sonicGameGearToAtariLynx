@@ -14,6 +14,8 @@
 
 #include "Utils.h"
 
+
+
 /* Tipi di tile */
 typedef enum {
 	TILE_EMPTY = 0,        // 0: Vuoto
@@ -36,7 +38,9 @@ typedef struct {
 	u8 layer;              //definisce il layer per il foreground //0 dietro al player , 1 in linea player , 2 davanti al player
 	u8 overlay_tile;
 	unsigned char* bitmap; // Puntatore ai dati bitmap
-	char* palette;
+	unsigned char* palette;//puntatore alla paletta
+	u8 xy_offset; //primo nibble x, secondo nibble y /per le tile smezzate, indica quale offset applicare
+
 
 } TileInfo;
 
