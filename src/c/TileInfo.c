@@ -15,10 +15,12 @@
 /* Tabella informazioni tile */
 static TileInfo tile_info_table[256];
 
-static const unsigned char AAA_TERRENO   [2]=   		{0x01,0x28};//MARRONE CHIARO / MARRONE SCURO
+static const unsigned char AAA_TERRENO   [2]=   		{0x01,0x28};//MARRONE SCURO / MARRONE CHIARO
 static const unsigned char AAA_ERBA_CELO [2]=   		{0x01,0xC6};//VERDE CHIARO,VERDE SCURO
 static const unsigned char AAA_TERRENO_ERBA_OMBRA[4]=   {0x01,0x82,0x6C,0xF0};// MARRONE SCURO / MARRONE CHIARO / VERDE SCURO / VERDE CHIARO / GRIGIO BIANCO
-static const unsigned char AAA_MONTAGNE[4]=   {0x01,0xE2,0x8A,0x00};// MARRONE SCURO / MARRONE CHIARO / VERDE SCURO / VERDE CHIARO / GRIGIO BIANCO
+static const unsigned char AAA_MONTAGNE[4]=   {0x01,0xE2,0x84,0xDF};// GIALLO,MARRONE CHIARO,MARRONE SCURO,VIOLETTO,BLU,GRIGIO BIANCO
+static const unsigned char AAA_MONTAGNE_BOSCO[4]=   {0x01,0xE2,0x86,0xDC};// GIALLO,MARRONE CHIARO,MARRONE SCURO,VIOLETTO,BLU,GRIGIO BIANCO
+
 static const unsigned char AAA_SONIC[4]= {0x01,0x4D,0xB8,0x2F};
 
 typedef enum {
@@ -193,61 +195,142 @@ void tileinfo_init_table(void) {
     tile_info_table[100].type = TILE_BACKGROUND;
     tile_info_table[100].colorDepth = BPP_3;
     tile_info_table[100].bitmap = &s3bg_prx_001;
-	tile_info_table[100].palette =AAA_SONIC;
+	tile_info_table[100].palette =AAA_MONTAGNE;
 
     tile_info_table[101].type = TILE_BACKGROUND;
     tile_info_table[101].colorDepth = BPP_3;
     tile_info_table[101].bitmap =&s3bg_prx_002;
-	tile_info_table[101].palette =AAA_SONIC;
+	tile_info_table[101].palette =AAA_MONTAGNE;
 
 
 
     tile_info_table[102].type = TILE_BACKGROUND;
     tile_info_table[102].colorDepth = BPP_3;
     tile_info_table[102].bitmap = &s3bg_prx_001;
-	tile_info_table[102].palette =AAA_SONIC;
+	tile_info_table[102].palette =AAA_MONTAGNE;
 	tile_info_table[102].is_mirrored=1;
-
+	tile_info_table[102].is_flipped=1;
 
     tile_info_table[103].type = TILE_BACKGROUND;
     tile_info_table[103].colorDepth = BPP_3;
     tile_info_table[103].bitmap =&s3bg_prx_002;
-	tile_info_table[103].palette =AAA_SONIC;
+	tile_info_table[103].palette =AAA_MONTAGNE;
 	tile_info_table[103].is_mirrored=1;
+	tile_info_table[103].is_flipped=1;
 
-
+//
+//    tile_info_table[102].type = TILE_BACKGROUND;
+//    tile_info_table[102].colorDepth = BPP_3;
+//    tile_info_table[102].bitmap = &s3bg_prx_001;
+//	tile_info_table[102].palette =AAA_SONIC;
+//	tile_info_table[102].is_mirrored=1;
+//
+//
+//    tile_info_table[103].type = TILE_BACKGROUND;
+//    tile_info_table[103].colorDepth = BPP_3;
+//    tile_info_table[103].bitmap =&s3bg_prx_002;
+//	tile_info_table[103].palette =AAA_SONIC;
+//	tile_info_table[103].is_mirrored=1;
+//
+//
+//
+//
+//    tile_info_table[104].type = TILE_BACKGROUND;
+//    tile_info_table[104].colorDepth = BPP_3;
+//    tile_info_table[104].bitmap =&s3bg_prx_003;
+//	tile_info_table[104].palette =AAA_MONTAGNE;
+//	tile_info_table[104].xy_offset=0x0C;
+//
+//
+//
 
 
     tile_info_table[104].type = TILE_BACKGROUND;
     tile_info_table[104].colorDepth = BPP_3;
-    tile_info_table[104].bitmap =&s3bg_prx_003;
+    tile_info_table[104].bitmap =&s3bg_prx_012;
 	tile_info_table[104].palette =AAA_MONTAGNE;
-	tile_info_table[104].xy_offset=0x0C;
-
+	tile_info_table[104].is_mirrored=1;
 
 
     tile_info_table[105].type = TILE_BACKGROUND;
     tile_info_table[105].colorDepth = BPP_3;
-    tile_info_table[105].bitmap =&s3bg_prx_004;
+    tile_info_table[105].bitmap =&s3bg_prx_005;
 	tile_info_table[105].palette =AAA_MONTAGNE;
-	tile_info_table[105].xy_offset=0x01;
+
 
     tile_info_table[106].type = TILE_BACKGROUND;
     tile_info_table[106].colorDepth = BPP_3;
-    tile_info_table[106].bitmap =&s3bg_prx_005;
+    tile_info_table[106].bitmap =&s3bg_prx_006;
 	tile_info_table[106].palette =AAA_MONTAGNE;
+
 
 
     tile_info_table[107].type = TILE_BACKGROUND;
     tile_info_table[107].colorDepth = BPP_3;
-    tile_info_table[107].bitmap =&s3bg_prx_006;
+    tile_info_table[107].bitmap =&s3bg_prx_007;
 	tile_info_table[107].palette =AAA_MONTAGNE;
+	//tile_info_table[107].xy_offset=0x0C;
+
+
 
 
     tile_info_table[108].type = TILE_BACKGROUND;
     tile_info_table[108].colorDepth = BPP_3;
-    tile_info_table[108].bitmap =&s3bg_prx_007;
+    tile_info_table[108].bitmap =&s3bg_prx_008;
 	tile_info_table[108].palette =AAA_MONTAGNE;
+//	tile_info_table[108].xy_offset=0x0C;
+
+
+    tile_info_table[109].type = TILE_BACKGROUND;
+    tile_info_table[109].colorDepth = BPP_3;
+    tile_info_table[109].bitmap =&s3bg_prx_009;
+	tile_info_table[109].palette =AAA_MONTAGNE;
+	//tile_info_table[109].xy_offset=0x0C;
+
+
+
+    tile_info_table[110].type = TILE_BACKGROUND;
+    tile_info_table[110].colorDepth = BPP_3;
+    tile_info_table[110].bitmap =&s3bg_prx_010;
+	tile_info_table[110].palette =AAA_MONTAGNE;
+
+
+    tile_info_table[111].type = TILE_BACKGROUND;
+    tile_info_table[111].colorDepth = BPP_3;
+    tile_info_table[111].bitmap =&s3bg_prx_011;
+	tile_info_table[111].palette =AAA_MONTAGNE;
+
+
+    tile_info_table[112].type = TILE_BACKGROUND;
+    tile_info_table[112].colorDepth = BPP_3;
+    tile_info_table[112].bitmap =&s3bg_prx_012;
+	tile_info_table[112].palette =AAA_MONTAGNE;
+
+
+
+    tile_info_table[113].type = TILE_BACKGROUND;
+    tile_info_table[113].colorDepth = BPP_3;
+    tile_info_table[113].bitmap =&s3bg_prx_013;
+	tile_info_table[113].palette =AAA_MONTAGNE;
+
+
+    tile_info_table[114].type = TILE_BACKGROUND;
+    tile_info_table[114].colorDepth = BPP_3;
+    tile_info_table[114].bitmap =&s3bg_prx_014;
+	tile_info_table[114].palette =AAA_MONTAGNE_BOSCO;
+
+
+    tile_info_table[115].type = TILE_BACKGROUND;
+    tile_info_table[115].colorDepth = BPP_3;
+    tile_info_table[115].bitmap =&s3bg_prx_015;
+	tile_info_table[115].palette =AAA_MONTAGNE_BOSCO;
+
+
+
+    tile_info_table[116].type = TILE_BACKGROUND;
+    tile_info_table[116].colorDepth = BPP_3;
+    tile_info_table[116].bitmap =&s3bg_prx_016;
+	tile_info_table[116].palette =AAA_MONTAGNE_BOSCO;
 
 }
 

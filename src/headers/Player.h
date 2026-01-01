@@ -11,10 +11,10 @@
 
 
 
-static const u8 MAX_RUN_SPEED = 14;//14;
+static const u8 MAX_RUN_SPEED = 16;//14;
 static const u8 MAX_WALK_SPEED = 8;//8;
-static const s8 DEFAULT_JUMP_POWER = -14;
-static const s8 WAIT_BEFORE_IDLE_ANIMATION = -100;
+static const s8 DEFAULT_JUMP_POWER = -10;
+static const s8 WAIT_BEFORE_IDLE_ANIMATION = -50;
 
 
 

@@ -61,4 +61,16 @@ extern const unsigned char s3bg_prx_005[];
 extern const unsigned char s3bg_prx_006[];
 extern const unsigned char s3bg_prx_007[];
 
+
+extern const unsigned char s3bg_prx_008[];
+extern const unsigned char s3bg_prx_009[];
+extern const unsigned char s3bg_prx_010[];
+extern const unsigned char s3bg_prx_011[];
+extern const unsigned char s3bg_prx_012[];
+extern const unsigned char s3bg_prx_013[];
+extern const unsigned char s3bg_prx_014[];
+extern const unsigned char s3bg_prx_016[];
+extern const unsigned char s3bg_prx_015[];
+
+
 #endif /* SPRITEREPO_H */

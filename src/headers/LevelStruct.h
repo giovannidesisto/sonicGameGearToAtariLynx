@@ -11,14 +11,16 @@
 
 /* Struttura Camera estesa */
 typedef struct {
-    u16 prev_tile_x;
-    u16 prev_tile_y;
+
 
     u8 center_x;
     u8 center_y;
+#pragma bss-name (push, "ZEROPAGE")
     s16 x;                   /* Posizione X della camera (in pixel world) */
     s16 y;                   /* Posizione Y della camera (in pixel world) */
-
+    u16 prev_tile_x;
+    u16 prev_tile_y;
+#pragma bss-name (pop)
     u8 width;               /* Larghezza della viewport */
     u8 height;              /* Altezza della viewport */
 
@@ -29,6 +31,8 @@ typedef struct {
     u8 inertia_counter;     /* Contatore per l'inerzia */
     u8 max_inertia_pixels;  /* Pixel massimi di inerzia (default 16) */
     u8 last_player_dir;     /* Ultima direzione del player (0=fermo, 1=dx, 2=sx) */
+
+
 } Camera;
 
 
@@ -40,21 +44,20 @@ typedef struct {
 	u16 start_y;
 	u16 end_x;                                /* Posizione fine livello */
 	u16 end_y;
-
-	u16 map_w;
-	u8  map_h;
 	u8 current_level;
-	//u8* fg_map; //punta alla porzione decompressa di mappa
-	//u8* bg_map;
-
-	/* Limita la camera ai bordi del livello */
 	u16 level_width_px; //=  level.map_w * TILE_SIZE;
 	u16 level_height_px ;//= level.map_h * TILE_SIZE;
-
+#pragma bss-name (push, "ZEROPAGE")
 	s16 map_buf_origin_x;
 	s16 map_buf_origin_y;
 	u8 map_buf_col0;
 	u8 map_buf_row0;
+	u16 map_w;
+	u8  map_h;
+#pragma bss-name (pop)
+
+
+
 
 	Camera camera;                            /* Camera per lo scroll */
 } Level;

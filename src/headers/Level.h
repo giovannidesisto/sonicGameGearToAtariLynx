@@ -15,15 +15,9 @@ extern Level level;
 static u8 map_buf[MAP_BUF_H][MAP_BUF_W]={0};
 static SCB_REHV_PAL sprite_pool[MAX_ACTIVE_SPRITES];
 static u8 sprite_used[MAX_ACTIVE_SPRITES];
-
 static const u8 tile_palette[8] = {
     0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF
 };
-
-
-
-
-
 
 
 

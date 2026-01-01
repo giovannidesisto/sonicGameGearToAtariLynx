@@ -10,16 +10,21 @@
 #define BG0_W 16
 #define BG0_H 1
 
-#define BG1_W 3
-#define BG1_H 2
+#define BG1_W 11
+#define BG1_H 4
 
 const u8 bg0_map[BG0_H][BG0_W]={
-		{100,101,0,0,0,0,100,101,0,0,0,0,0,0,0,0}
+		{100,101,0,0,0,0,103,102,0,0,0,0,0,0,0,0}
 };
 const u8 bg1_map[BG1_H][BG1_W]=
 {
-		{104,105,0},
-		{106,107,108}
+	//	{0,0,0},
+//		{0,0,0},
+	//	{0,0,0},
+		{110,111,112,113,114,115,116,112,106,105,104},
+		{0},
+		{0},
+		{109,109,108,107,109,109,109,108,109,109,107}
 };
 
 
@@ -45,26 +50,6 @@ static void release_all_sprites(void) {
 }
 
 
-/**
- * FIXME non funziona l'inlining
- */
-//u8 level_get_tile_abs(u16 tile_x, u16 tile_y)
-//{
-//	s16 bx = tile_x - level.map_buf_origin_x;
-//	s16 by = tile_y - level.map_buf_origin_y;
-//
-//	if ((u16)bx >= MAP_BUF_W || (u16)by >= MAP_BUF_H)
-//		return TILE_EMPTY;
-//
-//	// applica circolarità
-//	bx += level.map_buf_col0;
-//	if (bx >= MAP_BUF_W) bx -= MAP_BUF_W;
-//
-//	by += level.map_buf_row0;
-//	if (by >= MAP_BUF_H) by -= MAP_BUF_H;
-//
-//	return map_buf[by][bx];
-//}
 
 
 
@@ -259,7 +244,7 @@ void level_draw(void)
 	/* ===================================================== */
 	/* ROOT */
 	/* ===================================================== */
-	agSprBackground.penpal[0] = 0x00;
+	agSprBackground.penpal[0] = 0x0D;
 	first_sprite = &agSprBackground;
 
 	/* ===================================================== */
@@ -286,13 +271,16 @@ void level_draw(void)
 				sprite->next    = NULL;
 
 
-//				if (tile_info->is_mirrored) {
-//					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
-//					sprite->hpos    = screen_x + TILE_SIZE - 1  + (tile_info->xy_offset >> 4);
-//				} else {
-//					sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
-//					sprite->hpos    = screen_x + (tile_info->xy_offset >> 4);
-//				}
+				if (tile_info->is_mirrored) {
+					sprite->sprctl0 =  sprite->sprctl0 |HFLIP;// tile_info->colorDepth | TYPE_NORMAL | HFLIP;
+					sprite->hpos    =  px_off + (x << TILE_SHIFT) + + TILE_SIZE - 1  + (tile_info->xy_offset >> 4);
+				}
+
+				if (tile_info->is_flipped) {
+					sprite->sprctl0 =  sprite->sprctl0 |VFLIP;
+					sprite->vpos =sprite->vpos +TILE_SIZE;
+				}
+
 
 
 
@@ -340,13 +328,14 @@ void level_draw(void)
 					sprite->next    = NULL;
 
 
-//					if (tile_info->is_mirrored) {
-//						sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL | HFLIP;
-//						sprite->hpos    = screen_x + TILE_SIZE - 1  + (tile_info->xy_offset >> 4);
-//					} else {
-//						sprite->sprctl0 = tile_info->colorDepth | TYPE_NORMAL;
-//						sprite->hpos    = screen_x + (tile_info->xy_offset >> 4);
-//					}
+					if (tile_info->is_mirrored) {
+						sprite->sprctl0 =  sprite->sprctl0 |HFLIP;// tile_info->colorDepth | TYPE_NORMAL | HFLIP;
+						sprite->hpos    =  px_off + (x << TILE_SHIFT) + + TILE_SIZE - 1  + (tile_info->xy_offset >> 4);
+					}
+					if (tile_info->is_flipped) {
+						sprite->sprctl0 =  sprite->sprctl0 |VFLIP;
+						sprite->vpos =sprite->vpos +TILE_SIZE;
+					}
 
 
 
@@ -414,17 +403,7 @@ addTile:    tile_info = tileinfo_get(tile_nr);//level_get_tile_abs(x, y));
 				sprite->penpal[2]=tile_info->palette[2];
 				sprite->penpal[3]=tile_info->palette[3];
 			}
-//			else if(tile_info->colorDepth==BPP_4){
-//				sprite->penpal[0]=tile_info->palette[0];
-//				sprite->penpal[1]=tile_info->palette[1];
-//				sprite->penpal[2]=tile_info->palette[2];
-//				sprite->penpal[3]=tile_info->palette[3];
-//
-//				sprite->penpal[4]=tile_info->palette[4];
-//				sprite->penpal[5]=tile_info->palette[5];
-//				sprite->penpal[6]=tile_info->palette[6];
-//				sprite->penpal[7]=tile_info->palette[7];
-//			}
+
 			/* -------- dispatch per layer -------- */
 			if (tile_info->layer == 0) {
 				if (!fg0_head) fg0_head = sprite;
@@ -776,8 +755,6 @@ void check_world_collision() {
 
 
 void player_update() {
-	//	if(player.x < player.width) player.x = player.width;
-	//	else if(player.x > level.end_x-player.width) player.x = level.end_x-player.width;
 
 
 	/* Applica gravità */

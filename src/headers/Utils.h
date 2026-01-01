@@ -29,14 +29,19 @@
 #define PLAYER_WIDTH 16
 #define PLAYER_HEIGHT 32
 
-#define TILE_SIZE 16// 16
+
+#pragma bss-name (push, "ZEROPAGE")
+#define TILE_SIZE 16
+#define TILE_SHIFT 4
+#pragma bss-name (pop)
+
 
 #define TILES_X  11//11
 #define TILES_Y  8//8
 
 #define MAP_BUF_W  16// 16          // POTENZA DI 2 (OBBLIGATORIO)
 #define MAP_BUF_H  16//16//TILES_Y
-#define TILE_SHIFT 4//4 //log2(TILE_SIZE)
+
 
 #define MAP_BUF_MASK (MAP_BUF_W - 1)
 
