@@ -91,7 +91,7 @@ typedef struct Player{
 
     //CollisionState collision;
 
-    s16 xOnSprite;
+    s16 patienceCounter;
     s16 tx;
     s16 newX;
 

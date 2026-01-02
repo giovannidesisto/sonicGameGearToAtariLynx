@@ -65,10 +65,10 @@ void player_init(){
 	player.visible_spc.sprite.penpal[1] = 0x4D;
 	player.visible_spc.sprite.penpal[2] = 0xB8;
 	player.visible_spc.sprite.penpal[3] = 0x2F;
-//	player.visible_spc.sprite.penpal[4] = 0x89;
-//	player.visible_spc.sprite.penpal[5] = 0xAB;
-//	player.visible_spc.sprite.penpal[6] = 0xCD;
-//	player.visible_spc.sprite.penpal[7] = 0xEF;
+	//	player.visible_spc.sprite.penpal[4] = 0x89;
+	//	player.visible_spc.sprite.penpal[5] = 0xAB;
+	//	player.visible_spc.sprite.penpal[6] = 0xCD;
+	//	player.visible_spc.sprite.penpal[7] = 0xEF;
 
 
 
@@ -85,7 +85,9 @@ void player_init(){
 	player.jump_frame_count = 6;         // 2 frame per salto
 
 
-	player.xOnSprite=0;
+	player.patienceCounter=8;
+
+
 
 }
 
@@ -102,7 +104,7 @@ void  player_animate() {
 	case PLAYER_IDLE:
 		current_animation = player.idle_frames;
 		frame_count = player.idle_frame_count;
-		player.animation_speed = 10;  // Più lento
+		player.animation_speed = 3;  // Più lento
 		//player.sprite.data = (unsigned char*)current_animation[0];
 		break;
 	case PLAYER_WALKING:
@@ -117,18 +119,18 @@ void  player_animate() {
 			frame_count = player.walk_frame_count;
 
 		}
-		player.animation_speed = 2;  // Normale
+		player.animation_speed = 1;  // Normale
 		break;
 	case PLAYER_JUMPING:
 	case PLAYER_RUN_JUMPING:
 		current_animation = player.jump_frames;
 		frame_count = player.jump_frame_count;
-		player.animation_speed = 2;  // Più veloce
+		player.animation_speed = 1;  // Più veloce
 		break;
 	case PLAYER_BRAKING:
 		current_animation = player.brake_frames;
 		frame_count = player.brake_frame_count;
-		player.animation_speed = 4;  // Più veloce
+		player.animation_speed = 1;  // Più veloce
 		break;
 	default:
 		current_animation = player.idle_frames;
@@ -140,11 +142,42 @@ void  player_animate() {
 	if(player.animation_timer >= player.animation_speed)
 	{
 		player.animation_timer = 0;
-		player.current_frame = (player.current_frame + 1 ) % frame_count;
-		player.visible_spc.sprite.data = (unsigned char*)current_animation[player.current_frame];
+
+
 
 		//resetto il timer impazienza di sonic, dopo che ha battuto il piedino
-		if(player.state==PLAYER_IDLE && player.current_frame == player.idle_frame_count-1)player.animation_timer=WAIT_BEFORE_IDLE_ANIMATION;
+		if(player.state==PLAYER_IDLE && player.current_frame > 2){//player.idle_frame_count-2
+
+			if(player.patienceCounter != 0)
+			{
+				if(player.current_frame == 3 )
+					player.current_frame = 4;
+				else
+					player.current_frame = 3;
+
+				player.patienceCounter--;
+			}
+
+			else
+			{
+				player.patienceCounter = 8;
+				player.current_frame = 0;
+				player.animation_timer = WAIT_BEFORE_IDLE_ANIMATION;
+			}
+		}else{
+
+			player.current_frame++;
+
+			if (player.current_frame >= frame_count) {
+				player.current_frame = 0;
+			}
+
+		}
+
+
+
+		player.visible_spc.sprite.data = (unsigned char*)current_animation[player.current_frame];
+
 	}
 	else if(player.animation_timer < 0 )
 		player.visible_spc.sprite.data = (unsigned char*)current_animation[0];

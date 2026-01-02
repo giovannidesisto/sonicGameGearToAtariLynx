@@ -1,26 +1,120 @@
 /* level.c */
 #include "Level.h"
-//#include "Player.h"
-//
-//extern Player player;
-
-
 
 
 #define BG0_W 16
 #define BG0_H 1
-
 #define BG1_W 11
 #define BG1_H 4
+
+
+#define PARALLAX_BG0_SHIFT 4   // 1/8
+#define PARALLAX_BG1_SHIFT 3   // 1/4
+#define BG0_FIXED_Y 0
+#define BG1_FIXED_Y 16
+
+
+static u8 prev_bg0_tile_index;
+static u8 prev_bg1_tile_index;
+static u8 prev_fg_tile_index;
+static TileInfo *prev_bg0_tile_info;
+static TileInfo *prev_bg1_tile_info;
+static TileInfo *prev_fg_tile_info;
+
+
+
+#define TILE_CACHE_SIZE 24
+
+typedef struct {
+	u8 tile_index;
+	TileInfo* info;
+	u8 hit_count;
+	u8 age;
+} TileCacheEntry;
+
+#pragma bss-name (push, "ZEROPAGE")
+static TileCacheEntry tile_cache[TILE_CACHE_SIZE];
+static TileInfo* bg0_tile_cache[BG0_W] = {NULL};
+static TileInfo* bg1_tile_cache[BG1_H][BG1_W] = {NULL};
+
+#pragma bss-name (pop)
+
+
+static u8 cache_clock = 0;
+// Funzione di cache
+
+
+static inline TileInfo* get_tile_cached(u8 tile_index) {
+	u8 i, lru_idx;
+
+	/* 1. Cerca nella cache (hit) */
+	for (i = 0; i < TILE_CACHE_SIZE; i++) {
+		if (tile_cache[i].tile_index == tile_index) {
+			/* Hit: aggiorna LRU e ritorna */
+			tile_cache[i].hit_count = ++cache_clock;
+			return tile_cache[i].info;
+		}
+	}
+
+	/* 2. Miss: trova la entry meno recentemente usata (LRU) */
+	lru_idx = 0;
+	for (i = 1; i < TILE_CACHE_SIZE; i++) {
+		if (tile_cache[i].hit_count < tile_cache[lru_idx].hit_count) {
+			lru_idx = i;
+		}
+	}
+
+	/* 3. Sostituisci entry LRU */
+	tile_cache[lru_idx].tile_index = tile_index;
+	tile_cache[lru_idx].info = tileinfo_get(tile_index);
+	tile_cache[lru_idx].hit_count = ++cache_clock;
+
+	return tile_cache[lru_idx].info;
+}
+
+//static  TileInfo* get_tile_cached(u8 tile_index) {
+//u8 i,replace_idx;
+//	cache_clock++;
+//
+//    // 1. Cerca nella cache
+//    for ( i = 0; i < TILE_CACHE_SIZE; i++) {
+//        if (tile_cache[i].tile_index == tile_index) {
+//            tile_cache[i].hit_count++;
+//            tile_cache[i].age = cache_clock;
+//            return tile_cache[i].info;
+//        }
+//    }
+//
+//    // 2. Non trovato: cerca slot da sostituire (LFU)
+//    replace_idx = 0;
+//    for ( i = 1; i < TILE_CACHE_SIZE; i++) {
+//        // LFU: meno hit, o se pari hit, più vecchio
+//        if (tile_cache[i].hit_count < tile_cache[replace_idx].hit_count ||
+//           (tile_cache[i].hit_count == tile_cache[replace_idx].hit_count
+//        		   &&tile_cache[i].age < tile_cache[replace_idx].age)
+//			)
+//        	{
+//            replace_idx = i;
+//        }
+//    }
+//
+//    // 3. Rimpiazza e ritorna
+//    tile_cache[replace_idx].tile_index = tile_index;
+//    tile_cache[replace_idx].info = tileinfo_get(tile_index);
+//    tile_cache[replace_idx].hit_count = 1;
+//    tile_cache[replace_idx].age = cache_clock;
+//
+//    return tile_cache[replace_idx].info;
+//}
 
 const u8 bg0_map[BG0_H][BG0_W]={
 		{100,101,0,0,0,0,103,102,0,0,0,0,0,0,0,0}
 };
 const u8 bg1_map[BG1_H][BG1_W]=
 {
-	//	{0,0,0},
-//		{0,0,0},
-	//	{0,0,0},
+		//	{0,0,0},
+		//		{0,0,0},
+		//	{0,0,0},
 		{110,111,112,113,114,115,116,112,106,105,104},
 		{0},
 		{0},
@@ -94,7 +188,7 @@ static void level_init_map_streaming(void)
 /* Inizializza il sistema di sprite */
 void level_init(void) {
 
-	u8 i;//,y;
+	u8 i,x,y;//,y;
 
 	lynx_load(1);//livello
 	lynx_load(2);//player
@@ -152,6 +246,32 @@ void level_init(void) {
 	}
 
 
+	prev_bg0_tile_info=0;
+	prev_bg1_tile_info=0;
+	prev_fg_tile_info=0;
+
+	prev_bg0_tile_index=0;
+	prev_bg1_tile_index=0;
+	prev_fg_tile_index=0;
+	for(i = 0; i < TILE_CACHE_SIZE; i++) {
+		tile_cache[i].tile_index = 0xFF;  // Invalida
+		tile_cache[i].hit_count = 0;
+		tile_cache[i].age = 0;
+		tile_cache[i].info = tileinfo_get(0);  // Tile vuota
+	}
+
+
+	// Pre-calcola BG0 (solo una volta)
+	for( x = 0; x < BG0_W; x++) {
+		bg0_tile_cache[x] = tileinfo_get(bg0_map[0][x]);
+	}
+
+	// Pre-calcola BG1 (solo una volta)
+	for( y = 0; y < BG1_H; y++) {
+		for( x = 0; x < BG1_W; x++) {
+			bg1_tile_cache[y][x] = tileinfo_get(bg1_map[y][x]);
+		}
+	}
 }
 
 /* Carica un livello */
@@ -170,8 +290,6 @@ void level_load(u8 level_num) {
 
 	/* Posiziona la camera sul player iniziale */
 	level_update_camera( );
-
-
 }
 
 
@@ -180,10 +298,6 @@ void level_load(u8 level_num) {
 
 
 
-#define PARALLAX_BG0_SHIFT 4   // 1/8
-#define PARALLAX_BG1_SHIFT 3   // 1/4
-#define BG0_FIXED_Y 0
-#define BG1_FIXED_Y 16
 
 
 
@@ -200,6 +314,8 @@ void level_draw(void)
 	SCB_REHV_PAL *tail ;
 
 
+
+
 	SCB_REHV_PAL *sprite;
 	SCB_REHV_PAL *first_sprite;
 
@@ -213,7 +329,10 @@ void level_draw(void)
 	SCB_REHV_PAL *fg2_head = NULL, *fg2_tail = NULL;
 
 	TileInfo *tile_info;
+
+
 	u8 tile_index;
+
 
 	ctr = 0;
 	release_all_sprites();
@@ -257,7 +376,18 @@ void level_draw(void)
 
 		for (x = 0; x < TILES_X + 2; x++) {
 			u16 map_x = (tile_x0 + x) % BG0_W;
-			tile_info = tileinfo_get(bg0_map[0][map_x]);
+
+			//			u8 currentTileIndex  = bg0_map[0][map_x];
+			//			if(currentTileIndex==prev_bg0_tile_index && prev_bg0_tile_info != 0)
+			//			{
+			//				tile_info = prev_bg0_tile_info;
+			//			}
+			//			else
+			//			{
+			tile_info =   bg0_tile_cache[map_x];//get_tile_cached(currentTileIndex);//tileinfo_get(currentTileIndex);
+			//				prev_bg0_tile_index = currentTileIndex;
+			//				prev_bg0_tile_info = tile_info;
+			//			}
 
 			if (tile_info->type != TILE_EMPTY) {
 				sprite = get_free_sprite();
@@ -298,7 +428,9 @@ void level_draw(void)
 				if (!bg0_head) bg0_head = sprite;
 				else bg0_tail->next = (char*)sprite;
 				bg0_tail = sprite;
+#ifdef DEBUG
 				ctr++;
+#endif
 			}
 		}
 	}
@@ -314,7 +446,9 @@ void level_draw(void)
 		for (y = 0; y < BG1_H; y++) {
 			for (x = 0; x < TILES_X + 2; x++) {
 				u16 map_x = (tile_x0 + x) % BG1_W;
-				tile_info = tileinfo_get(bg1_map[y][map_x]);
+				tile_info  = bg1_tile_cache[y][map_x]; // tileinfo_get(currentTileIndex);
+
+
 
 				if (tile_info->type != TILE_EMPTY) {
 					sprite = get_free_sprite();
@@ -353,7 +487,9 @@ void level_draw(void)
 					if (!bg1_head) bg1_head = sprite;
 					else bg1_tail->next = (char*)sprite;
 					bg1_tail = sprite;
+#ifdef DEBUG
 					ctr++;
+#endif
 				}
 			}
 		}
@@ -366,10 +502,28 @@ void level_draw(void)
 		for (x = start_tile_x; x < end_tile_x; x++) {
 			u8 tile_nr;
 			u8 tile_bk;
+			u8 currentTileIndex;
 			tile_nr =level_get_tile_abs(x, y);
 
 
-addTile:    tile_info = tileinfo_get(tile_nr);//level_get_tile_abs(x, y));
+			addTile:
+			//tile_info = tileinfo_get(tile_nr);//level_get_tile_abs(x, y));
+
+			currentTileIndex  = tile_nr;//bg1_map[y][map_x];
+			if(currentTileIndex==prev_fg_tile_index && prev_fg_tile_info != 0)
+			{
+				tile_info = prev_fg_tile_info;
+			}
+			else
+			{
+				tile_info = get_tile_cached(currentTileIndex);//	tileinfo_get(currentTileIndex);
+				prev_fg_tile_index = currentTileIndex;
+				prev_fg_tile_info = tile_info;
+			}
+
+
+
+
 			if (tile_info->type == TILE_EMPTY) continue;
 
 			screen_x = (x << TILE_SHIFT) - level.camera.x;
@@ -420,9 +574,9 @@ addTile:    tile_info = tileinfo_get(tile_nr);//level_get_tile_abs(x, y));
 				else fg2_tail->next = (char*)sprite;
 				fg2_tail = sprite;
 			}
-
+#ifdef DEBUG
 			ctr++;
-
+#endif
 
 
 			if(tile_info->overlay_tile>0){
@@ -482,7 +636,9 @@ addTile:    tile_info = tileinfo_get(tile_nr);//level_get_tile_abs(x, y));
 	/* DRAW */
 	/* ===================================================== */
 	tgi_sprite(first_sprite);
+#ifdef DEBUG
 	printU16(ctr, 0, 0, 0x01);
+#endif
 }
 
 
@@ -641,7 +797,7 @@ void check_world_collision() {
 
 
 			tile_index = level_get_tile_abs(tile_x, tile_y );//level.fg_map[tile_y*level.map_w+tile_x];//
-			tile_info = tileinfo_get(tile_index);
+			tile_info = get_tile_cached(tile_index);
 
 			if (tile_info->type == TILE_SOLID)
 			{
@@ -697,7 +853,7 @@ void check_world_collision() {
 
 			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
 				tile_index = level_get_tile_abs(tile_x , tile_y);//level.fg_map[tile_y*level.map_w+tile_x];//
-				tile_info = tileinfo_get(tile_index);
+				tile_info = get_tile_cached(tile_index);
 
 				if (tile_info->type == TILE_SOLID) {
 					player.y = tile_y * TILE_SIZE - player.height;
@@ -737,7 +893,7 @@ void check_world_collision() {
 
 			if (tile_y >= 0 && tile_y < level.map_h && tile_x >= 0 && tile_x < level.map_w) {
 				tile_index =level_get_tile_abs(tile_x , tile_y);// level.fg_map[tile_y*level.map_w+tile_x];//
-				tile_info = tileinfo_get(tile_index);
+				tile_info = get_tile_cached(tile_index);
 
 				if (tile_info->type == TILE_SOLID) {
 					player.y = (tile_y + 1) << TILE_SHIFT;

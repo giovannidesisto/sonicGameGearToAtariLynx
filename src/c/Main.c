@@ -115,7 +115,7 @@ void main(void) {
 	agInitRand8(37);   // initialise RNG (use your own seed other than 42)
 	startTime = clock2();
 	//tgi_setcollisiondetection(1);
-	//tgi_setframerate(140);
+	tgi_setframerate(50);
 
 	//logoScreen();      // startup logo screen
 	//gameMenuScreen();  // game menu screen, before you begin a game
@@ -245,10 +245,10 @@ static void  __fastcall__  updateAndDrawGame() {
 	level_update_camera();
 
 	// DISEGNA solo ogni 2 frame (30 FPS ancora fluido)
-	if((frame_count++ & 1) == 0)//% FRAME_DIVIDER
+	//if((frame_count++ & 1) == 0)//% FRAME_DIVIDER
 	//if(!tgi_busy())
 	{
-		//AG_WAIT_LCD();
+		AG_WAIT_LCD();
 		level_draw();
 		tgi_updatedisplay();
 //		if(effect_counter <EFFECT_TOGGLE_VALUE*2)
